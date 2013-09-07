@@ -1,6 +1,6 @@
 package esmj3d.data.shared.records;
 
-import utils.ESMByteConvert;
+import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 
 public abstract class InstRECO extends RECO

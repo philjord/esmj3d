@@ -16,8 +16,8 @@ import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
 
+import tools.io.ESMByteConvert;
 import utils.ESConfig;
-import utils.ESMByteConvert;
 import utils.PhysAppearance;
 import utils.source.TextureSource;
 

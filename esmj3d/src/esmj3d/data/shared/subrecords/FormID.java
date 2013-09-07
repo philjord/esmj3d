@@ -1,6 +1,7 @@
 package esmj3d.data.shared.subrecords;
 
-import utils.ESMByteConvert;
+import tools.io.ESMByteConvert;
+import tools.io.PrimitiveBytes;
 
 public class FormID
 {
@@ -13,5 +14,12 @@ public class FormID
 		//{
 		//	new Throwable("Odd formId? " + formId).printStackTrace();
 		//}
+	}
+
+	public byte[] getBytes()
+	{
+		byte[] bytes = new byte[4];
+		PrimitiveBytes.insertInt(bytes, formId, 0);
+		return bytes;
 	}
 }

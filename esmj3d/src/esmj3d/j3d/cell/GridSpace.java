@@ -7,7 +7,7 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.Node;
 
-import utils.ESMByteConvert;
+import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
 import esmj3d.j3d.j3drecords.inst.J3dRECODynInst;

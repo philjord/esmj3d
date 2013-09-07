@@ -2,14 +2,19 @@ package esmj3d.data.shared.records;
 
 import java.util.ArrayList;
 
-import utils.ESMByteConvert;
+import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.FNAM;
 import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.TNAM;
+import esmj3d.data.shared.subrecords.XACT;
+import esmj3d.data.shared.subrecords.XCNT;
+import esmj3d.data.shared.subrecords.XESP;
+import esmj3d.data.shared.subrecords.XLCM;
 import esmj3d.data.shared.subrecords.XLOC;
+import esmj3d.data.shared.subrecords.XLOD;
 import esmj3d.data.shared.subrecords.XRNK;
 import esmj3d.data.shared.subrecords.XTEL;
 import esmj3d.data.shared.subrecords.ZString;
@@ -30,11 +35,11 @@ public class CommonREFR extends InstRECO
 
 	public FormID XOWN;
 
-	public FormID XGLB;//not in fallout3
+	public FormID XGLB;//tes4, tes5, not fallout3
 
-	public FormID XRTM;//not in fallout3
+	public FormID XRTM;//tes4, tes5, not fallout3
 
-	public XRNK XRNK;//not in fallout3
+	public XRNK XRNK;//tes4, tes5, not fallout3
 
 	public FormID XTRG;
 
@@ -43,6 +48,16 @@ public class CommonREFR extends InstRECO
 	public XLOC XLOC;
 
 	public TNAM TNAM;
+
+	public XESP XESP;
+
+	public XLCM XLCM;
+
+	public XACT XACT;
+
+	public XCNT XCNT;
+
+	public XLOD XLOD;//tes4, fallout3, not tes5
 
 	public CommonREFR(Record recordData)
 	{
@@ -69,6 +84,10 @@ public class CommonREFR extends InstRECO
 			else if (sr.getSubrecordType().equals("ONAM"))
 			{
 				defaultsOpen = true;
+			}
+			else if (sr.getSubrecordType().equals("XACT"))
+			{
+				XACT = new XACT(bs);
 			}
 			else if (sr.getSubrecordType().equals("XMRK"))
 			{
@@ -113,6 +132,22 @@ public class CommonREFR extends InstRECO
 			else if (sr.getSubrecordType().equals("TNAM"))
 			{
 				TNAM = new TNAM(bs);
+			}
+			else if (sr.getSubrecordType().equals("XESP"))
+			{
+				XESP = new XESP(bs);
+			}
+			else if (sr.getSubrecordType().equals("XLCM"))
+			{
+				XLCM = new XLCM(bs);
+			}
+			else if (sr.getSubrecordType().equals("XCNT"))
+			{
+				XCNT = new XCNT(bs);
+			}
+			else if (sr.getSubrecordType().equals("XLOD"))
+			{
+				XLOD = new XLOD(bs);
 			}
 
 		}
