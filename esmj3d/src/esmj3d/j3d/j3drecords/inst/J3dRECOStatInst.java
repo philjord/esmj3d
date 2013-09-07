@@ -13,7 +13,6 @@ import javax.vecmath.Vector3f;
 import utils.ESConfig;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.data.shared.subrecords.XTEL;
-
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOType;
 
@@ -33,7 +32,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	private int recordId = -1;
 
-	public XTEL xtel = null; //for doors
+	public XTEL xtel = null; //for doors	 
 
 	public J3dRECOStatInst(InstRECO instRECO, boolean makePhys)
 	{
