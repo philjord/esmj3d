@@ -12,7 +12,6 @@ import javax.vecmath.Vector3f;
 
 import utils.ESConfig;
 import esmj3d.data.shared.records.InstRECO;
-import esmj3d.data.shared.subrecords.XTEL;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOType;
 
@@ -30,9 +29,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	protected J3dRECOType j3dRECOType;
 
-	private int recordId = -1;
-
-	public XTEL xtel = null; //for doors	 
+	private InstRECO instRECO = null;
 
 	public J3dRECOStatInst(InstRECO instRECO, boolean makePhys)
 	{
@@ -46,7 +43,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		super.addChild(transformGroup);//Note must use super here
 
 		setLocation(instRECO);
-		recordId = instRECO.getRecordId();
+		this.instRECO = instRECO;
 
 		//TODO: I'm mixing faders and lod'er as one concept, change variable name?
 		//TODO: this fixes teh missing stats issue sometimes, 
@@ -114,9 +111,16 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		}
 	}
 
+	@Override
+	public InstRECO getInstRECO()
+	{
+		return instRECO;
+	}
+
+	@Override
 	public int getRecordId()
 	{
-		return recordId;
+		return instRECO.getRecordId();
 	}
 
 	@Override

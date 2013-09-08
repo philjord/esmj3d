@@ -30,7 +30,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 
 	protected J3dRECOType j3dRECOType;
 
-	private int recordId = -1;
+	private InstRECO instRECO = null;
 
 	public J3dRECODynInst(InstRECO instRECO, boolean makePhys)
 	{
@@ -45,7 +45,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		super.addChild(transformGroup);//Note must use super here
 		setLocation(instRECO);
-		recordId = instRECO.getRecordId();
+		this.instRECO = instRECO;
 
 		if (fader && !makePhys)
 		{
@@ -64,9 +64,16 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 
 	}
 
+	@Override
+	public InstRECO getInstRECO()
+	{
+		return instRECO;
+	}
+
+	@Override
 	public int getRecordId()
 	{
-		return recordId;
+		return instRECO.getRecordId();
 	}
 
 	@Override
@@ -104,7 +111,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	public void setJ3dRECOType(J3dRECOType j3dRECOType)
 	{
 		this.j3dRECOType = j3dRECOType;
-		if (fader&& !makePhys)
+		if (fader && !makePhys)
 		{
 			sw.addChild(j3dRECOType);
 			sw.addChild(new Group());// empty group for no rendering
@@ -160,7 +167,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	}
 
 	/**
-	 * NOTE MUSt be pre * ESConfig.ES_TO_METERS_SCALE multiplied
+	 * NOTE loc MUST include * ESConfig.ES_TO_METERS_SCALE multiplied
 	 * @param loc
 	 */
 	public void setLocation(Vector3f loc)
