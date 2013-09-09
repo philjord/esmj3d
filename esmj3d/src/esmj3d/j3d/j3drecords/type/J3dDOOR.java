@@ -12,6 +12,8 @@ public class J3dDOOR extends J3dRECOType
 
 	private boolean isOpen = false;
 
+	
+
 	public J3dDOOR(RECO reco, String nifFileName, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
 	{
 		super(reco, nifFileName);
@@ -33,5 +35,16 @@ public class J3dDOOR extends J3dRECOType
 	{
 		isOpen = !isOpen;
 		j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
+	}
+	
+	public void setOpen(boolean isOpen)
+	{
+		this.isOpen = isOpen;
+		j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
+	}
+
+	public boolean isOpen()
+	{
+		return isOpen;
 	}
 }
