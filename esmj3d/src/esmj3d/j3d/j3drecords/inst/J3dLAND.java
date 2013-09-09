@@ -214,7 +214,7 @@ public class J3dLAND extends J3dRECOStatInst
 			landMaterial = new Material();
 
 			landMaterial.setShininess(1.0f); // land is not very shiny, generally
-
+			landMaterial.setDiffuseColor(0.5f, 0.5f, 0.5f);
 			landMaterial.setSpecularColor(0.0f, 0.0f, 0.0f);// is the shiny value above not working?
 			landMaterial.setColorTarget(Material.AMBIENT_AND_DIFFUSE);//new
 		}
