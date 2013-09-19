@@ -17,19 +17,18 @@ import javax.media.j3d.GraphicsConfigTemplate3D;
 import javax.media.j3d.Texture;
 import javax.swing.SwingUtilities;
 
-import bsa.source.BsaMeshSource;
-import bsa.source.BsaTextureSource;
-
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
 import tools.image.SimpleImageLoader;
-import tools.texture.DDSToTextureOld;
+import tools.texture.DDSToTexture;
 import utils.source.DummyTextureSource;
 import FO3Archive.ArchiveEntry;
 import FO3Archive.Main;
 import FO3Archive.StatusDialog;
+import bsa.source.BsaMeshSource;
+import bsa.source.BsaTextureSource;
 
 // Referenced classes of package FO3Archive:
 //            ArchiveEntry, ArchiveFile, StatusDialog, Main
@@ -119,11 +118,11 @@ public class DisplayTask extends Thread
 								System.out.println("issue: " + fileName);
 							}
 
-							DDSToTextureOld.clearCache();
+							DDSToTexture.clearCache();
 						}
 						else
 						{
-							DDSToTextureOld.showImage(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName),
+							DDSToTexture.showImage(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName),
 									entries.size() < 10 ? 5000 : 500);
 						}
 					}
