@@ -84,6 +84,10 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 					add(archiveFile);
 					nodes.add(archiveNode);
 				}
+				else
+				{
+					System.out.println("status != 1 in bsa loader? " + status + " " + file.getAbsolutePath());
+				}
 			}
 			else
 			{
@@ -92,9 +96,15 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 
 				int status = statusDialog.showDialog();
 				loadTask.join();
+				
+				//TODO: in a deploy state I get a proper archive but then status !=1, super fast race condition? 
 				if (status == 1)
 				{
 					add(archiveFile);
+				}
+				else
+				{
+					System.out.println("status != 1 in bsa loader? " + status + " " + file.getAbsolutePath());
 				}
 			}
 		}

@@ -42,11 +42,9 @@ public class DisplayTask extends Thread
 	private StatusDialog statusDialog;
 
 	private boolean verifyOnly;
-
-	private boolean completed;
-
+ 
 	private boolean sopErrOnly;
-
+	private boolean completed;
 	public DisplayTask(BSAFileSet bsaFileSet, List<ArchiveEntry> entries, StatusDialog statusDialog, boolean verifyOnly, boolean sopErrOnly)
 	{
 		completed = false;
@@ -251,9 +249,7 @@ public class DisplayTask extends Thread
 				}
 			}
 		}
-
 		completed = true;
-
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
