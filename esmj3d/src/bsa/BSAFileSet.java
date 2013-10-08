@@ -13,6 +13,8 @@ import FO3Archive.StatusDialog;
 
 public class BSAFileSet extends ArrayList<ArchiveFile>
 {
+	public ArrayList<LoadTask> loadTasks = new ArrayList<LoadTask>();
+
 	public ArrayList<ArchiveNode> nodes = new ArrayList<ArchiveNode>();
 
 	private String name = "";
@@ -42,6 +44,7 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 					loadFile(file, loadNodes);
 				}
 			}
+
 		}
 		else
 		{
@@ -56,22 +59,40 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 			}
 		}
 
+		for (LoadTask loadTask : loadTasks)
+		{
+			try
+			{
+				loadTask.join();
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		loadTasks.clear();
+
 		if (this.size() == 0)
 		{
 			System.out.println("BSAFileSet loaded no files using root: " + rootFilename);
 		}
 	}
 
+	/**
+	 * Loading Nodes uses teh progress dialog system
+	 * @param file
+	 * @param loadNodes
+	 */
 	private void loadFile(final File file, boolean loadNodes)
 	{
 		System.out.println("BSA File Set loading " + file);
 		ArchiveFile archiveFile = new ArchiveFile(file);
-		StatusDialog statusDialog = new StatusDialog(null, "Loading " + archiveFile.getName());
 
 		try
 		{
 			if (loadNodes)
 			{
+				StatusDialog statusDialog = new StatusDialog(null, "Loading " + archiveFile.getName());
 				ArchiveNode archiveNode = new ArchiveNode(archiveFile);
 
 				LoadTask loadTask = new LoadTask(archiveFile, archiveNode, statusDialog);
@@ -91,21 +112,10 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 			}
 			else
 			{
-				LoadTask loadTask = new LoadTask(archiveFile, statusDialog);
+				LoadTask loadTask = new LoadTask(archiveFile, null);
+				add(archiveFile);
 				loadTask.start();
-
-				int status = statusDialog.showDialog();
-				loadTask.join();
-				
-				//TODO: in a deploy state I get a proper archive but then status !=1, super fast race condition? 
-				if (status == 1)
-				{
-					add(archiveFile);
-				}
-				else
-				{
-					System.out.println("status != 1 in bsa loader? " + status + " " + file.getAbsolutePath());
-				}
+				loadTasks.add(loadTask);
 			}
 		}
 		catch (InterruptedException e)
