@@ -1,6 +1,7 @@
 package bsa.source;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.media.j3d.Texture;
 
+import tools.image.ImageFlip;
 import tools.image.SimpleImageLoader;
 import tools.texture.DDSToTexture;
 import utils.source.TextureSource;
@@ -159,11 +161,11 @@ public class BsaTextureSource implements TextureSource
 					{
 						InputStream in = archiveFile.getInputStream(archiveEntry);
 
-						Image image = SimpleImageLoader.getImage(imageName, in);
+						BufferedImage image = SimpleImageLoader.getImage(imageName, in);
 
 						if (image != null)
 						{
-							return image;
+							return ImageFlip.verticalflip(image);
 						}
 					}
 					catch (IOException e)
