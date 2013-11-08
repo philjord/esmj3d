@@ -16,7 +16,7 @@ public class BethRenderSettings
 
 	public static final int OBJECT_FADE_DEFAULT = 100;
 
-	private static int FAR_LOAD_GRID_COUNT = 16;// int in number of cells (82 meters each)
+	private static int FAR_LOAD_GRID_COUNT = 4;// int in number of cells (82 meters each)
 
 	private static int NEAR_LOAD_GRID_COUNT = 2;// int in number of cells (82 meters each)
 
