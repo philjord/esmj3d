@@ -130,7 +130,9 @@ public class J3dLAND extends J3dRECOStatInst
 			// make up some base land texture, pre sorted to btxt by quadrant
 			for (int quadrant = 0; quadrant < 4; quadrant++)
 			{
-				DecalGroup decalGroup = new DecalGroup();
+				//TODO: this makes for no see throughs and I think I'm not losing textures?
+				Group decalGroup = new Group();
+				//DecalGroup decalGroup = new DecalGroup();
 				//OrderedGroup decalGroup = new OrderedGroup();
 				quadrantBaseGroups[quadrant] = decalGroup;
 				addNodeChild(decalGroup);
