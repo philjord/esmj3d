@@ -11,6 +11,7 @@ import utils.ESConfig;
 
 public class J3dUtils
 {
+	//TODO: merge with static and dynamic reco same calls
 	public static TransformGroup makeTransform(float x, float y, float z, float rx, float ry, float rz, float scale, Node lowerNode)
 	{
 		TransformGroup transformGroup = new TransformGroup();
@@ -41,24 +42,27 @@ public class J3dUtils
 
 	public static Transform3D setTransform(InstRECO reco, Transform3D transform)
 	{
+		Vector3f t = reco.getTrans();
+		Vector3f er = reco.getEulerRot();
 
 		Transform3D xrotT = new Transform3D();
-		xrotT.rotX(-reco.rx);
+		xrotT.rotX(-er.x);
 		Transform3D zrotT = new Transform3D();
-		zrotT.rotZ(reco.ry);
+		zrotT.rotZ(er.y);
 		Transform3D yrotT = new Transform3D();
-		yrotT.rotY(-reco.rz);
+		yrotT.rotY(-er.z);
 
 		xrotT.mul(zrotT);
 		xrotT.mul(yrotT);
 
 		transform.set(xrotT);
 
-		transform.setTranslation(new Vector3f(reco.x * ESConfig.ES_TO_METERS_SCALE, reco.z * ESConfig.ES_TO_METERS_SCALE, -reco.y
+		transform.setTranslation(new Vector3f(t.x * ESConfig.ES_TO_METERS_SCALE, t.z * ESConfig.ES_TO_METERS_SCALE, -t.y
 				* ESConfig.ES_TO_METERS_SCALE));
 
-		transform.setScale(reco.scale);
+		transform.setScale(reco.getScale());
 
 		return transform;
 	}
+
 }

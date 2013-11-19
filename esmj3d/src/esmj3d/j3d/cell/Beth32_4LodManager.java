@@ -51,6 +51,8 @@ public class Beth32_4LodManager extends Group
 		else if (j3dCellFactory.getMainESMFileName().toLowerCase().contains("falloutnv"))
 		{
 			LOD_SCOPE_EXTREMES = FO3_LOD_SCOPE;
+			this.worldFormName = "wastelandnv";
+			System.out.println("LOD set for NV");
 		}
 
 	}
@@ -170,7 +172,7 @@ public class Beth32_4LodManager extends Group
 				//attach if not yet attached
 				if (lod.getParent() == null)
 				{
-					//System.out.println("Added lod level" + scale + " at " + key);
+					System.out.println("Added lod level" + scale + " at " + key);
 					addChild(lod);
 				}
 			}

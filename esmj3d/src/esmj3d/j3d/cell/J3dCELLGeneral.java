@@ -55,7 +55,7 @@ public class J3dCELLGeneral extends BranchGroup
 	{
 		this.instCell = instCell;
 		float landSize = J3dLAND.LAND_SIZE;
-		cellLocation = new Vector3f((instCell.x * landSize) + (landSize / 2f), 0, -(instCell.y * landSize) - (landSize / 2f));
+		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0, -(instCell.getTrans().y * landSize) - (landSize / 2f));
 	}
 
 	public InstRECO getInstCell()

@@ -168,9 +168,12 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		transformGroup.setTransform(transform);
 	}
 
+
 	private void setLocation(InstRECO ir)
 	{
-		setLocation(ir.x, ir.y, ir.z, ir.rx, ir.ry, ir.rz, 1);
+		Vector3f t = ir.getTrans();
+		Vector3f er = ir.getEulerRot();
+		setLocation(t.x, t.y, t.z, er.x, er.y, er.z, ir.getScale());
 	}
 
 	/**
