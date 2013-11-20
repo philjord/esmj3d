@@ -17,7 +17,7 @@ public abstract class Beth32LODLandscape extends BranchGroup
 
 	private int lodY = 0;
 
-	private Rectangle prevBounds = new Rectangle();;
+	private Rectangle prevBounds = new Rectangle();
 
 	private IndexedGeometryArray baseItsa;
 
@@ -30,12 +30,16 @@ public abstract class Beth32LODLandscape extends BranchGroup
 	protected void setGeometryArray(IndexedGeometryArray baseItsa)
 	{
 		this.baseItsa = baseItsa;
+
+		System.out.println("LOD of vertex count " + baseItsa + " " + baseItsa.getIndexCount());
 	}
 
 	/**
 	 * these params are in obliv coords already
+	 * TODO: I really need the near grids to come in and to stich the fars into the edge of the nears
+	 * but this requires much more maths and probably holding an original as well as current vertex array 
 	 * 
-	 +
+	 * 
 	 * @param charX
 	 * @param charY
 	 */
@@ -71,15 +75,16 @@ public abstract class Beth32LODLandscape extends BranchGroup
 								int xSpaceIdx = (int) (x / J3dLAND.LAND_SIZE);
 								int zSpaceIdx = -(int) (z / J3dLAND.LAND_SIZE);
 
+								//notice it might start at 1000 high so only get down to just under -500
 								if (xSpaceIdx >= lowX && xSpaceIdx <= highX && zSpaceIdx >= lowY && zSpaceIdx <= highY)
 								{
-									if (y > -5000)
-										coordRefFloat[(i * 3) + 1] -= 10000;
+									if (y > -500)
+										coordRefFloat[(i * 3) + 1] -= 1500;
 								}
 								else
 								{
-									if (y < -5000)
-										coordRefFloat[(i * 3) + 1] += 10000;
+									if (y < -500)
+										coordRefFloat[(i * 3) + 1] += 1500;
 								}
 							}
 						}
