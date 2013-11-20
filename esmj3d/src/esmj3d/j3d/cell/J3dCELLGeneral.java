@@ -18,7 +18,7 @@ import esmj3d.j3d.Water;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 
-public class J3dCELLGeneral extends BranchGroup
+public abstract class J3dCELLGeneral extends BranchGroup
 {
 	protected IRecordStore master;
 
@@ -51,11 +51,14 @@ public class J3dCELLGeneral extends BranchGroup
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 	}
 
+	public abstract J3dRECOInst makeJ3dRECO(Record record);
+
 	protected void setCell(InstRECO instCell)
 	{
 		this.instCell = instCell;
 		float landSize = J3dLAND.LAND_SIZE;
-		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0, -(instCell.getTrans().y * landSize) - (landSize / 2f));
+		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0, -(instCell.getTrans().y * landSize)
+				- (landSize / 2f));
 	}
 
 	public InstRECO getInstCell()

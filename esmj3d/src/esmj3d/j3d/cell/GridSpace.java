@@ -30,19 +30,19 @@ public class GridSpace extends BranchGroup
 
 	private HashMap<Integer, J3dRECOInst> j3dRECOsById = new HashMap<Integer, J3dRECOInst>();
 
-	private J3dICELLPersistent j3dCELLPersistent;
+	private J3dCELLGeneral j3dCELL;
 
 	private BranchGroup children;
 
 	/**
-	 * j3dLoaded means teh grid is nowvisible and needs it's j3d records addeed
+	 * j3dLoaded means the grid is now visible and needs it's j3d records addeed
 	 * @param j3dCELLPersistent 
 	 * @param key 
 	 * @param parent
 	 */
-	public GridSpace(J3dICELLPersistent j3dCELLPersistent, Point key)
+	public GridSpace(J3dCELLGeneral j3dCELL, Point key)
 	{
-		this.j3dCELLPersistent = j3dCELLPersistent;
+		this.j3dCELL = j3dCELL;
 		this.key = key;
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
@@ -92,11 +92,9 @@ public class GridSpace extends BranchGroup
 
 	public void handleRecordUpdate(Record record, Subrecord updatedSubrecord)
 	{
-
 		J3dRECOInst j3dRECO = j3dRECOsById.get(new Integer(record.getFormID()));
 		if (j3dRECO instanceof J3dRECODynInst)
 		{
-
 			if (record.getRecordType().equals("REFR") || (!makePhys && record.getRecordType().equals("ACRE"))
 					|| (!makePhys && record.getRecordType().equals("ACHR")))
 			{
@@ -119,7 +117,7 @@ public class GridSpace extends BranchGroup
 	}
 
 	public void loadChildren()
-	{		 
+	{
 		//skip if loaded already
 		if (children == null)
 		{
@@ -130,7 +128,7 @@ public class GridSpace extends BranchGroup
 
 			for (Record record : recordsById.values())
 			{
-				J3dRECOInst j3dRECOInst = j3dCELLPersistent.makeJ3dRECO(record);
+				J3dRECOInst j3dRECOInst = j3dCELL.makeJ3dRECO(record);
 				if (j3dRECOInst != null)
 				{
 					// now attach and record the j3dRECO
