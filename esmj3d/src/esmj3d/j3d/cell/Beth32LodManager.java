@@ -68,7 +68,7 @@ public class Beth32LodManager extends Group
 	}
 
 	/**
-	 * 4 ints represent teh near grid x,y locations (not floats of real points)
+	 * 4 ints represent the near grid x,y locations (not floats of real points)
 	 * @return
 	 */
 	public static Rectangle getBounds(float charX, float charY, int loadGridCount)
@@ -79,6 +79,6 @@ public class Beth32LodManager extends Group
 		int lowX = (charLodX - loadGridCount);
 		int lowY = (charLodY - loadGridCount);
 
-		return new Rectangle(lowX, lowY, loadGridCount * 2, loadGridCount * 2);
+		return new Rectangle(lowX, lowY, (loadGridCount * 2), (loadGridCount * 2));
 	}
 }
