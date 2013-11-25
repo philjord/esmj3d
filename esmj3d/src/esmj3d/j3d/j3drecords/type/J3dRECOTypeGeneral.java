@@ -4,74 +4,56 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
 
-import javax.media.j3d.Link;
-import javax.media.j3d.Node;
-import javax.media.j3d.SharedGroup;
-
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
-import tools.WeakValueHashMap;
-import tools3d.utils.scenegraph.SharedGroupCapableChecker;
+import tools3d.utils.scenegraph.Fadable;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
 import esmj3d.data.shared.records.RECO;
 
-public class J3dRECOTypeGeneral extends J3dRECOType
+public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 {
+	private J3dNiAVObject j3dNiAVObject;
 
 	public J3dRECOTypeGeneral(RECO reco, String nifFileName, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
 	{
 		super(reco, nifFileName);
-		Node node = loadSharedGroup(nifFileName, makePhys, meshSource, textureSource);
-		addChild(node);
+		j3dNiAVObject = loadNif(nifFileName, makePhys, meshSource, textureSource);
+		addChild(j3dNiAVObject);
 	}
 
-	private static WeakValueHashMap<String, SharedGroup> loadedSharedGroups = new WeakValueHashMap<String, SharedGroup>();
-
-	public static Node loadSharedGroup(String nifFileName, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
+	@Override
+	public void renderSettingsUpdated()
 	{
-		String keyString = nifFileName + (makePhys ? "_phys" : "");// keep phys seperate
+		// TODO Auto-generated method stub
 
-		SharedGroup sg = loadedSharedGroups.get(keyString);
+	}
 
-		if (sg != null)
+	@Override
+	public void fade(float percent)
+	{
+		if (j3dNiAVObject != null && j3dNiAVObject instanceof Fadable)
 		{
-			Link l = new Link();
-			l.setSharedGroup(sg);
-			return l;
+			((Fadable) j3dNiAVObject).fade(percent);
+		}
+
+	}
+
+	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
+	{
+		J3dNiAVObject j3dNiAVObject;
+
+		if (makePhys)
+		{
+			j3dNiAVObject = NifToJ3d.loadHavok(nifFileName, meshSource).getHavokRoot();
 		}
 		else
 		{
-			J3dNiAVObject j3dNiAVObject;
-
-			if (makePhys)
-			{
-				j3dNiAVObject = NifToJ3d.loadHavok(nifFileName, meshSource).getHavokRoot();
-			}
-			else
-			{
-				j3dNiAVObject = NifToJ3d.loadShapes(nifFileName, meshSource, textureSource).getVisualRoot();
-			}
-
-			if (SharedGroupCapableChecker.canBeShared(j3dNiAVObject))
-			{
-				sg = new SharedGroup();
-
-				sg.addChild(j3dNiAVObject);
-				loadedSharedGroups.put(keyString, sg);
-
-				Link l = new Link();
-				l.setSharedGroup(sg);
-				return l;
-
-			}
-			else
-			{
-				setupDemoControllerTrigger(j3dNiAVObject);
-				return j3dNiAVObject;
-			}
-
+			j3dNiAVObject = NifToJ3d.loadShapes(nifFileName, meshSource, textureSource).getVisualRoot();
 		}
+
+		setupDemoControllerTrigger(j3dNiAVObject);
+		return j3dNiAVObject;
 
 	}
 
@@ -149,10 +131,4 @@ public class J3dRECOTypeGeneral extends J3dRECOType
 		}
 	}
 
-	@Override
-	public void renderSettingsUpdated()
-	{
-		// TODO Auto-generated method stub
-		
-	}
 }

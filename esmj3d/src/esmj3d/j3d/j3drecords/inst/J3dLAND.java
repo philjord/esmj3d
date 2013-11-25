@@ -1,7 +1,6 @@
 package esmj3d.j3d.j3drecords.inst;
 
 import javax.media.j3d.Appearance;
-import javax.media.j3d.DecalGroup;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.IndexedTriangleStripArray;
@@ -64,7 +63,7 @@ public class J3dLAND extends J3dRECOStatInst
 	 */
 	public J3dLAND(LAND land)
 	{
-		super(land, false);
+		super(land, false, false);
 		if (land.VHGT != null)
 		{
 			// extract the heights
@@ -107,7 +106,7 @@ public class J3dLAND extends J3dRECOStatInst
 	 */
 	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
-		super(land, false);
+		super(land, false, false);
 		Group[] quadrantBaseGroups = new Group[4];
 
 		if (land.VHGT != null)

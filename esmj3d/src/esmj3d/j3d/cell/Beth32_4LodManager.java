@@ -172,7 +172,7 @@ public class Beth32_4LodManager extends Group
 				//attach if not yet attached
 				if (lod.getParent() == null)
 				{
-					System.out.println("Added lod level" + scale + " at " + key);
+					//System.out.println("Added lod level" + scale + " at " + key);
 					addChild(lod);
 				}
 			}

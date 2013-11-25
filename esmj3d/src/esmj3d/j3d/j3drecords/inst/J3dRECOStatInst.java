@@ -1,15 +1,18 @@
 package esmj3d.j3d.j3drecords.inst;
 
-import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.DistanceLOD;
+import java.util.ArrayList;
+
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.Node;
-import javax.media.j3d.Switch;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3f;
 
+import com.sun.j3d.utils.geometry.ColorCube;
+
+import tools3d.utils.Utils3D;
+import tools3d.utils.scenegraph.BetterDistanceLOD;
 import utils.ESConfig;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
@@ -17,13 +20,15 @@ import esmj3d.j3d.j3drecords.type.J3dRECOType;
 
 public class J3dRECOStatInst extends Group implements J3dRECOInst
 {
-	private boolean fader = true;
+	public static boolean SHOW_FADE_OUT_MARKER = false;
+
+	private boolean fader = false;
 
 	private boolean makePhys = true;
 
-	private Switch sw;
+	private BetterDistanceLOD dl;
 
-	private DistanceLOD dl;
+	private ArrayList<BranchGroup> myNodes = new ArrayList<BranchGroup>();
 
 	protected TransformGroup transformGroup = new TransformGroup();
 
@@ -36,40 +41,21 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		this(instRECO, true, makePhys);
 	}
 
-	public J3dRECOStatInst(InstRECO instRECO, boolean _fader, boolean makePhys)
+	public J3dRECOStatInst(InstRECO instRECO, boolean enableSimpleFade, boolean makePhys)
 	{
-		this.fader = _fader;
+		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
 		this.makePhys = makePhys;
 		super.addChild(transformGroup);//Note must use super here
 
 		setLocation(instRECO);
 		this.instRECO = instRECO;
-
-		//TODO: I'm mixing faders and lod'er as one concept, change variable name?
-		//TODO: this fixes teh missing stats issue sometimes, 
-		//I've seen badly placed physics so perhaps some of it is a missing transfrom
-		// but I've seen no non phys visuals? though on the side of high hrothgar some crazy stuff
-		fader = false;
-		if (fader && !makePhys)
-		{
-			sw = new Switch(0);
-			dl = new DistanceLOD(new float[]
-			{ BethRenderSettings.getItemFade() });
-			sw.setCapability(Switch.ALLOW_SWITCH_WRITE);
-			transformGroup.addChild(sw);
-			dl.addSwitch(sw);
-			transformGroup.addChild(dl);
-			dl.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
-			dl.setEnable(true);
-		}
-
 	}
 
 	@Override
 	public void renderSettingsUpdated()
 	{
 		//TODO: different render settings for  different types
-		if (fader && !makePhys)
+		if (fader)
 		{
 			dl.setDistance(0, BethRenderSettings.getItemFade());
 		}
@@ -81,9 +67,9 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	public void addNodeChild(Node node)
 	{
-		if (fader && !makePhys)
+		if (fader)
 		{
-			sw.addChild(node);
+			throw new UnsupportedOperationException("addNodeChild with fader! " + this);
 		}
 		else
 		{
@@ -93,17 +79,26 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	public void setJ3dRECOType(J3dRECOType j3dRECOType)
 	{
-		setJ3dRECOType(j3dRECOType, new Group());// empty group for no rendering
+		BranchGroup bg = new BranchGroup();// empty group for no rendering
+		bg.addChild(SHOW_FADE_OUT_MARKER ? new ColorCube(0.1) : new BranchGroup());
+		setJ3dRECOType(j3dRECOType, bg);
 	}
 
-	public void setJ3dRECOType(J3dRECOType j3dRECOType, Group j3dRECOTypeFar)
+	public void setJ3dRECOType(J3dRECOType j3dRECOType, BranchGroup j3dRECOTypeFar)
 	{
 		this.j3dRECOType = j3dRECOType;
 		if (fader && !makePhys)
 		{
-			sw.addChild(j3dRECOType);
-			sw.addChild(j3dRECOTypeFar);
-			sw.setWhichChild(1);
+			myNodes.add(j3dRECOType);
+			myNodes.add(j3dRECOTypeFar);
+			Group parent = new Group();
+			transformGroup.addChild(parent);
+			dl = new BetterDistanceLOD(parent, myNodes, new float[]
+			{ BethRenderSettings.getItemFade() });
+			transformGroup.addChild(dl);//Note must use super here
+			dl.setSchedulingBounds(Utils3D.defaultBounds);
+			dl.setEnable(true);
+
 		}
 		else
 		{
@@ -167,7 +162,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 		transformGroup.setTransform(transform);
 	}
-
 
 	private void setLocation(InstRECO ir)
 	{

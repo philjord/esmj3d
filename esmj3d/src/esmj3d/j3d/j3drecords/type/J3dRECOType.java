@@ -1,10 +1,10 @@
 package esmj3d.j3d.j3drecords.type;
 
-import javax.media.j3d.Group;
+import javax.media.j3d.BranchGroup;
 
 import esmj3d.data.shared.records.RECO;
 
-public abstract class J3dRECOType extends Group
+public abstract class J3dRECOType extends BranchGroup
 {
 	private int recordId = -1;
 
