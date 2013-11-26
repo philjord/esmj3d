@@ -104,6 +104,8 @@ public class J3dLAND extends J3dRECOStatInst
 	 * @param land
 	 * @param master
 	 */
+
+	
 	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		super(land, false, false);
@@ -361,19 +363,29 @@ public class J3dLAND extends J3dRECOStatInst
 	private Texture getTexture(int textureFormID, IRecordStore master, TextureSource textureSource)
 	{
 		Record ltexRec = master.getRecord(textureFormID);
-		LTEX ltex = new LTEX(ltexRec);
-		int texSetId = ltex.textureSetId;
-		//obliv uses simpler system
-		if (texSetId != -1)
+		if (ltexRec.getRecordType().equals("LTEX"))
 		{
-			Record texSetRec = master.getRecord(texSetId);
-			TXST textureSet = new TXST(texSetRec);
-			return textureSource.getTexture(textureSet.TX00.str);
+			LTEX ltex = new LTEX(ltexRec);
+			int texSetId = ltex.textureSetId;
+			//obliv uses simpler system
+			if (texSetId != -1)
+			{
+				Record texSetRec = master.getRecord(texSetId);
+				TXST textureSet = new TXST(texSetRec);
+				return textureSource.getTexture(textureSet.TX00.str);
+			}
+			else if (ltex.ICON != null)
+			{
+				return textureSource.getTexture("Landscape\\" + ltex.ICON.str);
+			}
 		}
 		else
 		{
-			return textureSource.getTexture("Landscape\\" + ltex.ICON.str);
+			System.out.println("Bad textureFormID " + textureFormID + " type is not LTEX but " + ltexRec.getRecordType());
 		}
+
+		return getDefaultTexture(textureSource);
+
 	}
 
 	private static Texture defaultTex = null;

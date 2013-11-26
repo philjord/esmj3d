@@ -24,8 +24,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	private boolean fader = false;
 
-	private boolean makePhys = true;
-
 	private BetterDistanceLOD dl;
 
 	private ArrayList<BranchGroup> myNodes = new ArrayList<BranchGroup>();
@@ -36,15 +34,10 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	private InstRECO instRECO = null;
 
-	public J3dRECOStatInst(InstRECO instRECO, boolean makePhys)
-	{
-		this(instRECO, true, makePhys);
-	}
-
 	public J3dRECOStatInst(InstRECO instRECO, boolean enableSimpleFade, boolean makePhys)
 	{
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
-		this.makePhys = makePhys;
+
 		super.addChild(transformGroup);//Note must use super here
 
 		setLocation(instRECO);
@@ -87,7 +80,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	public void setJ3dRECOType(J3dRECOType j3dRECOType, BranchGroup j3dRECOTypeFar)
 	{
 		this.j3dRECOType = j3dRECOType;
-		if (fader && !makePhys)
+		if (fader)
 		{
 			myNodes.add(j3dRECOType);
 			myNodes.add(j3dRECOTypeFar);

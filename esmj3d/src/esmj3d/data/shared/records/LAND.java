@@ -67,6 +67,9 @@ public class LAND extends InstRECO
 				i++;
 				Subrecord sr2 = subrecords.get(i);
 
+				if (!sr2.getSubrecordType().equals("VTXT"))
+					System.out.println("BAD record following ATXT: " + sr2);
+
 				atxt.vtxt = new VTXT(sr2.getSubrecordData());
 				ATXTsv.add(atxt);
 			}
@@ -75,10 +78,18 @@ public class LAND extends InstRECO
 				//TODO: why the hell is there a VTEX??  what is it??  it's 256 long
 				//there is one in anvil world and I note that a land in anvil is stuffed with totally wrong shape	
 				//land id 96329 it only has subs of DATA VNML, VHGT, VCLR no texture data	
+
+				//TODO: MegaTonWordl in fallut3 shows signs of being corrupted for some reason
+				// LTEX wrong ids data is mis placing the quadrants in height
+				// but mega ton does not seem to have one? and it has some quandrants
+				
+				//I notice my hieght data is out in the case of bad land record, but the cell location is correct
+
+				System.out.println("VTEX spotted!");
 			}
 			else
 			{
-				System.out.println("unhandled : " + sr.getSubrecordType() + " in " + recordData);
+				System.out.println("unhandled : " + sr.getSubrecordType() + " in record " + recordData + " in " + this);
 			}
 
 		}
