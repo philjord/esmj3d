@@ -46,7 +46,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	 * @param enableSimpleFade
 	 * @param makePhys
 	 */
-	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean makePhys)
+	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType defaultJ3dRECOType, boolean enableSimpleFade, boolean makePhys)
 	{
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
 
@@ -54,15 +54,17 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 		setLocation(instRECO);
 		this.instRECO = instRECO;
-		if (j3dRECOType != null)
+		if (defaultJ3dRECOType != null)
 		{
 			if (fader)
 			{
-				setJ3dRECOType(j3dRECOType);
+				setJ3dRECOType(defaultJ3dRECOType);
 			}
 			else
 			{
-				addNodeChild(j3dRECOType);
+				// attach non fading physic node as a type for bullet build
+				this.j3dRECOType = defaultJ3dRECOType;
+				transformGroup.addChild(defaultJ3dRECOType);
 			}
 		}
 	}
@@ -81,6 +83,11 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		}
 	}
 
+	/**
+	 * NOTE will NOT show up in bullet physics!
+	 * For use by odd things like trees and maybe sounds 
+	 * @param node
+	 */
 	public void addNodeChild(Node node)
 	{
 		if (fader)

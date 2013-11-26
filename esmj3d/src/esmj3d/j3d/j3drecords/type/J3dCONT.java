@@ -30,7 +30,12 @@ public class J3dCONT extends J3dRECOType
 	public void setOpen(boolean isOpen)
 	{
 		this.isOpen = isOpen;
-		j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
+
+		//Oblivion chest don't open!		
+		if (j3dNiAVObject.getJ3dNiControllerManager() != null)
+		{
+			j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
+		}
 	}
 
 	public boolean isOpen()
