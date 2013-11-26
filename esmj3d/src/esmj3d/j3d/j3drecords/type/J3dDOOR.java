@@ -4,7 +4,7 @@ import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
-import esmj3d.data.shared.records.RECO;
+import esmj3d.data.shared.records.GenericDOOR;
 
 public class J3dDOOR extends J3dRECOType
 {
@@ -12,17 +12,17 @@ public class J3dDOOR extends J3dRECOType
 
 	private boolean isOpen = false;
 
-	public J3dDOOR(RECO reco, String nifFileName, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
+	public J3dDOOR(GenericDOOR reco, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
 	{
-		super(reco, nifFileName);
+		super(reco, reco.MODL.model.str);
 
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(nifFileName, meshSource).getHavokRoot();
+			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model.str, meshSource).getHavokRoot();
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(nifFileName, meshSource, textureSource).getVisualRoot();
+			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, meshSource, textureSource).getVisualRoot();
 		}
 		addChild(j3dNiAVObject);
 	}

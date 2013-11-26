@@ -5,30 +5,30 @@ import java.util.ArrayList;
 import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
-import esmj3d.data.shared.subrecords.CNTO;
 import esmj3d.data.shared.subrecords.MODL;
 import esmj3d.data.shared.subrecords.ZString;
 
-public class GenericCONT extends RECO
+public class GenericDOOR extends RECO
 {
 	public ZString EDID;
 
 	public MODL MODL;
 
-	public ArrayList<CNTO> CNTOs = new ArrayList<CNTO>();
+	public int SNAM = -1; //open sound
 
-	public int SNAM;
+	public int BNAM = -1; //loop sound
 
-	public int QNAM;
+	public int ANAM = -1; //close sound
 
-	public GenericCONT(Record recordData)
+	public byte FNAM = 0; //flags
+
+	public GenericDOOR(Record recordData)
 	{
 		super(recordData);
 
 		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
 		{
-
 			Subrecord sr = subrecords.get(i);
 			byte[] bs = sr.getSubrecordData();
 
@@ -36,29 +36,41 @@ public class GenericCONT extends RECO
 			{
 				EDID = new ZString(bs);
 			}
+
 			else if (sr.getSubrecordType().equals("MODL"))
 			{
 				MODL = new MODL(bs);
+			}
+			else if (sr.getSubrecordType().equals("MODB"))
+			{
+				MODL.addMODBSub(bs);
 			}
 			else if (sr.getSubrecordType().equals("MODT"))
 			{
 				MODL.addMODTSub(bs);
 			}
+			else if (sr.getSubrecordType().equals("MODS"))
+			{
+				MODL.addMODSSub(bs);
+			}
 			else if (sr.getSubrecordType().equals("SNAM"))
 			{
 				SNAM = ESMByteConvert.extractInt(bs, 0);
 			}
-			else if (sr.getSubrecordType().equals("QNAM"))
+			else if (sr.getSubrecordType().equals("BNAM"))
 			{
-				QNAM = ESMByteConvert.extractInt(bs, 0);
+				BNAM = ESMByteConvert.extractInt(bs, 0);
 			}
-			else if (sr.getSubrecordType().equals("CNTO"))
+			else if (sr.getSubrecordType().equals("ANAM"))
 			{
-				CNTOs.add(new CNTO(bs));
+				ANAM = ESMByteConvert.extractInt(bs, 0);
+			}
+			else if (sr.getSubrecordType().equals("FNAM"))
+			{
+				FNAM = bs[0];
 			}
 			else
 			{
-				// hierachy this make no sense now
 				//System.out.println("unhandled : " + sr.getSubrecordType() + " in record " + recordData + " in " + this);
 			}
 		}
@@ -66,7 +78,7 @@ public class GenericCONT extends RECO
 
 	public String showDetails()
 	{
-		return "CONT : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str + " : " + MODL.model;
+		return "DOOR : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str;
 	}
 
 }
