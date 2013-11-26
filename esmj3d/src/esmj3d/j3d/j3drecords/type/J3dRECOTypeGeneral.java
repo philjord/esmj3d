@@ -59,7 +59,7 @@ public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 
 	private static WeakHashMap<J3dNiAVObject, J3dNiAVObjectAnimationThread> threads = new WeakHashMap<J3dNiAVObject, J3dNiAVObjectAnimationThread>();
 
-	public static void setupDemoControllerTrigger(J3dNiAVObject j3dNiAVObject)
+	private static void setupDemoControllerTrigger(J3dNiAVObject j3dNiAVObject)
 	{
 		// TODO: take this out it is for demo only
 		if (j3dNiAVObject.getJ3dNiControllerManager() != null)

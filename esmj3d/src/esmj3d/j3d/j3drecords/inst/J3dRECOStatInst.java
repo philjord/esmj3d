@@ -36,12 +36,35 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	public J3dRECOStatInst(InstRECO instRECO, boolean enableSimpleFade, boolean makePhys)
 	{
+		this(instRECO, null, enableSimpleFade, makePhys);
+	}
+
+	/**
+	 * 
+	 * @param instRECO
+	 * @param j3dRECOType
+	 * @param enableSimpleFade
+	 * @param makePhys
+	 */
+	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean makePhys)
+	{
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
 
 		super.addChild(transformGroup);//Note must use super here
 
 		setLocation(instRECO);
 		this.instRECO = instRECO;
+		if (j3dRECOType != null)
+		{
+			if (fader)
+			{
+				setJ3dRECOType(j3dRECOType);
+			}
+			else
+			{
+				addNodeChild(j3dRECOType);
+			}
+		}
 	}
 
 	@Override
