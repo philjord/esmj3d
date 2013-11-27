@@ -20,7 +20,7 @@ public class BethRenderSettings
 
 	private static int NEAR_LOAD_GRID_COUNT = 2;// int in number of cells (82 meters each)
 
-	private static float CHAR_MOVE_UPDATE_DIST = 2f;//in meters
+	private static int LOD_LOAD_DIST_MAX = 64;//in grids (82 meters)
 
 	private static int actorFade = ACTOR_FADE_DEFAULT;//in meters
 
@@ -62,9 +62,9 @@ public class BethRenderSettings
 
 	}
 
-	public static void setCHAR_MOVE_UPDATE_DIST(float f)
+	public static void setLOD_LOAD_DIST_MAX(int i)
 	{
-		CHAR_MOVE_UPDATE_DIST = f;
+		LOD_LOAD_DIST_MAX = i;
 		fireUpdate();
 	}
 
@@ -152,9 +152,9 @@ public class BethRenderSettings
 		return NEAR_LOAD_GRID_COUNT;
 	}
 
-	public static float getCHAR_MOVE_UPDATE_DIST()
+	public static int getLOD_LOAD_DIST_MAX()
 	{
-		return CHAR_MOVE_UPDATE_DIST;
+		return LOD_LOAD_DIST_MAX;
 	}
 
 	public static int getActorFade()

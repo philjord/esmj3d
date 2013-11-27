@@ -31,7 +31,7 @@ public class Beth32LodManager extends Group
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		long start = System.currentTimeMillis();
-
+		
 		for (int x = OBLIVION_MIN_LOD; x < OBLIVION_MAX_LOD; x += SCALE_32)
 		{
 			for (int y = OBLIVION_MIN_LOD; y < OBLIVION_MAX_LOD; y += SCALE_32)

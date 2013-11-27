@@ -11,6 +11,11 @@ import javax.media.j3d.IndexedGeometryArray;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 
+/**
+ * Used by Oblivion only, the morph land system
+ * @author philip
+ *
+ */
 public abstract class Beth32LODLandscape extends BranchGroup
 {
 

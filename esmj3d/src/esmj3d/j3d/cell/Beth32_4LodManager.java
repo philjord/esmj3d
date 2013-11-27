@@ -9,6 +9,7 @@ import java.util.HashSet;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 
+import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 
 public class Beth32_4LodManager extends Group
@@ -140,8 +141,12 @@ public class Beth32_4LodManager extends Group
 					if (toAttachX.contains(x) || toAttachY.contains(y))
 					{
 						Point key = new Point(x, y);
-						//System.out.println("key to attach " + key);
-						pointsToAttach.add(key);
+
+						if (Math.abs(key.x - charLodXY.x) < BethRenderSettings.getLOD_LOAD_DIST_MAX()
+								&& Math.abs(key.y - charLodXY.y) < BethRenderSettings.getLOD_LOAD_DIST_MAX())
+						{
+							pointsToAttach.add(key);
+						}
 					}
 				}
 			}

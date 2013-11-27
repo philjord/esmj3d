@@ -128,7 +128,7 @@ public class GridSpace extends BranchGroup
 
 			for (Record record : recordsById.values())
 			{
-				J3dRECOInst j3dRECOInst = j3dCELL.makeJ3dRECO(record);
+				J3dRECOInst j3dRECOInst = j3dCELL.makeJ3dRECO(record, false);
 				if (j3dRECOInst != null)
 				{
 					// now attach and record the j3dRECO
