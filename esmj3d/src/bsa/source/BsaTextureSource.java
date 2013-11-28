@@ -10,9 +10,9 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.media.j3d.Texture;
 
+import tools.ddstexture.DDSToTexture;
 import tools.image.ImageFlip;
 import tools.image.SimpleImageLoader;
-import tools.texture.DDSToTexture;
 import utils.source.TextureSource;
 import FO3Archive.ArchiveEntry;
 import FO3Archive.ArchiveFile;
