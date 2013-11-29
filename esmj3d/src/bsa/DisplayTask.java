@@ -21,7 +21,8 @@ import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
-import tools.ddstexture.DDSToTexture;
+import tools.ddstexture.DDSTextureLoader;
+import tools.ddstexture.utils.DDSTextureLoaderTester;
 import tools.image.SimpleImageLoader;
 import utils.source.DummyTextureSource;
 import FO3Archive.ArchiveEntry;
@@ -116,11 +117,11 @@ public class DisplayTask extends Thread
 								System.out.println("issue: " + fileName);
 							}
 
-							DDSToTexture.clearCache();
+							DDSTextureLoader.clearCache();
 						}
 						else
 						{
-							DDSToTexture.showImage(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName),
+							DDSTextureLoaderTester.showImage(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName),
 									entries.size() < 10 ? 5000 : 500);
 						}
 					}

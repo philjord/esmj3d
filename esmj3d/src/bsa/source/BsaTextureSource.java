@@ -10,7 +10,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.media.j3d.Texture;
 
-import tools.ddstexture.DDSToTexture;
+import tools.ddstexture.DDSTextureLoader;
 import tools.image.ImageFlip;
 import tools.image.SimpleImageLoader;
 import utils.source.TextureSource;
@@ -50,7 +50,7 @@ public class BsaTextureSource implements TextureSource
 
 			Texture tex = null;
 			//check cache hit
-			tex = DDSToTexture.checkCachedTexture(texName);
+			tex = DDSTextureLoader.checkCachedTexture(texName);
 			if (tex != null)
 			{
 				return true;
@@ -90,7 +90,7 @@ public class BsaTextureSource implements TextureSource
 
 			Texture tex = null;
 			//check cache hit
-			tex = DDSToTexture.checkCachedTexture(texName);
+			tex = DDSTextureLoader.checkCachedTexture(texName);
 			if (tex != null)
 			{
 				return tex;
@@ -109,7 +109,7 @@ public class BsaTextureSource implements TextureSource
 
 						if (texName.endsWith(".dds"))
 						{
-							tex = DDSToTexture.getTexture(texName, in);
+							tex = DDSTextureLoader.getTexture(texName, in);
 						}
 						else
 						{
