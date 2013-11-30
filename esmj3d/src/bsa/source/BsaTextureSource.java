@@ -89,6 +89,7 @@ public class BsaTextureSource implements TextureSource
 			}
 
 			Texture tex = null;
+			
 			//check cache hit
 			tex = DDSTextureLoader.checkCachedTexture(texName);
 			if (tex != null)
