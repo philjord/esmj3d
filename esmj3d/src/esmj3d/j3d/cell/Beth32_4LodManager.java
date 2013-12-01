@@ -8,7 +8,10 @@ import java.util.HashSet;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
+import javax.media.j3d.LinearFog;
+import javax.vecmath.Color3f;
 
+import tools3d.utils.Utils3D;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 
@@ -36,6 +39,14 @@ public class Beth32_4LodManager extends Group
 
 	public Beth32_4LodManager(int worldFormId, String worldFormName, J3dICellFactory j3dCellFactory)
 	{
+
+		//create a hillarious distance fog
+		//LinearFog, ExponentialFog
+		LinearFog fog = new LinearFog(new Color3f(0.7f, 0.7f, 0.7f), 500, 3500);
+		fog.addScope(this);
+		fog.setInfluencingBounds(Utils3D.defaultBounds);
+		addChild(fog);
+
 		this.worldFormId = worldFormId;
 		this.worldFormName = worldFormName;
 		this.j3dCellFactory = j3dCellFactory;

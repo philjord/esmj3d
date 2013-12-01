@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.media.j3d.Group;
+import javax.media.j3d.LinearFog;
+import javax.vecmath.Color3f;
 
+import tools3d.utils.Utils3D;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 
 public class Beth32LodManager extends Group
@@ -25,13 +28,21 @@ public class Beth32LodManager extends Group
 
 	public Beth32LodManager(int worldFormId, String worldFormName, J3dICellFactory j3dCellFactory)
 	{
+
+		//create a hillarious distance fog
+		//LinearFog, ExponentialFog
+		LinearFog fog = new LinearFog(new Color3f(0.7f, 0.7f, 0.7f), 500, 3500);
+		fog.addScope(this);
+		fog.setInfluencingBounds(Utils3D.defaultBounds);
+		addChild(fog);
+
 		this.worldFormId = worldFormId;
 		this.worldFormName = worldFormName;
 
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		long start = System.currentTimeMillis();
-		
+
 		for (int x = OBLIVION_MIN_LOD; x < OBLIVION_MAX_LOD; x += SCALE_32)
 		{
 			for (int y = OBLIVION_MIN_LOD; y < OBLIVION_MAX_LOD; y += SCALE_32)
