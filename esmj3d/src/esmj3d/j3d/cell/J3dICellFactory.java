@@ -7,8 +7,6 @@ public interface J3dICellFactory
 
 	public String getMainESMFileName();
 
-	public boolean isWRLD(int formId);
-
 	public J3dICELLPersistent makeBGWRLDPersistent(int formId, boolean makePhys);
 
 	public J3dCELLGeneral makeBGWRLDTemporary(int cellId, boolean makePhys);
@@ -26,5 +24,7 @@ public interface J3dICellFactory
 	public J3dCELLGeneral makeBGInteriorCELLDistant(int cellId, boolean makePhys);
 
 	public BranchGroup makeLODLandscape(int lodX, int lodY, int scale, int worldFormId, String worldFormName);
+
+	public boolean isWRLD(int worldFormId);
 
 }
