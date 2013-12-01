@@ -10,9 +10,10 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.media.j3d.Texture;
 
+import tools.ddstexture.DDSImage;
 import tools.ddstexture.DDSTextureLoader;
+import tools.ddstexture.utils.DDSDecompressor;
 import tools.image.ImageFlip;
-import tools.image.SimpleImageLoader;
 import utils.source.TextureSource;
 import FO3Archive.ArchiveEntry;
 import FO3Archive.ArchiveFile;
@@ -89,7 +90,7 @@ public class BsaTextureSource implements TextureSource
 			}
 
 			Texture tex = null;
-			
+
 			//check cache hit
 			tex = DDSTextureLoader.checkCachedTexture(texName);
 			if (tex != null)
@@ -158,21 +159,26 @@ public class BsaTextureSource implements TextureSource
 				ArchiveEntry archiveEntry = archiveFile.getEntry(imageName);
 				if (archiveEntry != null)
 				{
+					DDSImage ddsImage = null;
 					try
 					{
 						InputStream in = archiveFile.getInputStream(archiveEntry);
 
-						BufferedImage image = SimpleImageLoader.getImage(imageName, in);
+						ddsImage = DDSImage.read(DDSTextureLoader.toByteBuffer(in));
+						BufferedImage image = new DDSDecompressor(ddsImage, 0, imageName).convertImage();
 
 						if (image != null)
 						{
 							return ImageFlip.verticalflip(image);
 						}
+
 					}
 					catch (IOException e)
 					{
 						System.out.println("BsaTextureSource  " + imageName + " " + e.getMessage());
 					}
+					if (ddsImage != null)
+						ddsImage.close();
 				}
 			}
 		}

@@ -54,17 +54,9 @@ public class Beth32_4LodManager extends Group
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 
-		if (worldFormId != 60 && worldFormId != 894758)//tamriel wasteland and wasteland nv
-		{
-			//TODO: disable for now
-			LOD_SCOPE_EXTREMES = 0;
-			System.out.println("LOD_SCOPE disabled");
-		}
-		else if (j3dCellFactory.getMainESMFileName().toLowerCase().contains("falloutnv"))
+		if (j3dCellFactory.getMainESMFileName().toLowerCase().contains("fallout"))
 		{
 			LOD_SCOPE_EXTREMES = FO3_LOD_SCOPE;
-			this.worldFormName = "wastelandnv";
-			System.out.println("LOD set for NV");
 		}
 
 	}
