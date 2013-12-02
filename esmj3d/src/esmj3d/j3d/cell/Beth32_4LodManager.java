@@ -33,26 +33,22 @@ public class Beth32_4LodManager extends Group
 
 	private int worldFormId;
 
-	private String worldFormName;
-
 	private J3dICellFactory j3dCellFactory;
 
-	public Beth32_4LodManager(int worldFormId, String worldFormName, J3dICellFactory j3dCellFactory)
+	public Beth32_4LodManager(int worldFormId, J3dICellFactory j3dCellFactory)
 	{
-
-		//create a hillarious distance fog
-		//LinearFog, ExponentialFog
-		LinearFog fog = new LinearFog(new Color3f(0.7f, 0.7f, 0.7f), 500, 3500);
-		fog.addScope(this);
-		fog.setInfluencingBounds(Utils3D.defaultBounds);
-		addChild(fog);
-
 		this.worldFormId = worldFormId;
-		this.worldFormName = worldFormName;
 		this.j3dCellFactory = j3dCellFactory;
 
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+
+		//create a hillarious distance fog
+		//LinearFog, ExponentialFog
+		LinearFog fog = new LinearFog(new Color3f(0.8f, 0.8f, 0.8f), 500, 3500);
+		fog.addScope(this);
+		fog.setInfluencingBounds(Utils3D.defaultBounds);
+		addChild(fog);
 
 		if (j3dCellFactory.getMainESMFileName().toLowerCase().contains("fallout"))
 		{
@@ -173,7 +169,7 @@ public class Beth32_4LodManager extends Group
 				BranchGroup lod = store.get(key);
 				if (lod == null)
 				{
-					lod = j3dCellFactory.makeLODLandscape(key.x, key.y, scale, worldFormId, worldFormName);
+					lod = j3dCellFactory.makeLODLandscape(key.x, key.y, scale, worldFormId);
 					store.put(key, lod);
 				}
 

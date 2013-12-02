@@ -22,25 +22,22 @@ public class Beth32LodManager extends Group
 
 	private HashMap<Point, Beth32LODLandscape> loadedGrosses = new HashMap<Point, Beth32LODLandscape>();
 
-	private int worldFormId;
+	//private int worldFormId;
 
-	private String worldFormName;
-
-	public Beth32LodManager(int worldFormId, String worldFormName, J3dICellFactory j3dCellFactory)
+	public Beth32LodManager(int worldFormId, J3dICellFactory j3dCellFactory)
 	{
+		//this.worldFormId = worldFormId;
+
+		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
+		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 
 		//create a hillarious distance fog
 		//LinearFog, ExponentialFog
-		LinearFog fog = new LinearFog(new Color3f(0.7f, 0.7f, 0.7f), 500, 3500);
+		LinearFog fog = new LinearFog(new Color3f(0.8f, 0.8f, 0.8f), 500, 3500);
 		fog.addScope(this);
 		fog.setInfluencingBounds(Utils3D.defaultBounds);
 		addChild(fog);
 
-		this.worldFormId = worldFormId;
-		this.worldFormName = worldFormName;
-
-		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
-		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		long start = System.currentTimeMillis();
 
 		for (int x = OBLIVION_MIN_LOD; x < OBLIVION_MAX_LOD; x += SCALE_32)
@@ -48,7 +45,7 @@ public class Beth32LodManager extends Group
 			for (int y = OBLIVION_MIN_LOD; y < OBLIVION_MAX_LOD; y += SCALE_32)
 			{
 				Point key = new Point(x, y);
-				Beth32LODLandscape bg = (Beth32LODLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, worldFormId, worldFormName);
+				Beth32LODLandscape bg = (Beth32LODLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, worldFormId);
 				loadedGrosses.put(key, bg);
 				addChild(bg);
 			}

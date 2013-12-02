@@ -23,7 +23,7 @@ public interface J3dICellFactory
 
 	public J3dCELLGeneral makeBGInteriorCELLDistant(int cellId, boolean makePhys);
 
-	public BranchGroup makeLODLandscape(int lodX, int lodY, int scale, int worldFormId, String worldFormName);
+	public BranchGroup makeLODLandscape(int lodX, int lodY, int scale, int worldFormId);
 
 	public boolean isWRLD(int worldFormId);
 
