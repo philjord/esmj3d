@@ -47,6 +47,7 @@ public class Beth32LodManager extends Group
 				Point key = new Point(x, y);
 				Beth32LODLandscape bg = (Beth32LODLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, worldFormId);
 				loadedGrosses.put(key, bg);
+				bg.compile();// better to be done not on the j3d thread?
 				addChild(bg);
 			}
 		}

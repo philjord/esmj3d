@@ -177,6 +177,7 @@ public class Beth32_4LodManager extends Group
 				if (lod.getParent() == null)
 				{
 					//System.out.println("Added lod level" + scale + " at " + key);
+					lod.compile();// better to be done not on the j3d thread?
 					addChild(lod);
 				}
 			}

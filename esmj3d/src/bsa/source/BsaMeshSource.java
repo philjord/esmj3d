@@ -55,7 +55,7 @@ public class BsaMeshSource implements MeshSource
 		{
 			nifName = "Meshes\\" + nifName;
 		}
-
+//TODO: I can use the flag to work out who has meshes and who has textures
 		for (ArchiveFile archiveFile : bsas)
 		{
 			ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
