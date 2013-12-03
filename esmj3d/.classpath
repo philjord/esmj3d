@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jnif"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jnifj3d"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Tools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsUtils"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/java3d/lib/ext/j3dcore.jar"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/java3d/lib/ext/j3dutils.jar"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/java3d/lib/ext/vecmath.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/3DTools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/BSAManager"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ESMLoader"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/external_jars/external jars/j3d/j3d-org-java3d-all.jar"/>
+	<classpathentry kind="lib" path="/external_jars/external jars/java3djogl2.jar" sourcepath="E:/Java/3rd party jars/java3d/src"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
