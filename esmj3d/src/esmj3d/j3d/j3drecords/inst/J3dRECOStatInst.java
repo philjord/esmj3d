@@ -73,7 +73,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	public void renderSettingsUpdated()
 	{
 		//TODO: different render settings for  different types
-		if (fader)
+		if (fader && dl != null)
 		{
 			dl.setDistance(0, BethRenderSettings.getItemFade());
 		}

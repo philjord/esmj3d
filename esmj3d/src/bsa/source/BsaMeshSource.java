@@ -15,7 +15,6 @@ import FO3Archive.ArchiveFile.Folder;
 
 public class BsaMeshSource implements MeshSource
 {
-	//TODO: the mesh texture and sound source needs to send back a list of files in a folder, for random sounds and random animations
 
 	private List<ArchiveFile> bsas;
 
@@ -24,6 +23,7 @@ public class BsaMeshSource implements MeshSource
 		this.bsas = bsas;
 	}
 
+	@Override
 	public boolean nifFileExists(String nifName)
 	{
 		if (!nifName.toLowerCase().startsWith("meshes"))
@@ -42,69 +42,69 @@ public class BsaMeshSource implements MeshSource
 		return false;
 	}
 
-	/**
-	 * Synchonized because at least physics and visual updater must access
-	 * but sometime corrupt file come from bsa as if file pinter sharing cock up
-	 * @see utils.source.MeshSource#getNifFile(java.lang.String)
-	 */
 	@Override
-	public synchronized NifFile getNifFile(String nifName)
+	public NifFile getNifFile(String nifName)
 	{
 
 		if (!nifName.toLowerCase().startsWith("meshes"))
 		{
 			nifName = "Meshes\\" + nifName;
 		}
-//TODO: I can use the flag to work out who has meshes and who has textures
+
 		for (ArchiveFile archiveFile : bsas)
 		{
-			ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
-			if (archiveEntry != null)
+			//dds and kf flags
+			if ((archiveFile.getFileFlags() & 1) != 0 || (archiveFile.getFileFlags() & 0x40) != 0)
 			{
-				try
+
+				ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
+				if (archiveEntry != null)
 				{
-					NifFile nifFile = null;
-					InputStream inputStream = archiveFile.getInputStream(archiveEntry);
-					//String fileName = archiveEntry.getName();
-
-					if (archiveFile.getName().toLowerCase().contains("skyrim"))
-					{
-						ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.SKYRIM_HAVOK_TO_METERS_SCALE;
-					}
-					else
-					{
-						ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.PRE_SKYRIM_HAVOK_TO_METERS_SCALE;
-					}
-
 					try
 					{
-						nifFile = NifFileReader.readNif(nifName, inputStream);
-					}
-					catch (IOException e)
-					{
-						System.out.println("BsaMeshSource:  " + nifName + " " + e.getMessage());
-					}
-					finally
-					{
+						NifFile nifFile = null;
+						InputStream inputStream = archiveFile.getInputStream(archiveEntry);
+						//String fileName = archiveEntry.getName();
+
+						if (archiveFile.getName().toLowerCase().contains("skyrim"))
+						{
+							ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.SKYRIM_HAVOK_TO_METERS_SCALE;
+						}
+						else
+						{
+							ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.PRE_SKYRIM_HAVOK_TO_METERS_SCALE;
+						}
+
 						try
 						{
-							if (inputStream != null)
-								inputStream.close();
+							nifFile = NifFileReader.readNif(nifName, inputStream);
 						}
 						catch (IOException e)
 						{
-							e.printStackTrace();
+							System.out.println("BsaMeshSource:  " + nifName + " " + e.getMessage());
+						}
+						finally
+						{
+							try
+							{
+								if (inputStream != null)
+									inputStream.close();
+							}
+							catch (IOException e)
+							{
+								e.printStackTrace();
+							}
+						}
+
+						if (nifFile != null)
+						{
+							return nifFile;
 						}
 					}
-
-					if (nifFile != null)
+					catch (IOException e)
 					{
-						return nifFile;
+						System.out.println("BsaMeshSource  " + nifName + " " + e.getMessage());
 					}
-				}
-				catch (IOException e)
-				{
-					System.out.println("BsaMeshSource  " + nifName + " " + e.getMessage());
 				}
 			}
 		}

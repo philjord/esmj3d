@@ -100,33 +100,37 @@ public class BsaTextureSource implements TextureSource
 
 			for (ArchiveFile archiveFile : bsas)
 			{
-				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
-				if (archiveEntry != null)
+				// texture flag
+				if ((archiveFile.getFileFlags() & 2) != 0)
 				{
-					try
+					ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
+					if (archiveEntry != null)
 					{
-
-						InputStream in = archiveFile.getInputStream(archiveEntry);
-						//String fileName = archiveEntry.getName();
-
-						if (texName.endsWith(".dds"))
+						try
 						{
-							tex = DDSTextureLoader.getTexture(texName, in);
-						}
-						else
-						{
-							TextureLoader tl = new TextureLoader(ImageIO.read(in));
-							tex = tl.getTexture();
-						}
 
-						if (tex != null)
-						{
-							return tex;
+							InputStream in = archiveFile.getInputStream(archiveEntry);
+							//String fileName = archiveEntry.getName();
+
+							if (texName.endsWith(".dds"))
+							{
+								tex = DDSTextureLoader.getTexture(texName, in);
+							}
+							else
+							{
+								TextureLoader tl = new TextureLoader(ImageIO.read(in));
+								tex = tl.getTexture();
+							}
+
+							if (tex != null)
+							{
+								return tex;
+							}
 						}
-					}
-					catch (IOException e)
-					{
-						System.out.println("BsaTextureSource  " + texName + " " + e.getMessage());
+						catch (IOException e)
+						{
+							System.out.println("BsaTextureSource  " + texName + " " + e.getMessage());
+						}
 					}
 				}
 			}
