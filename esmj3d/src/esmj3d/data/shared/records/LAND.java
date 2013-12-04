@@ -65,12 +65,15 @@ public class LAND extends InstRECO
 				ATXT atxt = new ATXT(bs);
 
 				i++;
-				Subrecord sr2 = subrecords.get(i);
+				if (i < subrecords.size())
+				{
+					Subrecord sr2 = subrecords.get(i);
 
-				if (!sr2.getSubrecordType().equals("VTXT"))
-					System.out.println("BAD record following ATXT: " + sr2);
+					if (!sr2.getSubrecordType().equals("VTXT"))
+						System.out.println("BAD record following ATXT: " + sr2);
 
-				atxt.vtxt = new VTXT(sr2.getSubrecordData());
+					atxt.vtxt = new VTXT(sr2.getSubrecordData());
+				}
 				ATXTsv.add(atxt);
 			}
 			else if (sr.getSubrecordType().equals("VTEX"))
@@ -82,7 +85,7 @@ public class LAND extends InstRECO
 				//TODO: MegaTonWordl in fallut3 shows signs of being corrupted for some reason
 				// LTEX wrong ids data is mis placing the quadrants in height
 				// but mega ton does not seem to have one? and it has some quandrants
-				
+
 				//I notice my hieght data is out in the case of bad land record, but the cell location is correct
 
 				System.out.println("VTEX spotted!");

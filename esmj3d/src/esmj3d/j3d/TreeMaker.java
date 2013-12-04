@@ -6,6 +6,7 @@ import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.Link;
 import javax.media.j3d.Material;
+import javax.media.j3d.Node;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.RenderingAttributes;
@@ -24,7 +25,9 @@ public class TreeMaker
 {
 	private static WeakValueHashMap<String, SharedGroup> loadedSharedGroups = new WeakValueHashMap<String, SharedGroup>();
 
-	public static Group makeLODTreeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
+	private static WeakValueHashMap<String, Appearance> loadedApps = new WeakValueHashMap<String, Appearance>();
+
+	public static Node makeLODTreeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
 	{
 		String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
 		SharedGroup sg = loadedSharedGroups.get(keyString);
@@ -33,10 +36,12 @@ public class TreeMaker
 		{
 			sg = new SharedGroup();
 
+			Appearance
+
+			app = new Appearance();
+
 			String treeLODTextureName = sptFileName.substring(sptFileName.lastIndexOf("\\") + 1);
 			treeLODTextureName = treeLODTextureName.substring(0, treeLODTextureName.indexOf(".spt")) + ".dds";
-
-			Appearance app = new Appearance();
 
 			PolygonAttributes pa = new PolygonAttributes();
 			pa.setCullFace(PolygonAttributes.CULL_NONE);
@@ -61,11 +66,16 @@ public class TreeMaker
 			m.setLightingEnable(false);
 			app.setMaterial(m);
 
+			loadedApps.put(keyString, app);
+
 			Shape3D treeShape = new Shape3D();
 			treeShape.setGeometry(createGeometryX(billWidth, billHeight));
 			treeShape.setAppearance(app);
 
+			//return treeShape;
+			
 			sg.addChild(treeShape);
+			sg.compile();
 			loadedSharedGroups.put(keyString, sg);
 
 		}
@@ -74,9 +84,7 @@ public class TreeMaker
 
 		if (sg != null)
 		{
-			Link link = new Link();
-			link.setSharedGroup(sg);
-			g.addChild(link);
+			g.addChild(new Link(sg));
 		}
 
 		return g;
