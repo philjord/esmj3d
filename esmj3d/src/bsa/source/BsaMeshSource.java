@@ -53,8 +53,8 @@ public class BsaMeshSource implements MeshSource
 
 		for (ArchiveFile archiveFile : bsas)
 		{
-			//dds and kf flags
-			if ((archiveFile.getFileFlags() & 1) != 0 || (archiveFile.getFileFlags() & 0x40) != 0)
+			//NOT dds content bsa files
+			if ((archiveFile.getFileFlags() & 2) == 0 )
 			{
 
 				ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);

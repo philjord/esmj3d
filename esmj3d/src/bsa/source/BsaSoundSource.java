@@ -33,31 +33,37 @@ public class BsaSoundSource implements SoundSource
 
 		for (ArchiveFile archiveFile : bsas)
 		{
-			ArchiveEntry archiveEntry = archiveFile.getEntry(soundFile);
-			if (archiveEntry != null)
+			//NOT dds content bsa files
+			if ((archiveFile.getFileFlags() & 2) == 0)
 			{
-				MediaContainer mediaContainer = null;
-				InputStream inputStream = null;
+				ArchiveEntry archiveEntry = archiveFile.getEntry(soundFile);
+				if (archiveEntry != null)
+				{
+					MediaContainer mediaContainer = null;
+					InputStream inputStream = null;
 
-				try
-				{
-					inputStream = archiveFile.getInputStream(archiveEntry);
-					//String fileName = archiveEntry.getName();
+					try
+					{
+						inputStream = archiveFile.getInputStream(archiveEntry);
+						//String fileName = archiveEntry.getName();
 
-					mediaContainer = new MediaContainer(inputStream);
-				}
-				catch (SoundException e)
-				{
-					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e.getMessage());
-				}
-				catch (IOException e)
-				{
-					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e.getMessage());
-				}
+						mediaContainer = new MediaContainer(inputStream);
+					}
+					catch (SoundException e)
+					{
+						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " "
+								+ e.getMessage());
+					}
+					catch (IOException e)
+					{
+						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " "
+								+ e.getMessage());
+					}
 
-				if (mediaContainer != null)
-				{
-					return mediaContainer;
+					if (mediaContainer != null)
+					{
+						return mediaContainer;
+					}
 				}
 			}
 		}
