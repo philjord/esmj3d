@@ -20,7 +20,7 @@ import esmj3d.j3d.j3drecords.type.J3dRECOType;
 
 public class J3dRECOStatInst extends Group implements J3dRECOInst
 {
-	public static boolean SHOW_FADE_OUT_MARKER = false;
+	public static boolean SHOW_FADE_OUT_MARKER = true;
 
 	private boolean fader = false;
 
@@ -147,6 +147,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		System.out.println("Oi! no addchild on " + this);
 	}
 
+	@Override
 	public J3dRECOType getJ3dRECOType()
 	{
 		return j3dRECOType;

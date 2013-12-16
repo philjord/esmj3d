@@ -233,26 +233,29 @@ public class Beth32_4LodManager extends Group
 
 	public static Rectangle getNearBounds(float charX, float charY, int nearLoadGridCount)
 	{
+		//TODO: foricing the 4x4 limit removed
+		// I want to put in the 4x4 under these cells and morph like oblivion
 
 		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
 		charLodX -= nearLoadGridCount;
-		while (charLodX % 4 != 0)
-			charLodX--;
+//		while (charLodX % 4 != 0)
+//			charLodX--;
 		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
 		charLodY -= nearLoadGridCount;
-		while (charLodY % 4 != 0)
-			charLodY--;
+//		while (charLodY % 4 != 0)
+//			charLodY--;
 		int w = (nearLoadGridCount * 2) + 1;
-		while (w % 4 != 0)
-			w++;
+//		while (w % 4 != 0)
+//			w++;
 		int h = (nearLoadGridCount * 2) + 1;
-		while (h % 4 != 0)
-			h++;
+//		while (h % 4 != 0)
+//			h++;
 
 		//System.out.println("near is "+ new Rectangle(charLodX, charLodY, w - 1, h - 1));
 
 		//because teh mod check allow for getting to the mod value and we wnat one less
-		return new Rectangle(charLodX, charLodY, w - 1, h - 1);
+	//	return new Rectangle(charLodX, charLodY, w - 1, h - 1);
+		return new Rectangle(charLodX, charLodY, w , h );
 	}
 
 	public static Rectangle getFarBounds(float charX, float charY, int farLoadGridCount)

@@ -6,7 +6,7 @@ public class XESP
 {
 	//XESP 	enable parent 	struct 	8-byte struct
 
-	//formid - Parent reference (Object to take enable state from)
+	// formid - Parent reference (Object to take enable state from)
 	// uint32 - Flags (records with no flags set have random values in high bits)
 
 	//   0x0001 = Set Enable State Opposite Parent

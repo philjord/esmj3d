@@ -133,7 +133,7 @@ public class GridSpace extends BranchGroup
 				{
 					// now attach and record the j3dRECO
 					j3dRECOsById.put(new Integer(record.getFormID()), j3dRECOInst);
-					children.addChild((Node) j3dRECOInst);
+					children.addChild((Node) j3dRECOInst);					
 				}
 			}
 

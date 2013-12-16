@@ -70,12 +70,10 @@ public class GridSpaces extends BranchGroup
 		List<GridSpace> gridsToAdd = getGridSpacesToAdd(charX, charY, loadDist);
 		for (GridSpace gridSpace : gridsToAdd)
 		{
-
 			attachedGridSpaces.put(gridSpace.getKey(), gridSpace);
 			gridSpace.loadChildren();
 			gridSpace.compile();// better to be done not on the j3d thread?
 			addChild(gridSpace);
-
 		}
 	}
 
