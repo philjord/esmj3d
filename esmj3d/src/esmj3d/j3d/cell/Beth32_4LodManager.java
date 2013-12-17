@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
@@ -69,6 +70,19 @@ public class Beth32_4LodManager extends Group
 			handleLodAtScale(charX, charY, 16, 32, loadedGrosses16);
 			handleLodAtScale(charX, charY, 32, LOD_SCOPE_EXTREMES, loadedGrosses32);
 
+			// now to tell each 4 that's loaded to update themselves
+			Point charPoint = convertCharToLodXY(charX, charY);
+			Iterator<Point> keys = loadedGrosses4.keySet().iterator();
+			while (keys.hasNext())
+			{
+				Point key = keys.next();
+				if (key.distance(charPoint) <= 64)
+				{
+					MorphingLandscape oblivLODLandscape = (MorphingLandscape) loadedGrosses4.get(key);
+					oblivLODLandscape.updateVisibility(charX, charY);
+				}
+			}
+
 			if ((System.currentTimeMillis() - start) > 50)
 				System.out.println("Beth32_4LodManager.updateGross " + (System.currentTimeMillis() - start));
 		}
@@ -91,7 +105,7 @@ public class Beth32_4LodManager extends Group
 		if (scale == 1)
 		{
 			//TODO: this nearLoad is important, basically near load min
-			int nearLoad = 2;
+			int nearLoad = 0;//2;
 			prevXmin = charLodXY.x - nearLoad;
 			prevYmin = charLodXY.y - nearLoad;
 			prevXmax = charLodXY.x + nearLoad;
@@ -233,34 +247,28 @@ public class Beth32_4LodManager extends Group
 
 	public static Rectangle getNearBounds(float charX, float charY, int nearLoadGridCount)
 	{
-		//TODO: foricing the 4x4 limit removed
-		// I want to put in the 4x4 under these cells and morph like oblivion
+		// the 4x4 limit removed, morph like oblivion
 
 		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
 		charLodX -= nearLoadGridCount;
-//		while (charLodX % 4 != 0)
-//			charLodX--;
+		//		while (charLodX % 4 != 0)
+		//			charLodX--;
 		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
 		charLodY -= nearLoadGridCount;
-//		while (charLodY % 4 != 0)
-//			charLodY--;
+		//		while (charLodY % 4 != 0)
+		//			charLodY--;
 		int w = (nearLoadGridCount * 2) + 1;
-//		while (w % 4 != 0)
-//			w++;
+		//		while (w % 4 != 0)
+		//			w++;
 		int h = (nearLoadGridCount * 2) + 1;
-//		while (h % 4 != 0)
-//			h++;
+		//		while (h % 4 != 0)
+		//			h++;
 
 		//System.out.println("near is "+ new Rectangle(charLodX, charLodY, w - 1, h - 1));
 
 		//because teh mod check allow for getting to the mod value and we wnat one less
-	//	return new Rectangle(charLodX, charLodY, w - 1, h - 1);
-		return new Rectangle(charLodX, charLodY, w , h );
+		//	return new Rectangle(charLodX, charLodY, w - 1, h - 1);
+		return new Rectangle(charLodX, charLodY, w, h);
 	}
 
-	public static Rectangle getFarBounds(float charX, float charY, int farLoadGridCount)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

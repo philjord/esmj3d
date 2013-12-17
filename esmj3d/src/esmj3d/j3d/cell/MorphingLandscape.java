@@ -16,12 +16,14 @@ import esmj3d.j3d.j3drecords.inst.J3dLAND;
  * @author philip
  *
  */
-public abstract class Beth32LODLandscape extends BranchGroup
+public class MorphingLandscape extends BranchGroup
 {
 
 	private int lodX = 0;
 
 	private int lodY = 0;
+
+	private int scale = 0;
 
 	private Rectangle prevAbsBounds = new Rectangle();
 
@@ -29,10 +31,11 @@ public abstract class Beth32LODLandscape extends BranchGroup
 
 	private IndexedGeometryArray baseItsa;
 
-	public Beth32LODLandscape(int lodX, int lodY)
+	public MorphingLandscape(int lodX, int lodY, int scale)
 	{
 		this.lodX = lodX;
 		this.lodY = lodY;
+		this.scale = scale;
 	}
 
 	protected void setGeometryArray(IndexedGeometryArray baseItsa)
@@ -47,6 +50,7 @@ public abstract class Beth32LODLandscape extends BranchGroup
 	 */
 	public void updateVisibility(float charX, float charY)
 	{
+		System.out.println("my god?");
 		if (baseItsa != null)
 		{
 			Rectangle absBounds = Beth32LodManager.getBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
@@ -60,7 +64,7 @@ public abstract class Beth32LODLandscape extends BranchGroup
 				final int lowY = absBounds.y - lodY;
 				final int highY = (absBounds.y + absBounds.height) - lodY;
 
-				if ((highX > 0 && lowX < 32) || (highY > 0 && lowY < 32))
+				if ((highX > 0 && lowX < scale) || (highY > 0 && lowY < scale))
 				{
 					final Rectangle bounds = new Rectangle(lowX, lowY, absBounds.width + 1, absBounds.height + 1);
 

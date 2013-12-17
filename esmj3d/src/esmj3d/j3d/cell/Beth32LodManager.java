@@ -20,7 +20,7 @@ public class Beth32LodManager extends Group
 
 	private static int SCALE_32 = 32;
 
-	private HashMap<Point, Beth32LODLandscape> loadedGrosses = new HashMap<Point, Beth32LODLandscape>();
+	private HashMap<Point, MorphingLandscape> loadedGrosses = new HashMap<Point, MorphingLandscape>();
 
 	//private int worldFormId;
 
@@ -45,7 +45,7 @@ public class Beth32LodManager extends Group
 			for (int y = OBLIVION_MIN_LOD; y < OBLIVION_MAX_LOD; y += SCALE_32)
 			{
 				Point key = new Point(x, y);
-				Beth32LODLandscape bg = (Beth32LODLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, worldFormId);
+				MorphingLandscape bg = (MorphingLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, worldFormId);
 				loadedGrosses.put(key, bg);
 				bg.compile();// better to be done not on the j3d thread?
 				addChild(bg);
@@ -67,7 +67,7 @@ public class Beth32LodManager extends Group
 			Point key = keys.next();
 			if (key.distance(charPoint) <= 64)
 			{
-				Beth32LODLandscape oblivLODLandscape = loadedGrosses.get(key);
+				MorphingLandscape oblivLODLandscape = loadedGrosses.get(key);
 				oblivLODLandscape.updateVisibility(charX, charY);
 			}
 		}
