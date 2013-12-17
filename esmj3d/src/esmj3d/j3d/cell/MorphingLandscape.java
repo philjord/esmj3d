@@ -50,7 +50,6 @@ public class MorphingLandscape extends BranchGroup
 	 */
 	public void updateVisibility(float charX, float charY)
 	{
-		System.out.println("my god?");
 		if (baseItsa != null)
 		{
 			Rectangle absBounds = Beth32LodManager.getBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
