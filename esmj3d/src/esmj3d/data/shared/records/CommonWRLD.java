@@ -28,29 +28,29 @@ public class CommonWRLD extends RECO
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getSubrecordData();
+			byte[] bs = sr.getData();
 
-			if (sr.getSubrecordType().equals("EDID"))
+			if (sr.getType().equals("EDID"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getSubrecordType().equals("FULL"))
+			else if (sr.getType().equals("FULL"))
 			{
 				FULL = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("WNAM"))
+			else if (sr.getType().equals("WNAM"))
 			{
 				WNAM = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("CNAM"))
+			else if (sr.getType().equals("CNAM"))
 			{
 				CNAM = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("NAM2"))
+			else if (sr.getType().equals("NAM2"))
 			{
 				NAM2 = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("DATA"))
+			else if (sr.getType().equals("DATA"))
 			{
 				DATA = bs[0];
 			}

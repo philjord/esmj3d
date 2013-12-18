@@ -38,29 +38,29 @@ public class LAND extends InstRECO
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getSubrecordData();
+			byte[] bs = sr.getData();
 
-			if (sr.getSubrecordType().equals("DATA"))
+			if (sr.getType().equals("DATA"))
 			{
 				DATA = new DATA(bs);
 			}
-			else if (sr.getSubrecordType().equals("VNML"))
+			else if (sr.getType().equals("VNML"))
 			{
 				VNML = bs;
 			}
-			else if (sr.getSubrecordType().equals("VHGT"))
+			else if (sr.getType().equals("VHGT"))
 			{
 				VHGT = bs;
 			}
-			else if (sr.getSubrecordType().equals("VCLR"))
+			else if (sr.getType().equals("VCLR"))
 			{
 				VCLR = bs;
 			}
-			else if (sr.getSubrecordType().equals("BTXT"))
+			else if (sr.getType().equals("BTXT"))
 			{
 				BTXTsv.add(new BTXT(bs));
 			}
-			else if (sr.getSubrecordType().equals("ATXT"))
+			else if (sr.getType().equals("ATXT"))
 			{
 				ATXT atxt = new ATXT(bs);
 
@@ -69,14 +69,14 @@ public class LAND extends InstRECO
 				{
 					Subrecord sr2 = subrecords.get(i);
 
-					if (!sr2.getSubrecordType().equals("VTXT"))
+					if (!sr2.getType().equals("VTXT"))
 						System.out.println("BAD record following ATXT: " + sr2);
 
-					atxt.vtxt = new VTXT(sr2.getSubrecordData());
+					atxt.vtxt = new VTXT(sr2.getData());
 				}
 				ATXTsv.add(atxt);
 			}
-			else if (sr.getSubrecordType().equals("VTEX"))
+			else if (sr.getType().equals("VTEX"))
 			{
 				//TODO: why the hell is there a VTEX??  what is it??  it's 256 long
 				//there is one in anvil world and I note that a land in anvil is stuffed with totally wrong shape	
@@ -92,7 +92,7 @@ public class LAND extends InstRECO
 			}
 			else
 			{
-				System.out.println("unhandled : " + sr.getSubrecordType() + " in record " + recordData + " in " + this);
+				System.out.println("unhandled : " + sr.getType() + " in record " + recordData + " in " + this);
 			}
 
 		}

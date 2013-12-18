@@ -67,85 +67,85 @@ public class CommonREFR extends InstRECO
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getSubrecordData();
+			byte[] bs = sr.getData();
 
-			if (sr.getSubrecordType().equals("NAME"))
+			if (sr.getType().equals("NAME"))
 			{
 				NAME = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("EDID"))
+			else if (sr.getType().equals("EDID"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getSubrecordType().equals("XTEL"))
+			else if (sr.getType().equals("XTEL"))
 			{
 				XTEL = new XTEL(bs);
 			}
-			else if (sr.getSubrecordType().equals("ONAM"))
+			else if (sr.getType().equals("ONAM"))
 			{
 				defaultsOpen = true;
 			}
-			else if (sr.getSubrecordType().equals("XACT"))
+			else if (sr.getType().equals("XACT"))
 			{
 				XACT = new XACT(bs);
 			}
-			else if (sr.getSubrecordType().equals("XMRK"))
+			else if (sr.getType().equals("XMRK"))
 			{
 				XMRK = true;
 			}
-			else if (sr.getSubrecordType().equals("XOWN"))
+			else if (sr.getType().equals("XOWN"))
 			{
 				XOWN = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("XGLB"))
+			else if (sr.getType().equals("XGLB"))
 			{
 				XGLB = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("XTRG"))
+			else if (sr.getType().equals("XTRG"))
 			{
 				XTRG = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("XSCL"))
+			else if (sr.getType().equals("XSCL"))
 			{
 				scale = ESMByteConvert.extractFloat(bs, 0);
 			}
-			else if (sr.getSubrecordType().equals("DATA"))
+			else if (sr.getType().equals("DATA"))
 			{
 				this.extractInstData(bs);
 			}
-			else if (sr.getSubrecordType().equals("FULL"))
+			else if (sr.getType().equals("FULL"))
 			{
 				FULL = new LString(bs);
 			}
-			else if (sr.getSubrecordType().equals("XRNK"))
+			else if (sr.getType().equals("XRNK"))
 			{
 				XRNK = new XRNK(bs);
 			}
-			else if (sr.getSubrecordType().equals("FNAM"))
+			else if (sr.getType().equals("FNAM"))
 			{
 				FNAM = new FNAM(bs);
 			}
-			else if (sr.getSubrecordType().equals("XLOC"))
+			else if (sr.getType().equals("XLOC"))
 			{
 				XLOC = new XLOC(bs);
 			}
-			else if (sr.getSubrecordType().equals("TNAM"))
+			else if (sr.getType().equals("TNAM"))
 			{
 				TNAM = new TNAM(bs);
 			}
-			else if (sr.getSubrecordType().equals("XESP"))
+			else if (sr.getType().equals("XESP"))
 			{
 				XESP = new XESP(bs);
 			}
-			else if (sr.getSubrecordType().equals("XLCM"))
+			else if (sr.getType().equals("XLCM"))
 			{
 				XLCM = new XLCM(bs);
 			}
-			else if (sr.getSubrecordType().equals("XCNT"))
+			else if (sr.getType().equals("XCNT"))
 			{
 				XCNT = new XCNT(bs);
 			}
-			else if (sr.getSubrecordType().equals("XLOD"))
+			else if (sr.getType().equals("XLOD"))
 			{
 				XLOD = new XLOD(bs);
 			}

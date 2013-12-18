@@ -98,9 +98,9 @@ public class GridSpace extends BranchGroup
 			if (record.getRecordType().equals("REFR") || (!makePhys && record.getRecordType().equals("ACRE"))
 					|| (!makePhys && record.getRecordType().equals("ACHR")))
 			{
-				if (updatedSubrecord.getSubrecordType().equals("DATA"))
+				if (updatedSubrecord.getType().equals("DATA"))
 				{
-					byte[] bs = updatedSubrecord.getSubrecordData();
+					byte[] bs = updatedSubrecord.getData();
 					float x = ESMByteConvert.extractFloat(bs, 0);
 					float y = ESMByteConvert.extractFloat(bs, 4);
 					float z = ESMByteConvert.extractFloat(bs, 8);

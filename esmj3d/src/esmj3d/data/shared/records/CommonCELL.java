@@ -40,42 +40,42 @@ public class CommonCELL extends InstRECO
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getSubrecordData();
+			byte[] bs = sr.getData();
 
-			if (sr.getSubrecordType().equals("EDID"))
+			if (sr.getType().equals("EDID"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getSubrecordType().equals("FULL"))
+			else if (sr.getType().equals("FULL"))
 			{
 				FULL = new LString(bs);
 			}
-			else if (sr.getSubrecordType().equals("XCLC"))
+			else if (sr.getType().equals("XCLC"))
 			{
 				x = ESMByteConvert.extractInt(bs, 0);
 				y = ESMByteConvert.extractInt(bs, 4);
 			}
-			else if (sr.getSubrecordType().equals("XOWN"))
+			else if (sr.getType().equals("XOWN"))
 			{
 				XOWN = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("XCLL"))
+			else if (sr.getType().equals("XCLL"))
 			{
 				XCLL = bs;
 			}
-			else if (sr.getSubrecordType().equals("XCLR"))
+			else if (sr.getType().equals("XCLR"))
 			{
 				XCLRs.add(new FormID(bs));
 			}
-			else if (sr.getSubrecordType().equals("XCLW"))
+			else if (sr.getType().equals("XCLW"))
 			{
 				XCLW = ESMByteConvert.extractFloat(bs, 0);
 			}
-			else if (sr.getSubrecordType().equals("XCWT"))
+			else if (sr.getType().equals("XCWT"))
 			{
 				XCWT = new FormID(bs);
 			}
-			else if (sr.getSubrecordType().equals("XCCM"))
+			else if (sr.getType().equals("XCCM"))
 			{
 				XCCM = new FormID(bs);
 			}

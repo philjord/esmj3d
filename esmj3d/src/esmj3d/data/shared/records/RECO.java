@@ -1,6 +1,9 @@
 package esmj3d.data.shared.records;
 
+import java.util.ArrayList;
+
 import esmLoader.common.data.record.Record;
+import esmLoader.common.data.record.Subrecord;
 
 public abstract class RECO
 {
@@ -27,16 +30,16 @@ public abstract class RECO
 	public static int CantWait_Flag = 0x00080000;
 
 	public static int DisabledByDefault_Flag = 0x00080000;
-	
+
 	/* FROM TES5
 	 Has Tree LOD = 0x00000040
-     Not On Local Map = 0x00000200
-     Has Distance LOD = 0x00008000
-     High Detail LOD Texture = 0x00020000
-     Has Currents = 0x00080000
-     Is Marker = 0x00800000
-     Obstacle = 0x02000000
-     Show On World Map = 0x10000000
+	 Not On Local Map = 0x00000200
+	 Has Distance LOD = 0x00008000
+	 High Detail LOD Texture = 0x00020000
+	 Has Currents = 0x00080000
+	 Is Marker = 0x00800000
+	 Obstacle = 0x02000000
+	 Show On World Map = 0x10000000
 	 */
 
 	/*	header flags
@@ -78,4 +81,10 @@ public abstract class RECO
 		return (flags1 & flagMask) > 0;
 	}
 
+	private int sri = 0;
+
+	protected Subrecord next(ArrayList<Subrecord> subrecords)
+	{
+		return subrecords.get(sri++);
+	}
 }
