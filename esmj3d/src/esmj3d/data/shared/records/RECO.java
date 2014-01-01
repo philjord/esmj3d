@@ -85,6 +85,9 @@ public abstract class RECO
 
 	protected Subrecord next(ArrayList<Subrecord> subrecords)
 	{
-		return subrecords.get(sri++);
+		if (sri < subrecords.size())
+			return subrecords.get(sri++);
+		else
+			return null;
 	}
 }
