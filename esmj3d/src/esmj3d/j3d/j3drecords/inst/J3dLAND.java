@@ -1,17 +1,29 @@
 package esmj3d.j3d.j3drecords.inst;
 
+import java.io.IOException;
+
 import javax.media.j3d.Appearance;
+import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.IndexedTriangleStripArray;
 import javax.media.j3d.Material;
+import javax.media.j3d.Shader;
+import javax.media.j3d.ShaderAppearance;
+import javax.media.j3d.ShaderAttribute;
+import javax.media.j3d.ShaderAttributeSet;
+import javax.media.j3d.ShaderAttributeValue;
+import javax.media.j3d.ShaderProgram;
 import javax.media.j3d.Shape3D;
+import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureAttributes;
 import javax.media.j3d.TransparencyAttributes;
 import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
+
+import nif.NifToJ3d;
 
 import org.j3d.geom.GeometryData;
 
@@ -21,6 +33,7 @@ import utils.PhysAppearance;
 import utils.source.TextureSource;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
+import com.sun.j3d.utils.shader.StringIO;
 
 import esmLoader.common.data.record.IRecordStore;
 import esmLoader.common.data.record.Record;
@@ -105,7 +118,6 @@ public class J3dLAND extends J3dRECOStatInst
 	 * @param master
 	 */
 
-	
 	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		super(land, false, false);
@@ -138,7 +150,7 @@ public class J3dLAND extends J3dRECOStatInst
 				quadrantBaseGroups[quadrant] = decalGroup;
 				addNodeChild(decalGroup);
 
-				Appearance app = new Appearance();
+				Appearance app = createAppearance();
 
 				app.setMaterial(getLandMaterial());
 				app.setTextureAttributes(textureAttributesBase);
@@ -161,7 +173,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 			}
 
-			//If I add transparency attirbute to teh base grid I see the texture itself has transparency
+			//If I add transparency attributes to the base grid I see the texture itself has transparency
 			// So I need to ignore the textures transparency in all cases
 			// and this is how it's done!			
 			TextureAttributes textureAttributes = new TextureAttributes();
@@ -185,7 +197,7 @@ public class J3dLAND extends J3dRECOStatInst
 				ATXT atxt = land.ATXTs[a];
 
 				int quadrant = atxt.quadrant;
-				Appearance app = new Appearance();
+				Appearance app = createAppearance();
 				app.setMaterial(getLandMaterial());
 				app.setTextureAttributes(textureAttributes);
 
@@ -207,6 +219,71 @@ public class J3dLAND extends J3dRECOStatInst
 			}
 		}
 	}
+	private static ShaderProgram shaderProgram = null;
+
+	private static ShaderAttributeSet shaderAttributeSet = null;
+
+	private static String vertexProgram = null;
+
+	private static String fragmentProgram = null;
+	private Appearance createAppearance()
+	{
+		//TODO: I think the material color is being set to white when color is bad?
+		
+		
+		
+		
+		if (!NifToJ3d.USE_SHADERS)
+		{
+			return new Appearance();
+		}
+		else
+		{
+			ShaderAppearance app = new ShaderAppearance();
+
+			if (shaderProgram == null)
+			{
+				try
+				{
+					vertexProgram = StringIO.readFully("./land.vert");
+					fragmentProgram = StringIO.readFully("./land.frag");
+				}
+				catch (IOException e)
+				{
+					System.err.println(e);
+				}
+
+				Shader[] shaders = new Shader[2];
+				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram);
+				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram);
+				final String[] shaderAttrNames =
+				{ "tex" };
+				final Object[] shaderAttrValues =
+				{ new Integer(0) };
+				shaderProgram = new GLSLShaderProgram();
+				shaderProgram.setShaders(shaders);
+				shaderProgram.setShaderAttrNames(shaderAttrNames);
+
+				// Create the shader attribute set
+				shaderAttributeSet = new ShaderAttributeSet();
+				for (int i = 0; i < shaderAttrNames.length; i++)
+				{
+					ShaderAttribute shaderAttribute = new ShaderAttributeValue(shaderAttrNames[i], shaderAttrValues[i]);
+					shaderAttributeSet.put(shaderAttribute);
+				}
+
+				// Create shader appearance to hold the shader program and
+				// shader attributes
+			}
+			app.setShaderProgram(shaderProgram);
+			app.setShaderAttributeSet(shaderAttributeSet);
+
+			return app;
+
+		}
+	}
+
+	
 
 	private static Material landMaterial = null;
 
@@ -392,23 +469,19 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private static Texture getDefaultTexture(TextureSource textureSource)
 	{
-		//Skyrim //textures\\landscape\\dirt02.dds
+		//Skyrim //textures\\landscape\\dirt01.dds
 		//FO3 //textures\\landscape\\dirt01.dds
-		//Obliv //textures\\landscape\\terraingcgrass01.dds
+		//Obliv //textures\\landscape\\default.dds
 		if (defaultTex == null)
 		{
-			if (textureSource.textureFileExists("Landscape\\dirt02.dds"))
-			{
-				defaultTex = textureSource.getTexture("Landscape\\dirt02.dds");
-			}
-			else if (textureSource.textureFileExists("Landscape\\dirt01.dds"))
+			if (textureSource.textureFileExists("Landscape\\dirt01.dds"))
 			{
 				defaultTex = textureSource.getTexture("Landscape\\dirt01.dds");
 			}
-			else if (textureSource.textureFileExists("Landscape\\terraingcgrass01.dds"))
+			else if (textureSource.textureFileExists("Landscape\\default.dds"))
 			{
-				defaultTex = textureSource.getTexture("Landscape\\terraingcgrass01.dds");
-			}
+				defaultTex = textureSource.getTexture("Landscape\\default.dds");
+			}			
 			else
 			{
 				System.out.println("BUM, no default LAND texture found somehow?");

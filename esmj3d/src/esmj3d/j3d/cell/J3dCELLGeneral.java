@@ -73,6 +73,13 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 	protected void makeWater(float waterLevel, String texture)
 	{
+		if (waterLevel == Float.NEGATIVE_INFINITY)
+		{
+			waterLevel = 0;
+		}
+		
+		
+		
 		if (waterLevel != Float.NEGATIVE_INFINITY)
 		{
 			Water water = new Water(J3dLAND.LAND_SIZE, texture, textureSource);
@@ -81,6 +88,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 			Transform3D transform = new Transform3D();
 
 			Vector3f loc = new Vector3f(cellLocation);
+
 			loc.y = waterLevel;
 			transform.set(loc);
 
