@@ -20,7 +20,7 @@ import esmj3d.j3d.j3drecords.type.J3dRECOType;
 
 public class J3dRECOStatInst extends Group implements J3dRECOInst
 {
-	public static boolean SHOW_FADE_OUT_MARKER = true;
+	public static boolean SHOW_FADE_OUT_MARKER = false;
 
 	private boolean fader = false;
 
