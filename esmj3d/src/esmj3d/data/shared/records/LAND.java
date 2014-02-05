@@ -7,6 +7,7 @@ import java.util.Comparator;
 import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
+import esmj3d.data.shared.subrecords.FormID;
 
 /**
  * Note no location data for these ones
@@ -27,12 +28,15 @@ public class LAND extends InstRECO
 
 	public ATXT[] ATXTs;
 
+	public FormID[] VTEXs;
+
 	public LAND(Record recordData)
 	{
 		super(recordData);
 
 		ArrayList<BTXT> BTXTsv = new ArrayList<BTXT>();
 		ArrayList<ATXT> ATXTsv = new ArrayList<ATXT>();
+		ArrayList<FormID> VTEXsv = new ArrayList<FormID>();
 
 		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
@@ -63,32 +67,42 @@ public class LAND extends InstRECO
 			else if (sr.getType().equals("ATXT"))
 			{
 				ATXT atxt = new ATXT(bs);
-
-				i++;
-				if (i < subrecords.size())
+				//TODO: use next()
+				//do we have space for the next item
+				if (i + 1 < subrecords.size())
 				{
-					Subrecord sr2 = subrecords.get(i);
+					Subrecord sr2 = subrecords.get(i + 1);
 
-					if (!sr2.getType().equals("VTXT"))
-						System.out.println("BAD record following ATXT: " + sr2);
-
-					atxt.vtxt = new VTXT(sr2.getData());
+					if (sr2.getType().equals("VTXT"))
+					{
+						atxt.vtxt = new VTXT(sr2.getData());
+						i++;
+					}
 				}
 				ATXTsv.add(atxt);
 			}
 			else if (sr.getType().equals("VTEX"))
 			{
-				//TODO: why the hell is there a VTEX??  what is it??  it's 256 long
-				//there is one in anvil world and I note that a land in anvil is stuffed with totally wrong shape	
-				//land id 96329 it only has subs of DATA VNML, VHGT, VCLR no texture data	
+				//VTEX (Optional): Texture FormIDs: A sequence of LTEX FormIDs. 
+				//Many may be NULL values. (Variable length, but always multiples of 4 bytes).
+				
+				for (int f = 0; f < bs.length; f += 4)
+				{
+					byte[] fbs = new byte[4];
+					System.arraycopy(bs, f, fbs, 0, 4);
+					VTEXsv.add(new FormID(fbs));					
+				}
+				 
+				//it's 64 ints long, is that 8 layers by 4 quadrants but last 32 are 0?
+				//there is one in anvil world and I note that this land has a shape that doesn't fit it's neighbours	
+				//land id 96329 it only has subs of DATA VNML, VHGT, VCLR no texture data	so therefore no VTXT for transparency
 
-				//TODO: MegaTonWordl in fallut3 shows signs of being corrupted for some reason
+				//TODO: MegaTonWordl in fallout3 shows signs of being corrupted for some reason
 				// LTEX wrong ids data is mis placing the quadrants in height
 				// but mega ton does not seem to have one? and it has some quandrants
 
-				//I notice my hieght data is out in the case of bad land record, but the cell location is correct
+				//I notice my height data is out in the case of bad land record, but the cell location is correct
 
-				System.out.println("VTEX spotted!");
 			}
 			else
 			{
@@ -108,6 +122,12 @@ public class LAND extends InstRECO
 		for (int j = 0; j < ATXTsv.size(); j++)
 		{
 			ATXTs[j] = ATXTsv.get(j);
+		}
+
+		VTEXs = new FormID[VTEXsv.size()];
+		for (int j = 0; j < VTEXsv.size(); j++)
+		{
+			VTEXs[j] = VTEXsv.get(j);
 		}
 
 		Arrays.sort(ATXTs, new Comparator<ATXT>()

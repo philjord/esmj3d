@@ -43,6 +43,7 @@ import esmj3d.data.shared.records.LAND.BTXT;
 import esmj3d.data.shared.records.LAND.VTXT;
 import esmj3d.data.shared.records.LTEX;
 import esmj3d.data.shared.records.TXST;
+import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.j3d.TESLANDGen;
 
 public class J3dLAND extends J3dRECOStatInst
@@ -191,34 +192,64 @@ public class J3dLAND extends J3dRECOStatInst
 
 			ta.setTransparency(0.0f);
 
-			//These are per sorted by layer in LAND RECO
-			for (int a = 0; a < land.ATXTs.length; a++)
+			if (land.VTEXs.length > 0)
 			{
-				ATXT atxt = land.ATXTs[a];
-
-				int quadrant = atxt.quadrant;
-				Appearance app = createAppearance();
-				app.setMaterial(getLandMaterial());
-				app.setTextureAttributes(textureAttributes);
-
-				app.setTransparencyAttributes(ta);
-
-				if (atxt.textureFormID != 0)
+				System.out.println("VTEXs in LAND");
+				for (int a = 0; a < land.VTEXs.length; a++)
 				{
-					app.setTexture(getTexture(atxt.textureFormID, master, textureSource));
-				}
-				else
-				{
-					app.setTexture(getDefaultTexture(textureSource));
-				}
+					FormID texForm = land.VTEXs[a];
+					if (texForm.formId != 0)
+					{
+						// these are in 4 quadrant groups then up each layer
+						int quadrant = (int) Math.floor(a % 4);
+						Appearance app = createAppearance();
+						app.setMaterial(getLandMaterial());
+						app.setTextureAttributes(textureAttributes);
 
-				Shape3D aTxtShape = new Shape3D();
-				aTxtShape.setAppearance(app);
-				aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, atxt.vtxt));
-				quadrantBaseGroups[quadrant].addChild(aTxtShape);
+						app.setTransparencyAttributes(ta);
+
+						app.setTexture(getTexture(texForm.formId, master, textureSource));
+
+						Shape3D aTxtShape = new Shape3D();
+						aTxtShape.setAppearance(app);
+						aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, null));
+						quadrantBaseGroups[quadrant].addChild(aTxtShape);
+					}
+				}
+			}
+			else
+			{
+
+				//These are per sorted by layer in LAND RECO
+				for (int a = 0; a < land.ATXTs.length; a++)
+				{
+					ATXT atxt = land.ATXTs[a];
+
+					int quadrant = atxt.quadrant;
+					Appearance app = createAppearance();
+					app.setMaterial(getLandMaterial());
+					app.setTextureAttributes(textureAttributes);
+
+					app.setTransparencyAttributes(ta);
+
+					if (atxt.textureFormID != 0)
+					{
+						app.setTexture(getTexture(atxt.textureFormID, master, textureSource));
+					}
+					else
+					{
+						app.setTexture(getDefaultTexture(textureSource));
+					}
+
+					Shape3D aTxtShape = new Shape3D();
+					aTxtShape.setAppearance(app);
+					aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, atxt.vtxt));
+					quadrantBaseGroups[quadrant].addChild(aTxtShape);
+				}
 			}
 		}
 	}
+
 	private static ShaderProgram shaderProgram = null;
 
 	private static ShaderAttributeSet shaderAttributeSet = null;
@@ -226,13 +257,11 @@ public class J3dLAND extends J3dRECOStatInst
 	private static String vertexProgram = null;
 
 	private static String fragmentProgram = null;
+
 	private Appearance createAppearance()
 	{
 		//TODO: I think the material color is being set to white when color is bad?
-		
-		
-		
-		
+
 		if (!NifToJ3d.USE_SHADERS)
 		{
 			return new Appearance();
@@ -282,8 +311,6 @@ public class J3dLAND extends J3dRECOStatInst
 
 		}
 	}
-
-	
 
 	private static Material landMaterial = null;
 
@@ -365,21 +392,24 @@ public class J3dLAND extends J3dRECOStatInst
 
 		makeQuadrantData(quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
-		// reset everything to transparent
-		for (int row = 0; row < quadrantSquareCount; row++)
+		if (vtxt != null)
 		{
-			for (int col = 0; col < quadrantSquareCount; col++)
+			// reset everything to transparent
+			for (int row = 0; row < quadrantSquareCount; row++)
 			{
-				quadrantColors[row][col].w = 0.0f;
+				for (int col = 0; col < quadrantSquareCount; col++)
+				{
+					quadrantColors[row][col].w = 0.0f;
+				}
 			}
-		}
 
-		for (int v = 0; v < vtxt.count; v++)
-		{
-			int rowno = 16 - (vtxt.position[v] / quadrantSquareCount);
-			int colno = (vtxt.position[v] % quadrantSquareCount);
+			for (int v = 0; v < vtxt.count; v++)
+			{
+				int rowno = 16 - (vtxt.position[v] / quadrantSquareCount);
+				int colno = (vtxt.position[v] % quadrantSquareCount);
 
-			quadrantColors[rowno][colno].w = vtxt.opacity[v];
+				quadrantColors[rowno][colno].w = vtxt.opacity[v];
+			}
 		}
 
 		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / 2f, LAND_SIZE / 2f, quadrantSquareCount, quadrantSquareCount,
@@ -481,7 +511,7 @@ public class J3dLAND extends J3dRECOStatInst
 			else if (textureSource.textureFileExists("Landscape\\default.dds"))
 			{
 				defaultTex = textureSource.getTexture("Landscape\\default.dds");
-			}			
+			}
 			else
 			{
 				System.out.println("BUM, no default LAND texture found somehow?");
