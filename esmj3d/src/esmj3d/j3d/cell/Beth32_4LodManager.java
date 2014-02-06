@@ -16,7 +16,7 @@ import tools3d.utils.Utils3D;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 
-public class Beth32_4LodManager extends Group
+public class Beth32_4LodManager extends BethLodManager
 {
 	private static int SKYRIM_LOD_SCOPE = 96;
 
@@ -32,13 +32,13 @@ public class Beth32_4LodManager extends Group
 
 	private HashMap<Point, BranchGroup> loadedGrosses4 = new HashMap<Point, BranchGroup>();
 
-	private int worldFormId;
+	private String lodWorldName = "";
 
 	private J3dICellFactory j3dCellFactory;
 
-	public Beth32_4LodManager(int worldFormId, J3dICellFactory j3dCellFactory)
+	public Beth32_4LodManager(J3dICellFactory j3dCellFactory)
 	{
-		this.worldFormId = worldFormId;
+
 		this.j3dCellFactory = j3dCellFactory;
 
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
@@ -56,6 +56,17 @@ public class Beth32_4LodManager extends Group
 			LOD_SCOPE_EXTREMES = FO3_LOD_SCOPE;
 		}
 
+	}
+
+	public void setWorldFormId(int worldFormId)
+	{
+		String newLodWorldName = j3dCellFactory.getLODWorldName(worldFormId);
+
+		if (!this.lodWorldName.equals(newLodWorldName))
+		{
+			this.removeAllChildren();
+			this.lodWorldName = newLodWorldName;
+		}
 	}
 
 	public void updateGross(float charX, float charY)
@@ -183,7 +194,7 @@ public class Beth32_4LodManager extends Group
 				BranchGroup lod = store.get(key);
 				if (lod == null)
 				{
-					lod = j3dCellFactory.makeLODLandscape(key.x, key.y, scale, worldFormId);
+					lod = j3dCellFactory.makeLODLandscape(key.x, key.y, scale, lodWorldName);
 					store.put(key, lod);
 				}
 

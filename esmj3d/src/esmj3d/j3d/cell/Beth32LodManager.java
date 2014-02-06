@@ -12,7 +12,7 @@ import javax.vecmath.Color3f;
 import tools3d.utils.Utils3D;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 
-public class Beth32LodManager extends Group
+public class Beth32LodManager extends BethLodManager
 {
 	private static int OBLIVION_MIN_LOD = -96;
 
@@ -22,11 +22,13 @@ public class Beth32LodManager extends Group
 
 	private HashMap<Point, MorphingLandscape> loadedGrosses = new HashMap<Point, MorphingLandscape>();
 
-	//private int worldFormId;
+	private String lodWorldFormId = "";
 
-	public Beth32LodManager(int worldFormId, J3dICellFactory j3dCellFactory)
+	private J3dICellFactory j3dCellFactory;
+
+	public Beth32LodManager(J3dICellFactory j3dCellFactory)
 	{
-		//this.worldFormId = worldFormId;
+		this.j3dCellFactory = j3dCellFactory;
 
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
@@ -38,22 +40,32 @@ public class Beth32LodManager extends Group
 		fog.setInfluencingBounds(Utils3D.defaultBounds);
 		addChild(fog);
 
-		long start = System.currentTimeMillis();
+	}
 
-		for (int x = OBLIVION_MIN_LOD; x < OBLIVION_MAX_LOD; x += SCALE_32)
+	public void setWorldFormId(int worldFormId)
+	{
+		String newLodWorldFormId = j3dCellFactory.getLODWorldName(worldFormId);
+		if (!this.lodWorldFormId.equals(newLodWorldFormId))
 		{
-			for (int y = OBLIVION_MIN_LOD; y < OBLIVION_MAX_LOD; y += SCALE_32)
-			{
-				Point key = new Point(x, y);
-				MorphingLandscape bg = (MorphingLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, worldFormId);
-				loadedGrosses.put(key, bg);
-				bg.compile();// better to be done not on the j3d thread?
-				addChild(bg);
-			}
-		}
-		if ((System.currentTimeMillis() - start) > 50)
-			System.out.println("Beth32LodManager.init " + (System.currentTimeMillis() - start));
+			this.removeAllChildren();
+			this.lodWorldFormId = newLodWorldFormId;
 
+			long start = System.currentTimeMillis();
+
+			for (int x = OBLIVION_MIN_LOD; x < OBLIVION_MAX_LOD; x += SCALE_32)
+			{
+				for (int y = OBLIVION_MIN_LOD; y < OBLIVION_MAX_LOD; y += SCALE_32)
+				{
+					Point key = new Point(x, y);
+					MorphingLandscape bg = (MorphingLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, lodWorldFormId);
+					loadedGrosses.put(key, bg);
+					bg.compile();// better to be done not on the j3d thread?
+					addChild(bg);
+				}
+			}
+			if ((System.currentTimeMillis() - start) > 50)
+				System.out.println("Beth32LodManager.setWorldFormId " + (System.currentTimeMillis() - start));
+		}
 	}
 
 	public void updateGross(float charX, float charY)

@@ -39,6 +39,7 @@ public class GridSpaces extends BranchGroup
 
 	public void sortOutBucket(InstRECO reco, Record record)
 	{
+
 		float recordX = reco.getTrans().x * ESConfig.ES_TO_METERS_SCALE;
 		float recordY = reco.getTrans().y * ESConfig.ES_TO_METERS_SCALE;
 		int xGridIdx = (int) Math.floor(recordX / BUCKET_RANGE);
@@ -147,6 +148,7 @@ public class GridSpaces extends BranchGroup
 
 	public J3dRECOInst getJ3dInstRECO(int recoId)
 	{
+
 		GridSpace gs = gridSpaceByRecordId.get(recoId);
 		if (gs != null)
 		{

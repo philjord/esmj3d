@@ -49,6 +49,8 @@ public class MorphingLandscape extends BranchGroup
 
 	public MorphingLandscape(int lodX, int lodY, int scale)
 	{
+		this.setCapability(BranchGroup.ALLOW_DETACH);
+		
 		this.lodX = lodX;
 		this.lodY = lodY;
 		this.scale = scale;
