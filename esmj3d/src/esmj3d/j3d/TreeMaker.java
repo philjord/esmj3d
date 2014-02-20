@@ -132,7 +132,7 @@ public class TreeMaker
 	}
 
 	//NOTE UNUSED
-	public static Group makeLODTreeBillboard(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
+	public static Group makeLODTreeBillboard2(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
 	{
 		String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
 		SharedGroup sg = loadedSharedGroups.get(keyString);
