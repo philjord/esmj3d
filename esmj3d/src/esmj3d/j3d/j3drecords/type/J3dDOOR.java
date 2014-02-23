@@ -1,5 +1,7 @@
 package esmj3d.j3d.j3drecords.type;
 
+import nif.NifJ3dHavokRoot;
+import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import utils.source.MeshSource;
@@ -18,11 +20,15 @@ public class J3dDOOR extends J3dRECOType
 
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model.str, meshSource).getHavokRoot();
+			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(reco.MODL.model.str, meshSource);
+			if (nhr != null)
+				j3dNiAVObject = nhr.getHavokRoot();
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, meshSource, textureSource).getVisualRoot();
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(reco.MODL.model.str, meshSource, textureSource);
+			if (nvr != null)
+				j3dNiAVObject = nvr.getVisualRoot();
 		}
 		addChild(j3dNiAVObject);
 	}

@@ -4,6 +4,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
 
+import nif.NifJ3dHavokRoot;
+import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import tools3d.utils.scenegraph.Fadable;
@@ -45,11 +47,17 @@ public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(nifFileName, meshSource).getHavokRoot();
+			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, meshSource);
+			if (nhr == null)
+				return null;
+			j3dNiAVObject = nhr.getHavokRoot();
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(nifFileName, meshSource, textureSource).getVisualRoot();
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, meshSource, textureSource);
+			if (nvr == null)
+				return null;
+			j3dNiAVObject = nvr.getVisualRoot();
 		}
 
 		setupDemoControllerTrigger(j3dNiAVObject);
