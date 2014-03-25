@@ -2,8 +2,7 @@ package esmj3d.j3d.j3drecords.type;
 
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
-import utils.source.MeshSource;
-import utils.source.TextureSource;
+import utils.source.MediaSources;
 import esmj3d.data.shared.records.GenericCONT;
 
 public class J3dCONT extends J3dRECOType
@@ -12,17 +11,18 @@ public class J3dCONT extends J3dRECOType
 
 	private boolean isOpen = false;
 
-	public J3dCONT(GenericCONT reco, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
+	public J3dCONT(GenericCONT reco, boolean makePhys, MediaSources mediaSources)
 	{
 		super(reco, reco.MODL.model.str);
 
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model.str, meshSource).getHavokRoot();
+			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model.str, mediaSources.getMeshSource()).getHavokRoot();
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, meshSource, textureSource).getVisualRoot();
+			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, mediaSources.getMeshSource(), mediaSources.getTextureSource())
+					.getVisualRoot();
 		}
 		addChild(j3dNiAVObject);
 	}

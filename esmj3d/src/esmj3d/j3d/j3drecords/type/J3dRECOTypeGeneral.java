@@ -9,18 +9,17 @@ import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import tools3d.utils.scenegraph.Fadable;
-import utils.source.MeshSource;
-import utils.source.TextureSource;
+import utils.source.MediaSources;
 import esmj3d.data.shared.records.RECO;
 
 public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 {
 	private J3dNiAVObject j3dNiAVObject;
 
-	public J3dRECOTypeGeneral(RECO reco, String nifFileName, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
+	public J3dRECOTypeGeneral(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources)
 	{
 		super(reco, nifFileName);
-		j3dNiAVObject = loadNif(nifFileName, makePhys, meshSource, textureSource);
+		j3dNiAVObject = loadNif(nifFileName, makePhys, mediaSources);
 		addChild(j3dNiAVObject);
 	}
 
@@ -41,20 +40,20 @@ public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 
 	}
 
-	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
+	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MediaSources mediaSources)
 	{
 		J3dNiAVObject j3dNiAVObject;
 
 		if (makePhys)
 		{
-			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, meshSource);
+			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
 			if (nhr == null)
 				return null;
 			j3dNiAVObject = nhr.getHavokRoot();
 		}
 		else
 		{
-			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, meshSource, textureSource);
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
 			if (nvr == null)
 				return null;
 			j3dNiAVObject = nvr.getVisualRoot();

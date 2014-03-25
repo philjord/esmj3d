@@ -4,8 +4,7 @@ import nif.NifJ3dHavokRoot;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
-import utils.source.MeshSource;
-import utils.source.TextureSource;
+import utils.source.MediaSources;
 import esmj3d.data.shared.records.GenericDOOR;
 
 public class J3dDOOR extends J3dRECOType
@@ -14,19 +13,19 @@ public class J3dDOOR extends J3dRECOType
 
 	private boolean isOpen = false;
 
-	public J3dDOOR(GenericDOOR reco, boolean makePhys, MeshSource meshSource, TextureSource textureSource)
+	public J3dDOOR(GenericDOOR reco, boolean makePhys, MediaSources mediaSources)
 	{
 		super(reco, reco.MODL.model.str);
 
 		if (makePhys)
 		{
-			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(reco.MODL.model.str, meshSource);
+			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(reco.MODL.model.str, mediaSources.getMeshSource());
 			if (nhr != null)
 				j3dNiAVObject = nhr.getHavokRoot();
 		}
 		else
 		{
-			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(reco.MODL.model.str, meshSource, textureSource);
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(reco.MODL.model.str, mediaSources.getMeshSource(), mediaSources.getTextureSource());
 			if (nvr != null)
 				j3dNiAVObject = nvr.getVisualRoot();
 		}
