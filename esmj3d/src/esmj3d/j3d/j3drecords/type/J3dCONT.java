@@ -2,6 +2,8 @@ package esmj3d.j3d.j3drecords.type;
 
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
+import nif.j3d.animation.J3dNiControllerManager;
+import nif.j3d.animation.J3dNiControllerSequence;
 import utils.source.MediaSources;
 import esmj3d.data.shared.records.GenericCONT;
 
@@ -31,10 +33,15 @@ public class J3dCONT extends J3dRECOType
 	{
 		this.isOpen = isOpen;
 
-		//Oblivion chest don't open!		
-		if (j3dNiAVObject.getJ3dNiControllerManager() != null)
+		//Oblivion chest don't open!	
+		J3dNiControllerManager ncm = j3dNiAVObject.getJ3dNiControllerManager();
+		if (ncm != null)
 		{
-			j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
+			J3dNiControllerSequence s = ncm.getSequence(isOpen ? "Open" : "Close");
+			if (s != null)
+			{
+				s.fireSequenceOnce();
+			}
 		}
 	}
 
