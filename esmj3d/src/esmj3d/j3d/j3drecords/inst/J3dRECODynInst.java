@@ -164,6 +164,11 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 		transformGroup.setTransform(transform);
 	}
 
+	public void setLocation(Transform3D t)
+	{
+		transformGroup.setTransform(t);
+	}
+
 	public void setLocation(InstRECO ir)
 	{
 		Vector3f t = ir.getTrans();
