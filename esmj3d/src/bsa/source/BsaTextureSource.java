@@ -129,7 +129,7 @@ public class BsaTextureSource implements TextureSource
 						}
 						catch (IOException e)
 						{
-							System.out.println("BsaTextureSource  " + texName + " " + e.getMessage());
+							System.out.println("BsaTextureSource  " + texName + " " + e + " " + e.getStackTrace()[0]);
 						}
 					}
 				}
@@ -179,7 +179,7 @@ public class BsaTextureSource implements TextureSource
 					}
 					catch (IOException e)
 					{
-						System.out.println("BsaTextureSource  " + imageName + " " + e.getMessage());
+						System.out.println("BsaTextureSource  " + imageName + " " + e + " " + e.getStackTrace()[0]);
 					}
 					if (ddsImage != null)
 						ddsImage.close();

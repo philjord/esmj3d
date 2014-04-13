@@ -54,7 +54,7 @@ public class BsaMeshSource implements MeshSource
 		for (ArchiveFile archiveFile : bsas)
 		{
 			//NOT dds content bsa files
-			if ((archiveFile.getFileFlags() & 2) == 0 )
+			if ((archiveFile.getFileFlags() & 2) == 0)
 			{
 
 				ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
@@ -81,7 +81,7 @@ public class BsaMeshSource implements MeshSource
 						}
 						catch (IOException e)
 						{
-							System.out.println("BsaMeshSource:  " + nifName + " " + e.getMessage());
+							System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
 						}
 						finally
 						{
@@ -103,7 +103,7 @@ public class BsaMeshSource implements MeshSource
 					}
 					catch (IOException e)
 					{
-						System.out.println("BsaMeshSource  " + nifName + " " + e.getMessage());
+						System.out.println("BsaMeshSource  " + nifName + " " + e + " " + e.getStackTrace()[0]);
 					}
 				}
 			}

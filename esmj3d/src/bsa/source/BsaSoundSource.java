@@ -51,13 +51,13 @@ public class BsaSoundSource implements SoundSource
 					}
 					catch (SoundException e)
 					{
-						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " "
-								+ e.getMessage());
+						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+								+ e.getStackTrace()[0]);
 					}
 					catch (IOException e)
 					{
-						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " "
-								+ e.getMessage());
+						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+								+ e.getStackTrace()[0]);
 					}
 
 					if (mediaContainer != null)
