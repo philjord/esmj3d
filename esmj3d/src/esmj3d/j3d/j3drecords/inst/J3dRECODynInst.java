@@ -189,4 +189,9 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 		return out;
 	}
 
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + " from " + instRECO;
+	}
 }

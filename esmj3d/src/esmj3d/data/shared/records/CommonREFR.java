@@ -152,4 +152,10 @@ public class CommonREFR extends InstRECO
 
 		}
 	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + " : " + (EDID != null ? EDID : NAME.formId);
+	}
 }

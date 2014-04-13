@@ -1,6 +1,5 @@
 package esmj3d.data.shared.subrecords;
 
-
 public class ZString
 {
 	public String str = "";
@@ -12,5 +11,11 @@ public class ZString
 		//{
 		//	new Throwable("Not a String!! " + str).printStackTrace();
 		//}
+	}
+
+	@Override
+	public String toString()
+	{
+		return str;
 	}
 }

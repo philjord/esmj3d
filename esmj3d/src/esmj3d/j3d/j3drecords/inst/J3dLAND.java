@@ -604,4 +604,9 @@ public class J3dLAND extends J3dRECOStatInst
 		return colors;
 	}
 
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName();
+	}
 }
