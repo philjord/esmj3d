@@ -39,7 +39,7 @@ public class GridSpaces extends BranchGroup
 
 	public void sortOutBucket(InstRECO reco, Record record)
 	{
-
+ 
 		float recordX = reco.getTrans().x * ESConfig.ES_TO_METERS_SCALE;
 		float recordY = reco.getTrans().y * ESConfig.ES_TO_METERS_SCALE;
 		int xGridIdx = (int) Math.floor(recordX / BUCKET_RANGE);
