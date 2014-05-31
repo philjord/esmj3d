@@ -9,7 +9,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/BSAManager"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ESMLoader"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/java3djogl2.jar" sourcepath="E:/Java/3rd party jars/java3d/src"/>
 	<classpathentry kind="lib" path="/external_jars/external jars/j3d/j3d-org-java3d-all.jar" sourcepath="E:/Java/3rd party jars/j3d/src"/>
+	<classpathentry kind="lib" path="/external_jars/external jars/java3d1.6_10.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
