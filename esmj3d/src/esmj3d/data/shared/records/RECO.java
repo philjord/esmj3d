@@ -7,6 +7,8 @@ import esmLoader.common.data.record.Subrecord;
 
 public abstract class RECO
 {
+
+	
 	public static int Deleted_Flag = 0x00000020;
 
 	public static int CastsShadows_Flag = 0x00000200;

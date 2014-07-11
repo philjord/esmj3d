@@ -22,7 +22,9 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 	protected List<Record> children;
 
-	protected HashMap<Integer, J3dRECOInst> j3dRECOs = new HashMap<Integer, J3dRECOInst>(){public String name = "J3dCELLGeneral";};;
+	protected HashMap<Integer, J3dRECOInst> j3dRECOs = new HashMap<Integer, J3dRECOInst>();
+
+	public String name = "J3dCELLGeneral";
 
 	protected boolean makePhys;
 
