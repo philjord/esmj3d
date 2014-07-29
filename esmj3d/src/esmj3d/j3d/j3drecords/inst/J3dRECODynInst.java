@@ -75,7 +75,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	public void renderSettingsUpdated()
 	{
 		//TODO: different render settings for  different types
-		if (fader)
+		if (fader && dl != null)
 		{
 			dl.setDistance(0, BethRenderSettings.getItemFade());
 		}
