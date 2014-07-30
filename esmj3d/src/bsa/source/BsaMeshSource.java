@@ -15,12 +15,18 @@ import FO3Archive.ArchiveFile.Folder;
 
 public class BsaMeshSource implements MeshSource
 {
-
 	private List<ArchiveFile> bsas;
 
-	public BsaMeshSource(List<ArchiveFile> bsas)
+	public BsaMeshSource(List<ArchiveFile> allBsas)
 	{
-		this.bsas = bsas;
+		this.bsas = new ArrayList<ArchiveFile>();
+		for (ArchiveFile archiveFile : allBsas)
+		{
+			if (archiveFile.hasNifOrKf())
+			{
+				bsas.add(archiveFile);
+			}
+		}
 	}
 
 	@Override
@@ -53,59 +59,56 @@ public class BsaMeshSource implements MeshSource
 
 		for (ArchiveFile archiveFile : bsas)
 		{
-			//NOT dds content bsa files
-			if ((archiveFile.getFileFlags() & 2) == 0)
-			{
 
-				ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
-				if (archiveEntry != null)
+			ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
+			if (archiveEntry != null)
+			{
+				try
 				{
+					NifFile nifFile = null;
+					InputStream inputStream = archiveFile.getInputStream(archiveEntry);
+					//String fileName = archiveEntry.getName();
+
+					if (archiveFile.getName().toLowerCase().contains("skyrim"))
+					{
+						ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.SKYRIM_HAVOK_TO_METERS_SCALE;
+					}
+					else
+					{
+						ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.PRE_SKYRIM_HAVOK_TO_METERS_SCALE;
+					}
+
 					try
 					{
-						NifFile nifFile = null;
-						InputStream inputStream = archiveFile.getInputStream(archiveEntry);
-						//String fileName = archiveEntry.getName();
-
-						if (archiveFile.getName().toLowerCase().contains("skyrim"))
-						{
-							ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.SKYRIM_HAVOK_TO_METERS_SCALE;
-						}
-						else
-						{
-							ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.PRE_SKYRIM_HAVOK_TO_METERS_SCALE;
-						}
-
-						try
-						{
-							nifFile = NifFileReader.readNif(nifName, inputStream);
-						}
-						catch (IOException e)
-						{
-							System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
-						}
-						finally
-						{
-							try
-							{
-								if (inputStream != null)
-									inputStream.close();
-							}
-							catch (IOException e)
-							{
-								e.printStackTrace();
-							}
-						}
-
-						if (nifFile != null)
-						{
-							return nifFile;
-						}
+						nifFile = NifFileReader.readNif(nifName, inputStream);
 					}
 					catch (IOException e)
 					{
-						System.out.println("BsaMeshSource  " + nifName + " " + e + " " + e.getStackTrace()[0]);
+						System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
+					}
+					finally
+					{
+						try
+						{
+							if (inputStream != null)
+								inputStream.close();
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+					}
+
+					if (nifFile != null)
+					{
+						return nifFile;
 					}
 				}
+				catch (IOException e)
+				{
+					System.out.println("BsaMeshSource  " + nifName + " " + e + " " + e.getStackTrace()[0]);
+				}
+
 			}
 		}
 
@@ -121,9 +124,12 @@ public class BsaMeshSource implements MeshSource
 		for (ArchiveFile archiveFile : bsas)
 		{
 			Folder folder = archiveFile.getFolder(folderName);
-			for (ArchiveEntry e : folder.fileToHashMap.values())
+			if (folder != null)
 			{
-				ret.add(folderName + "\\" + e.getFileName());
+				for (ArchiveEntry e : folder.fileToHashMap.values())
+				{
+					ret.add(folderName + "\\" + e.getFileName());
+				}
 			}
 		}
 

@@ -20,9 +20,17 @@ public class BsaSoundSource implements SoundSource
 
 	private SoundKeyToName soundKeyToName;
 
-	public BsaSoundSource(List<ArchiveFile> bsas, SoundKeyToName soundKeyToName)
+	public BsaSoundSource(List<ArchiveFile> allBsas, SoundKeyToName soundKeyToName)
 	{
-		this.bsas = bsas;
+		this.bsas = new ArrayList<ArchiveFile>();
+		for (ArchiveFile archiveFile : allBsas)
+		{
+			if (archiveFile.hasSounds())
+			{
+				bsas.add(archiveFile);
+			}
+		}
+
 		this.soundKeyToName = soundKeyToName;
 	}
 
@@ -33,39 +41,37 @@ public class BsaSoundSource implements SoundSource
 
 		for (ArchiveFile archiveFile : bsas)
 		{
-			//NOT dds content bsa files
-			if ((archiveFile.getFileFlags() & 2) == 0)
+
+			ArchiveEntry archiveEntry = archiveFile.getEntry(soundFile);
+			if (archiveEntry != null)
 			{
-				ArchiveEntry archiveEntry = archiveFile.getEntry(soundFile);
-				if (archiveEntry != null)
+				MediaContainer mediaContainer = null;
+				InputStream inputStream = null;
+
+				try
 				{
-					MediaContainer mediaContainer = null;
-					InputStream inputStream = null;
+					inputStream = archiveFile.getInputStream(archiveEntry);
+					//String fileName = archiveEntry.getName();
 
-					try
-					{
-						inputStream = archiveFile.getInputStream(archiveEntry);
-						//String fileName = archiveEntry.getName();
+					mediaContainer = new MediaContainer(inputStream);
+				}
+				catch (SoundException e)
+				{
+					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+							+ e.getStackTrace()[0]);
+				}
+				catch (IOException e)
+				{
+					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+							+ e.getStackTrace()[0]);
+				}
 
-						mediaContainer = new MediaContainer(inputStream);
-					}
-					catch (SoundException e)
-					{
-						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
-								+ e.getStackTrace()[0]);
-					}
-					catch (IOException e)
-					{
-						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
-								+ e.getStackTrace()[0]);
-					}
-
-					if (mediaContainer != null)
-					{
-						return mediaContainer;
-					}
+				if (mediaContainer != null)
+				{
+					return mediaContainer;
 				}
 			}
+
 		}
 
 		System.out.println("BsaSoundSource Error getting sound from bsas key: " + mediaName + " file: " + soundFile);
@@ -80,9 +86,12 @@ public class BsaSoundSource implements SoundSource
 		for (ArchiveFile archiveFile : bsas)
 		{
 			Folder folder = archiveFile.getFolder(folderName);
-			for (ArchiveEntry e : folder.fileToHashMap.values())
+			if (folder != null)
 			{
-				ret.add(folderName + "\\" + e.getFileName());
+				for (ArchiveEntry e : folder.fileToHashMap.values())
+				{
+					ret.add(folderName + "\\" + e.getFileName());
+				}
 			}
 		}
 

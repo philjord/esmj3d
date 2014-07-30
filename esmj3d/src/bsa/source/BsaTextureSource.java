@@ -25,9 +25,16 @@ public class BsaTextureSource implements TextureSource
 {
 	private List<ArchiveFile> bsas;
 
-	public BsaTextureSource(List<ArchiveFile> bsas)
+	public BsaTextureSource(List<ArchiveFile> allBsas)
 	{
-		this.bsas = bsas;
+		this.bsas = new ArrayList<ArchiveFile>();
+		for (ArchiveFile archiveFile : allBsas)
+		{
+			if (archiveFile.hasDDS())
+			{
+				bsas.add(archiveFile);
+			}
+		}
 	}
 
 	@Override
@@ -100,39 +107,37 @@ public class BsaTextureSource implements TextureSource
 
 			for (ArchiveFile archiveFile : bsas)
 			{
-				// texture flag
-				if ((archiveFile.getFileFlags() & 2) != 0)
+
+				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
+				if (archiveEntry != null)
 				{
-					ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
-					if (archiveEntry != null)
+					try
 					{
-						try
+
+						InputStream in = archiveFile.getInputStream(archiveEntry);
+						//String fileName = archiveEntry.getName();
+
+						if (texName.endsWith(".dds"))
 						{
-
-							InputStream in = archiveFile.getInputStream(archiveEntry);
-							//String fileName = archiveEntry.getName();
-
-							if (texName.endsWith(".dds"))
-							{
-								tex = DDSTextureLoader.getTexture(texName, in);
-							}
-							else
-							{
-								TextureLoader tl = new TextureLoader(ImageIO.read(in));
-								tex = tl.getTexture();
-							}
-
-							if (tex != null)
-							{
-								return tex;
-							}
+							tex = DDSTextureLoader.getTexture(texName, in);
 						}
-						catch (IOException e)
+						else
 						{
-							System.out.println("BsaTextureSource  " + texName + " " + e + " " + e.getStackTrace()[0]);
+							TextureLoader tl = new TextureLoader(ImageIO.read(in));
+							tex = tl.getTexture();
+						}
+
+						if (tex != null)
+						{
+							return tex;
 						}
 					}
+					catch (IOException e)
+					{
+						System.out.println("BsaTextureSource  " + texName + " " + e + " " + e.getStackTrace()[0]);
+					}
 				}
+
 			}
 		}
 		System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
@@ -200,9 +205,12 @@ public class BsaTextureSource implements TextureSource
 		for (ArchiveFile archiveFile : bsas)
 		{
 			Folder folder = archiveFile.getFolder(folderName);
-			for (ArchiveEntry e : folder.fileToHashMap.values())
+			if (folder != null)
 			{
-				ret.add(folderName + "\\" + e.getFileName());
+				for (ArchiveEntry e : folder.fileToHashMap.values())
+				{
+					ret.add(folderName + "\\" + e.getFileName());
+				}
 			}
 		}
 
