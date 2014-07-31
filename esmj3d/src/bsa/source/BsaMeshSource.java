@@ -122,7 +122,7 @@ public class BsaMeshSource implements MeshSource
 		ArrayList<String> ret = new ArrayList<String>();
 
 		for (ArchiveFile archiveFile : bsas)
-		{
+		{			
 			Folder folder = archiveFile.getFolder(folderName);
 			if (folder != null)
 			{
@@ -131,7 +131,8 @@ public class BsaMeshSource implements MeshSource
 					ret.add(folderName + "\\" + e.getFileName());
 				}
 			}
-		}
+		} 
+		
 
 		return ret;
 	}
