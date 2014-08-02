@@ -35,6 +35,14 @@ public class BsaTextureSource implements TextureSource
 				bsas.add(archiveFile);
 			}
 		}
+		if (bsas.size() == 0)
+		{
+			System.out.println("No hasDDS archive files found in:");
+			for (ArchiveFile archiveFile : allBsas)
+			{
+				System.out.println("ArchiveFiFSle:" + archiveFile.getName());
+			}
+		}
 	}
 
 	@Override

@@ -27,6 +27,15 @@ public class BsaMeshSource implements MeshSource
 				bsas.add(archiveFile);
 			}
 		}
+		
+		if (bsas.size() == 0)
+		{
+			System.out.println("No hasNifOrKf archive files found in:");
+			for (ArchiveFile archiveFile : allBsas)
+			{
+				System.out.println("ArchiveFiFSle:" + archiveFile.getName());
+			}
+		}
 	}
 
 	@Override

@@ -32,6 +32,15 @@ public class BsaSoundSource implements SoundSource
 		}
 
 		this.soundKeyToName = soundKeyToName;
+
+		if (bsas.size() == 0)
+		{
+			System.out.println("No hasSounds archive files found in:");
+			for (ArchiveFile archiveFile : allBsas)
+			{
+				System.out.println("ArchiveFiFSle:" + archiveFile.getName());
+			}
+		}
 	}
 
 	@Override
