@@ -119,9 +119,9 @@ public class TreeMaker
 				zPosition, 0f, -rectWidth / 2 };
 
 		float[] texCoords =
-		{ 0f, -1f, 0f, 0f, (-1f), 0f, (-1f), -1f//
+		{ 0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f//
 				,//
-				0f, -1f, 0f, 0f, (-1f), 0f, (-1f), -1f //
+				0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f //
 		};
 
 		QuadArray rect = new QuadArray(8, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2);
@@ -201,7 +201,7 @@ public class TreeMaker
 		{ rectWidth / 2, 0f, zPosition, rectWidth / 2, rectHeight, zPosition, -rectWidth / 2, rectHeight, zPosition, -rectWidth / 2, 0f,
 				zPosition };
 		float[] texCoords =
-		{ 0f, -1f, 0f, 0f, (-1f), 0f, (-1f), -1f };
+		{ 0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f };
 
 		QuadArray rect = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2);
 		rect.setCoordinates(0, verts1);
