@@ -5,15 +5,11 @@
 
 package bsa;
 
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.media.j3d.GraphicsConfigTemplate3D;
 import javax.media.j3d.Texture;
 import javax.swing.SwingUtilities;
 
@@ -266,14 +262,7 @@ public class DisplayTask extends Thread
 	{
 		if (nifDisplay == null)
 		{
-			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			GraphicsDevice gd = ge.getDefaultScreenDevice();
-			GraphicsConfiguration[] gc = gd.getConfigurations();
-			GraphicsConfigTemplate3D template = new GraphicsConfigTemplate3D();
-			template.setStencilSize(8);
-			GraphicsConfiguration config = template.getBestConfiguration(gc);
-
-			nifDisplay = new NifDisplayTester(config);
+			nifDisplay = new NifDisplayTester();
 		}
 
 		return nifDisplay;
