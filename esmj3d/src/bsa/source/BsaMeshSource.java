@@ -7,7 +7,6 @@ import java.util.List;
 
 import nif.NifFile;
 import nif.NifFileReader;
-import utils.ESConfig;
 import utils.source.MeshSource;
 import FO3Archive.ArchiveEntry;
 import FO3Archive.ArchiveFile;
@@ -27,7 +26,7 @@ public class BsaMeshSource implements MeshSource
 				bsas.add(archiveFile);
 			}
 		}
-		
+
 		if (bsas.size() == 0)
 		{
 			System.out.println("No hasNifOrKf archive files found in:");
@@ -77,16 +76,7 @@ public class BsaMeshSource implements MeshSource
 					NifFile nifFile = null;
 					InputStream inputStream = archiveFile.getInputStream(archiveEntry);
 					//String fileName = archiveEntry.getName();
-
-					if (archiveFile.getName().toLowerCase().contains("skyrim"))
-					{
-						ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.SKYRIM_HAVOK_TO_METERS_SCALE;
-					}
-					else
-					{
-						ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.PRE_SKYRIM_HAVOK_TO_METERS_SCALE;
-					}
-
+	
 					try
 					{
 						nifFile = NifFileReader.readNif(nifName, inputStream);
@@ -121,7 +111,12 @@ public class BsaMeshSource implements MeshSource
 			}
 		}
 
-		System.out.println("nif not found in archive bsas " + nifName);
+		System.out.print("nif " + nifName + " not found in archive bsas ");
+		for (ArchiveFile archiveFile : bsas)
+		{
+			System.out.print(" checked: " + archiveFile.getName() + ", ");
+		}
+		System.out.println("");
 		return null;
 	}
 
@@ -131,7 +126,7 @@ public class BsaMeshSource implements MeshSource
 		ArrayList<String> ret = new ArrayList<String>();
 
 		for (ArchiveFile archiveFile : bsas)
-		{			
+		{
 			Folder folder = archiveFile.getFolder(folderName);
 			if (folder != null)
 			{
@@ -140,8 +135,7 @@ public class BsaMeshSource implements MeshSource
 					ret.add(folderName + "\\" + e.getFileName());
 				}
 			}
-		} 
-		
+		}
 
 		return ret;
 	}

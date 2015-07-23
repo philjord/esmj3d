@@ -29,33 +29,42 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 	 */
 	public BSAFileSet(String rootFilename, boolean loadSiblingBsaFiles, boolean loadNodes)
 	{
-		File rootFile = new File(rootFilename);
-		if (loadSiblingBsaFiles)
-		{
-			if (!rootFile.isDirectory())
-			{
-				rootFile = rootFile.getParentFile();
-			}
-			name = rootFile.getAbsolutePath();
-			for (File file : rootFile.listFiles())
-			{
-				if (file.getName().toLowerCase().endsWith(".bsa"))
-				{
-					loadFile(file, loadNodes);
-				}
-			}
+		this(new String[]
+		{ rootFilename }, loadSiblingBsaFiles, loadNodes);
+	}
 
-		}
-		else
+	public BSAFileSet(String[] rootFilenames, boolean loadSiblingBsaFiles, boolean loadNodes)
+	{
+		for (String rootFilename : rootFilenames)
 		{
-			if (!rootFile.isDirectory() && rootFile.getName().toLowerCase().endsWith(".bsa"))
+			File rootFile = new File(rootFilename);
+			if (loadSiblingBsaFiles)
 			{
+				if (!rootFile.isDirectory())
+				{
+					rootFile = rootFile.getParentFile();
+				}
 				name = rootFile.getAbsolutePath();
-				loadFile(rootFile, loadNodes);
+				for (File file : rootFile.listFiles())
+				{
+					if (file.getName().toLowerCase().endsWith(".bsa"))
+					{
+						loadFile(file, loadNodes);
+					}
+				}
+
 			}
 			else
 			{
-				System.out.println("BSAFileSet bad non sibling load of " + rootFilename);
+				if (!rootFile.isDirectory() && rootFile.getName().toLowerCase().endsWith(".bsa"))
+				{
+					name = rootFile.getAbsolutePath();
+					loadFile(rootFile, loadNodes);
+				}
+				else
+				{
+					System.out.println("BSAFileSet bad non sibling load of " + rootFilename);
+				}
 			}
 		}
 
@@ -74,7 +83,8 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 
 		if (this.size() == 0)
 		{
-			System.out.println("BSAFileSet loaded no files using root: " + rootFilename);
+			//TODO: misleading
+			System.out.println("BSAFileSet loaded no files using root: " + rootFilenames[0]);
 		}
 	}
 
@@ -85,6 +95,13 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 	 */
 	private void loadFile(final File file, boolean loadNodes)
 	{
+		// don't double load ever
+		for (ArchiveFile af : this)
+		{
+			if(af.getName().equals(file.getPath()))
+				return;
+		}
+		
 		System.out.println("BSA File Set loading " + file);
 		ArchiveFile archiveFile = new ArchiveFile(file);
 
