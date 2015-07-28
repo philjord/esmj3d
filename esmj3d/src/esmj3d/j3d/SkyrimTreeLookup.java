@@ -176,7 +176,8 @@ public class SkyrimTreeLookup
 			//////////////////////////////
 			
 			 
-			{ "euonymusbush01", "trees\\reachtree01" }, //
+			// no fallout
+			/*{ "euonymusbush01", "trees\\reachtree01" }, //
 			{ "oasiselm01", "trees\\reachtree01" }, //
 			{ "oasiselm02", "trees\\reachtree01" }, //
 			{ "oasistreetop01", "trees\\reachtree01" }, //
@@ -185,7 +186,7 @@ public class SkyrimTreeLookup
 			{ "sycamore01", "trees\\reachtree01" }, //
 			{ "wastelandshrub01", "trees\\reachtree01" }, //
 			{ "wastelandundergrowth01", "trees\\reachtree01" }, //
-			{ "whiteoak01", "trees\\reachtree01" }, //
+			{ "whiteoak01", "trees\\reachtree01" }, //*/
 
 	};
 

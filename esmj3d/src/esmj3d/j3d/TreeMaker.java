@@ -48,18 +48,19 @@ public class TreeMaker
 {
 
 	public static J3dRECOStatInst makeTree(InstRECO inst, boolean makePhys, MediaSources mediaSources, String treeName,
-			float billBoardWidth, float billBoardHeight)
-	{
-
+			float billBoardWidth, float billBoardHeight, boolean far)
+	{		
 		String nifTreeFileName = null;
 		//firstly deal with spt file (speed tree) for oblic and fallouts
 		if (treeName.endsWith(".spt"))
 		{
 			// see if we have a map of a skyrim tree
 			String sptFileName = treeName;
+
 			String skyrimReplacer = SkyrimTreeLookup.getLookup(sptFileName);
 
-			if (skyrimReplacer != null)
+			//fars always just show original far
+			if (!far && skyrimReplacer != null)
 			{
 				nifTreeFileName = skyrimReplacer;
 			}
@@ -67,14 +68,18 @@ public class TreeMaker
 			{
 				if (!makePhys)
 				{
+					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, false, makePhys);
 					Node node = makeLODTreeX(sptFileName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE, billBoardHeight
 							* ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource());
-					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, false, makePhys);
 					j3dinst.addNodeChild(node);
 					return j3dinst;
 				}
+				else
+				{
+					// no physics for near by X style trees, sad but true
+					return null;
+				}
 			}
-
 		}
 		else
 		{
@@ -84,80 +89,132 @@ public class TreeMaker
 		if (nifTreeFileName != null)
 		{
 			//Attempt to make a Skyrim tree now
-			J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, true, makePhys);
 
 			//TODO: tree models themselves have cool animated and non-animated version inside,
 			//must work out how to switch
 
 			String treeLodFlat = nifTreeFileName.substring(0, nifTreeFileName.indexOf(".nif")) + "_lod_flat.nif";
 
-			if (mediaSources.getMeshSource().nifFileExists(treeLodFlat))
+			if (!makePhys && mediaSources.getMeshSource().nifFileExists(treeLodFlat))
 			{
-				j3dinst.setJ3dRECOType(//
-						new J3dRECOTypeGeneral(inst, nifTreeFileName, makePhys, mediaSources),//
-						makeFlatLodTree(treeLodFlat, makePhys, mediaSources));
-				//new J3dRECOTypeGeneral(inst, treeLodFlat, makePhys, mediaSources));
+				if (!far)
+				{
+					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, true, makePhys);
+					j3dinst.setJ3dRECOType(//
+							new J3dRECOTypeGeneral(inst, nifTreeFileName, makePhys, mediaSources),//							
+							makeFlatLodTree(treeLodFlat, mediaSources));
+					return j3dinst;
+				}
+				else
+				{
+					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, false, makePhys);
+					j3dinst.addNodeChild(makeFlatLodTree(treeLodFlat, mediaSources));
+					return j3dinst;
+				}
 			}
 			else
 			{
+				J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, true, makePhys);
 				j3dinst.setJ3dRECOType(new J3dRECOTypeGeneral(inst, nifTreeFileName, makePhys, mediaSources));
+				return j3dinst;
 			}
-			return j3dinst;
+
 		}
 		else
 		{
-			System.err.println("bad tree name " + treeName);
+			System.err.println("bad tree name " + treeName + " makePhys " + makePhys);
 		}
 		return null;
 
 	}
 
+	private static boolean ENABLE_SG = false;
+
 	private static WeakValueHashMap<String, SharedGroup> loadedFlatLodSharedGroups = new WeakValueHashMap<String, SharedGroup>();
 
-	public static BranchGroup makeFlatLodTree(String nifFileName, boolean makePhys, MediaSources mediaSources)
+	public static BranchGroup makeFlatLodTree(String nifFileName, MediaSources mediaSources)
 	{
-		String keyString = nifFileName;
-		SharedGroup sg = loadedFlatLodSharedGroups.get(keyString);
-
-		if (sg == null && nifFileName.indexOf(".nif") != -1)
+		if (ENABLE_SG)
 		{
-			sg = new SharedGroup();
+			String keyString = nifFileName;
+			SharedGroup sg = loadedFlatLodSharedGroups.get(keyString);
 
-			J3dNiAVObject nif = J3dRECOTypeGeneral.loadNif(nifFileName, makePhys, mediaSources);
-			sg.addChild(nif);
-			loadedFlatLodSharedGroups.put(keyString, sg);
+			if (sg == null && nifFileName.indexOf(".nif") != -1)
+			{
+				sg = new SharedGroup();
 
+				J3dNiAVObject nif = J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
+				sg.addChild(nif);
+				loadedFlatLodSharedGroups.put(keyString, sg);
+
+			}
+
+			BranchGroup bg = new BranchGroup();
+
+			if (sg != null)
+			{
+				bg.addChild(new Link(sg));
+			}
+
+			return bg;
 		}
-
-		BranchGroup bg = new BranchGroup();
-
-		if (sg != null)
+		else
 		{
-			bg.addChild(new Link(sg));
+			return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
 		}
-
-		return bg;
 	}
 
 	private static WeakValueHashMap<String, SharedGroup> loadedLodXSharedGroups = new WeakValueHashMap<String, SharedGroup>();
 
-	//private static WeakValueHashMap<String, Appearance> loadedApps = new WeakValueHashMap<String, Appearance>();
-
 	public static Node makeLODTreeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
 	{
-		String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
-		SharedGroup sg = loadedLodXSharedGroups.get(keyString);
-
-		if (sg == null && sptFileName.indexOf(".spt") != -1)
+		if (ENABLE_SG)
 		{
-			sg = new SharedGroup();
+			String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
+			SharedGroup sg = loadedLodXSharedGroups.get(keyString);
 
-			String treeLODTextureName = sptFileName.substring(sptFileName.lastIndexOf("\\") + 1);
-			treeLODTextureName = treeLODTextureName.substring(0, treeLODTextureName.indexOf(".spt")) + ".dds";
+			if (sg == null && sptFileName.indexOf(".spt") != -1)
+			{
+				sg = new SharedGroup();
 
-			Texture tex = textureSource.getTexture("textures\\trees\\billboards\\" + treeLODTextureName);
+				sg.addChild(createShapeX(sptFileName, billWidth, billHeight, textureSource));
+				sg.compile();
+				loadedLodXSharedGroups.put(keyString, sg);
 
-			Appearance app = createAppearance(tex);
+			}
+
+			Group g = new Group();
+
+			if (sg != null)
+			{
+				g.addChild(new Link(sg));
+			}
+
+			return g;
+		}
+		else
+		{
+			return createShapeX(sptFileName, billWidth, billHeight, textureSource);
+		}
+	}
+
+	private static WeakValueHashMap<String, Appearance> loadedApps = new WeakValueHashMap<String, Appearance>();
+
+	private static WeakValueHashMap<String, QuadArray> loadedGeoms = new WeakValueHashMap<String, QuadArray>();
+
+	private static Shape3D createShapeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
+	{
+		String treeLODTextureName = sptFileName.substring(sptFileName.lastIndexOf("\\") + 1);
+		treeLODTextureName = treeLODTextureName.substring(0, treeLODTextureName.indexOf(".spt")) + ".dds";
+
+		Texture tex = textureSource.getTexture("textures\\trees\\billboards\\" + treeLODTextureName);
+
+		String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
+		Appearance app = loadedApps.get(keyString);
+		QuadArray geom = loadedGeoms.get(keyString);
+		if (app == null)
+		{
+			app = createAppearance(tex);
 
 			PolygonAttributes pa = new PolygonAttributes();
 			pa.setCullFace(PolygonAttributes.CULL_NONE);
@@ -176,31 +233,20 @@ public class TreeMaker
 			app.setTransparencyAttributes(transparencyAttributes);
 
 			Material m = new Material();
-			m.setLightingEnable(false);
+			m.setLightingEnable(false);//TODO: why false lighting enable?
 			app.setMaterial(m);
 
-			//loadedApps.put(keyString, app);
+			loadedApps.put(keyString, app);
 
-			Shape3D treeShape = new Shape3D();
-			treeShape.setGeometry(createGeometryX(billWidth, billHeight));
-			treeShape.setAppearance(app);
-
-			//return treeShape;
-
-			sg.addChild(treeShape);
-			sg.compile();
-			loadedLodXSharedGroups.put(keyString, sg);
-
+			geom = createGeometryX(billWidth, billHeight);
+			loadedGeoms.put(keyString, geom);
 		}
 
-		Group g = new Group();
+		Shape3D treeShape = new Shape3D();
+		treeShape.setGeometry(geom);
+		treeShape.setAppearance(app);
 
-		if (sg != null)
-		{
-			g.addChild(new Link(sg));
-		}
-
-		return g;
+		return treeShape;
 	}
 
 	private static QuadArray createGeometryX(float rectWidth, float rectHeight)

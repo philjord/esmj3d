@@ -43,8 +43,10 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 	}
-
-	public abstract J3dRECOInst makeJ3dRECO(Record record, boolean noFade);
+	
+	public abstract J3dRECOInst makeJ3dRECOFar(Record record);
+	
+	public abstract J3dRECOInst makeJ3dRECO(Record record);
 
 	protected void setCell(InstRECO instCell)
 	{

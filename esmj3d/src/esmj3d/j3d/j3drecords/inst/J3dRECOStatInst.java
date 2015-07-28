@@ -9,11 +9,12 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3f;
 
-import com.sun.j3d.utils.geometry.ColorCube;
-
 import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
 import utils.ESConfig;
+
+import com.sun.j3d.utils.geometry.ColorCube;
+
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOType;
