@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3f;
@@ -44,7 +45,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 	}
 	
-	public abstract J3dRECOInst makeJ3dRECOFar(Record record);
+	public abstract Node makeJ3dRECOFar(Record record);
 	
 	public abstract J3dRECOInst makeJ3dRECO(Record record);
 

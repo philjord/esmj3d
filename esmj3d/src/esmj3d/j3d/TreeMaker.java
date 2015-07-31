@@ -1,11 +1,7 @@
 package esmj3d.j3d;
 
-import java.io.IOException;
-
 import javax.media.j3d.Appearance;
-import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
-import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.Link;
@@ -14,31 +10,18 @@ import javax.media.j3d.Node;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.RenderingAttributes;
-import javax.media.j3d.Shader;
-import javax.media.j3d.ShaderAppearance;
-import javax.media.j3d.ShaderAttribute;
-import javax.media.j3d.ShaderAttributeSet;
-import javax.media.j3d.ShaderAttributeValue;
-import javax.media.j3d.ShaderProgram;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.SharedGroup;
-import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
-import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
-import javax.vecmath.Point3d;
+import javax.vecmath.Vector3f;
 
-import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import tools.WeakValueHashMap;
-import tools3d.utils.scenegraph.LODBillBoard;
 import utils.ESConfig;
 import utils.source.MediaSources;
 import utils.source.TextureSource;
-
-import com.sun.j3d.utils.shader.StringIO;
-
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
@@ -47,9 +30,45 @@ import esmj3d.j3d.j3drecords.type.J3dRECOTypeGeneral;
 public class TreeMaker
 {
 
+	/** far trees need to be trival TG with shape and no BG or other over heads
+	 * This is ULTRA optomized, location is baked into X verts, No Groups involved
+	 */
+	public static Node makeTreeFar(InstRECO inst, boolean makePhys, MediaSources mediaSources, String treeName, float billBoardWidth,
+			float billBoardHeight)
+	{
+		if (!makePhys)
+		{
+			if (treeName.endsWith(".spt"))
+			{
+
+				// give it the InstREco to prebake
+				Node node = createShapeX(treeName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE, billBoardHeight
+						* ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource(), inst);
+				return node;
+			}
+			else
+			{
+				String treeLodFlat = treeName.substring(0, treeName.indexOf(".nif")) + "_lod_flat.nif";
+
+				if (mediaSources.getMeshSource().nifFileExists(treeLodFlat))
+				{
+					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, false, makePhys);
+					j3dinst.addNodeChild(new LODNif(treeLodFlat, mediaSources));
+					return j3dinst;
+				}
+			}
+		}
+		else
+		{
+			// no physics for far trees ever!
+			System.out.println("Far tree asked for with makePhys true");
+		}
+		return null;
+	}
+
 	public static J3dRECOStatInst makeTree(InstRECO inst, boolean makePhys, MediaSources mediaSources, String treeName,
 			float billBoardWidth, float billBoardHeight, boolean far)
-	{		
+	{
 		String nifTreeFileName = null;
 		//firstly deal with spt file (speed tree) for oblic and fallouts
 		if (treeName.endsWith(".spt"))
@@ -168,6 +187,7 @@ public class TreeMaker
 
 	public static Node makeLODTreeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
 	{
+
 		if (ENABLE_SG)
 		{
 			String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
@@ -177,7 +197,7 @@ public class TreeMaker
 			{
 				sg = new SharedGroup();
 
-				sg.addChild(createShapeX(sptFileName, billWidth, billHeight, textureSource));
+				sg.addChild(createShapeX(sptFileName, billWidth, billHeight, textureSource, null));
 				sg.compile();
 				loadedLodXSharedGroups.put(keyString, sg);
 
@@ -194,26 +214,24 @@ public class TreeMaker
 		}
 		else
 		{
-			return createShapeX(sptFileName, billWidth, billHeight, textureSource);
+			return createShapeX(sptFileName, billWidth, billHeight, textureSource, null);
 		}
 	}
 
 	private static WeakValueHashMap<String, Appearance> loadedApps = new WeakValueHashMap<String, Appearance>();
 
-	private static WeakValueHashMap<String, QuadArray> loadedGeoms = new WeakValueHashMap<String, QuadArray>();
-
-	private static Shape3D createShapeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
+	private static Shape3D createShapeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource, InstRECO ir)
 	{
 		String treeLODTextureName = sptFileName.substring(sptFileName.lastIndexOf("\\") + 1);
 		treeLODTextureName = treeLODTextureName.substring(0, treeLODTextureName.indexOf(".spt")) + ".dds";
 
-		Texture tex = textureSource.getTexture("textures\\trees\\billboards\\" + treeLODTextureName);
-
 		String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
 		Appearance app = loadedApps.get(keyString);
-		QuadArray geom = loadedGeoms.get(keyString);
+		QuadArray geom = createGeometryX(billWidth, billHeight, ir);
 		if (app == null)
 		{
+			Texture tex = textureSource.getTexture("textures\\trees\\billboards\\" + treeLODTextureName);
+
 			app = createAppearance(tex);
 
 			PolygonAttributes pa = new PolygonAttributes();
@@ -233,13 +251,10 @@ public class TreeMaker
 			app.setTransparencyAttributes(transparencyAttributes);
 
 			Material m = new Material();
-			m.setLightingEnable(false);//TODO: why false lighting enable?
+			m.setLightingEnable(false);//TODO: why false lighting enable? speed appears to be unaffected?
 			app.setMaterial(m);
 
 			loadedApps.put(keyString, app);
-
-			geom = createGeometryX(billWidth, billHeight);
-			loadedGeoms.put(keyString, geom);
 		}
 
 		Shape3D treeShape = new Shape3D();
@@ -249,20 +264,42 @@ public class TreeMaker
 		return treeShape;
 	}
 
-	private static QuadArray createGeometryX(float rectWidth, float rectHeight)
+	/**
+	 * Non null ir mean pre bake InstRECO coords into verts
+	 * @param rectWidth
+	 * @param rectHeight
+	 * @param ir
+	 * @return
+	 */
+	private static QuadArray createGeometryX(float rectWidth, float rectHeight, InstRECO ir)
 	{
+
+		float x = 0;
+		float y = 0;
+		float z = 0;
+		if (ir != null)
+		{
+			rectWidth = rectWidth * ir.getScale();
+			rectHeight = rectHeight * ir.getScale();
+
+			Vector3f t = ir.getTrans();
+			x = t.x * ESConfig.ES_TO_METERS_SCALE;
+			y = t.z * ESConfig.ES_TO_METERS_SCALE;
+			z = -t.y * ESConfig.ES_TO_METERS_SCALE;
+		}
+
 		float zPosition = 0f;
 
 		float[] verts1 =
-		{ rectWidth / 2, 0f, zPosition,//
-				rectWidth / 2, rectHeight, zPosition,//
-				-rectWidth / 2, rectHeight, zPosition,//
-				-rectWidth / 2, 0f, zPosition//
+		{ x + (rectWidth / 2), y + 0f, z + zPosition,//
+				x + (rectWidth / 2), y + rectHeight, z + zPosition,//
+				x + (-rectWidth / 2), y + rectHeight, z + zPosition,//
+				x + (-rectWidth / 2), y + 0f, z + zPosition//
 				, //
-				zPosition, 0f, rectWidth / 2,//
-				zPosition, rectHeight, rectWidth / 2,//
-				zPosition, rectHeight, -rectWidth / 2,//
-				zPosition, 0f, -rectWidth / 2 };
+				x + zPosition, y + 0f, z + (rectWidth / 2),//
+				x + zPosition, y + rectHeight, z + (rectWidth / 2),//
+				x + zPosition, y + rectHeight, z + (-rectWidth / 2),//
+				x + zPosition, y + 0f, z + (-rectWidth / 2) };
 
 		float[] texCoords =
 		{ 0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f//
@@ -270,149 +307,29 @@ public class TreeMaker
 				0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f //
 		};
 
-		QuadArray rect = new QuadArray(8, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2);
+		//probably should add normals too for speed?otherwise auto generated or something
+		float[] normals =
+		{ 0f, 0f, 1f, //
+				0f, 0f, 1f, //
+				0f, 0f, 1f, //
+				0f, 0f, 1f, //
+				1f, 0f, 0f, //
+				1f, 0f, 0f, //
+				1f, 0f, 0f, //
+				1f, 0f, 0f, //
+		};
+
+		//TODO: should try filling in with interleaving etc
+		QuadArray rect = new QuadArray(8, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.NORMALS);
 		rect.setCoordinates(0, verts1);
 		rect.setTextureCoordinates(0, 0, texCoords);
-
+		rect.setNormals(0, normals);
 		return rect;
 	}
 
-	//NOTE UNUSED
-	protected static Group makeLODTreeBillboard2(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
+	private static Appearance createAppearance(Texture tex)
 	{
-		String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
-		SharedGroup sg = loadedLodXSharedGroups.get(keyString);
-
-		if (sg == null && sptFileName.indexOf(".spt") != -1)
-		{
-			sg = new SharedGroup();
-
-			String treeLODTextureName = sptFileName.substring(sptFileName.lastIndexOf("\\") + 1);
-			treeLODTextureName = treeLODTextureName.substring(0, treeLODTextureName.indexOf(".spt")) + ".dds";
-
-			Appearance app = new Appearance();
-
-			TransparencyAttributes transparencyAttributes = new TransparencyAttributes();
-			transparencyAttributes.setTransparencyMode(TransparencyAttributes.SCREEN_DOOR);
-			transparencyAttributes.setTransparency(0f);
-
-			RenderingAttributes ra = new RenderingAttributes();
-			ra.setAlphaTestFunction(RenderingAttributes.GREATER);
-			float threshold = 0.5f;
-			ra.setAlphaTestValue(threshold);
-			app.setRenderingAttributes(ra);
-
-			app.setTransparencyAttributes(transparencyAttributes);
-
-			Texture texture = textureSource.getTexture("textures\\trees\\billboards\\" + treeLODTextureName);
-			app.setTexture(texture);
-
-			Material m = new Material();
-			m.setLightingEnable(false);
-			app.setMaterial(m);
-
-			Shape3D treeShape = new Shape3D();
-			treeShape.setGeometry(createGeometry(billWidth, billHeight));
-			treeShape.setAppearance(app);
-
-			sg.addChild(treeShape);
-			loadedLodXSharedGroups.put(keyString, sg);
-
-		}
-
-		TransformGroup billTrans = new TransformGroup();
-		billTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		billTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-
-		if (sg != null)
-		{
-			Link link = new Link();
-			link.setSharedGroup(sg);
-			billTrans.addChild(link);
-		}
-
-		LODBillBoard billBehave = new LODBillBoard(billTrans);
-		billBehave.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
-		billBehave.setEnable(true);
-		billTrans.addChild(billBehave);
-
-		return billTrans;
-	}
-
-	private static QuadArray createGeometry(float rectWidth, float rectHeight)
-	{
-		float zPosition = 0f;
-
-		float[] verts1 =
-		{ rectWidth / 2, 0f, zPosition, rectWidth / 2, rectHeight, zPosition, -rectWidth / 2, rectHeight, zPosition, -rectWidth / 2, 0f,
-				zPosition };
-		float[] texCoords =
-		{ 0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f };
-
-		QuadArray rect = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2);
-		rect.setCoordinates(0, verts1);
-		rect.setTextureCoordinates(0, 0, texCoords);
-
-		return rect;
-	}
-
-	private static ShaderProgram shaderProgram = null;
-
-	private static ShaderAttributeSet shaderAttributeSet = null;
-
-	private static String vertexProgram = null;
-
-	private static String fragmentProgram = null;
-
-	protected static Appearance createAppearance(Texture tex)
-	{
-		Appearance app = null;
-		if (!NifToJ3d.USE_SHADERS)
-		{
-			app = new Appearance();
-		}
-		else
-		{
-			app = new ShaderAppearance();
-
-			if (shaderProgram == null)
-			{
-				try
-				{
-					vertexProgram = StringIO.readFully("./fixedpipeline.vert");
-					fragmentProgram = StringIO.readFully("./fixedpipeline.frag");
-				}
-				catch (IOException e)
-				{
-					System.err.println(e);
-				}
-
-				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram);
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram);
-				final String[] shaderAttrNames =
-				{ "tex" };
-				final Object[] shaderAttrValues =
-				{ new Integer(0) };
-				shaderProgram = new GLSLShaderProgram();
-				shaderProgram.setShaders(shaders);
-				shaderProgram.setShaderAttrNames(shaderAttrNames);
-
-				// Create the shader attribute set
-				shaderAttributeSet = new ShaderAttributeSet();
-				for (int i = 0; i < shaderAttrNames.length; i++)
-				{
-					ShaderAttribute shaderAttribute = new ShaderAttributeValue(shaderAttrNames[i], shaderAttrValues[i]);
-					shaderAttributeSet.put(shaderAttribute);
-				}
-
-				// Create shader appearance to hold the shader program and
-				// shader attributes
-			}
-			((ShaderAppearance) app).setShaderProgram(shaderProgram);
-			((ShaderAppearance) app).setShaderAttributeSet(shaderAttributeSet);
-
-		}
+		Appearance app = new Appearance();
 
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();

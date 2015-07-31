@@ -7,8 +7,20 @@ import esmLoader.common.data.record.Subrecord;
 
 public abstract class RECO
 {
+	/*	header flags
+	0x00000001 	 ESM file. (TES4.HEDR record only.)
+	0x00000020 	Deleted
+	0x00000200 	Casts shadows
+	0x00000400 	Quest item / Persistent reference
+	0x00000800 	Initially disabled
+	0x00001000 	Ignored
+	0x00008000 	Visible when distant
+	0x00020000 	Dangerous / Off limits (Interior cell)
+	0x00040000 	Data is compressed
+	0x00080000 	Can't wait
+	0x00080000 	Disabled By Default 
+	*/
 
-	
 	public static int Deleted_Flag = 0x00000020;
 
 	public static int CastsShadows_Flag = 0x00000200;
@@ -43,20 +55,9 @@ public abstract class RECO
 	 Obstacle = 0x02000000
 	 Show On World Map = 0x10000000
 	 */
+	public static int HasTreeLOD_Flag = 0x00000040;
 
-	/*	header flags
-		0x00000001 	 ESM file. (TES4.HEDR record only.)
-		0x00000020 	Deleted
-		0x00000200 	Casts shadows
-		0x00000400 	Quest item / Persistent reference
-		0x00000800 	Initially disabled
-		0x00001000 	Ignored
-		0x00008000 	Visible when distant
-		0x00020000 	Dangerous / Off limits (Interior cell)
-		0x00040000 	Data is compressed
-		0x00080000 	Can't wait
-		0x00080000 	Disabled By Default 
-		*/
+	public static int IsMarker_Flag = 0x00800000;
 
 	public int formId = -1;
 
