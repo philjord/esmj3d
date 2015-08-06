@@ -20,7 +20,6 @@ import javax.media.j3d.ShaderProgram;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
-import javax.media.j3d.TextureCubeMap;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
 import javax.vecmath.Point2f;

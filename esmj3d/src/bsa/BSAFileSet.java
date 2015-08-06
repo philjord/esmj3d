@@ -93,7 +93,7 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 	 * @param file
 	 * @param loadNodes
 	 */
-	private void loadFile(final File file, boolean loadNodes)
+	public void loadFile(final File file, boolean loadNodes)
 	{
 		// don't double load ever
 		for (ArchiveFile af : this)

@@ -67,7 +67,6 @@ public class BsaMeshSource implements MeshSource
 
 		for (ArchiveFile archiveFile : bsas)
 		{
-
 			ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
 			if (archiveEntry != null)
 			{

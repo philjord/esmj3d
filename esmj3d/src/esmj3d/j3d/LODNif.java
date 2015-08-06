@@ -20,7 +20,7 @@ import utils.source.TextureSource;
 
 /**
  * This class assumes a trival nif file suitable for a lod object
- * and attempts to optomise rendering (no groups no transforms, no interesting appearence
+ * and attempts to optomise rendering (no groups, no transforms, no interesting appearence)
  * @author phil
  *
  */

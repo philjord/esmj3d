@@ -40,7 +40,6 @@ public class TreeMaker
 		{
 			if (treeName.endsWith(".spt"))
 			{
-
 				// give it the InstREco to prebake
 				Node node = createShapeX(treeName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE, billBoardHeight
 						* ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource(), inst);
@@ -179,7 +178,7 @@ public class TreeMaker
 		}
 		else
 		{
-			return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
+			return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources).getRootNode();
 		}
 	}
 

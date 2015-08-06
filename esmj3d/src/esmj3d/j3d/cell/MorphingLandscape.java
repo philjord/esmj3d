@@ -2,27 +2,22 @@ package esmj3d.j3d.cell;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
-import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.Geometry;
+import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.IndexedGeometryArray;
-import javax.media.j3d.Shader;
-import javax.media.j3d.ShaderAppearance;
-import javax.media.j3d.ShaderAttribute;
-import javax.media.j3d.ShaderAttributeSet;
-import javax.media.j3d.ShaderAttributeValue;
-import javax.media.j3d.ShaderProgram;
-import javax.media.j3d.SourceCodeShader;
+import javax.media.j3d.Material;
+import javax.media.j3d.PolygonAttributes;
+import javax.media.j3d.QuadArray;
+import javax.media.j3d.RenderingAttributes;
+import javax.media.j3d.Shape3D;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
-
-import nif.NifToJ3d;
-
-import com.sun.j3d.utils.shader.StringIO;
+import javax.media.j3d.TransparencyAttributes;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
@@ -45,7 +40,7 @@ public class MorphingLandscape extends BranchGroup
 
 	private Rectangle prevBounds = new Rectangle();
 
-	private IndexedGeometryArray baseItsa;
+	private ArrayList<IndexedGeometryArray> baseItsas = new ArrayList<IndexedGeometryArray>();
 
 	public MorphingLandscape(int lodX, int lodY, int scale)
 	{
@@ -56,9 +51,9 @@ public class MorphingLandscape extends BranchGroup
 		this.scale = scale;
 	}
 
-	protected void setGeometryArray(IndexedGeometryArray baseItsa)
+	protected void addGeometryArray(IndexedGeometryArray baseItsa)
 	{
-		this.baseItsa = baseItsa;
+		baseItsas.add(baseItsa);
 	}
 
 	/**
@@ -68,7 +63,7 @@ public class MorphingLandscape extends BranchGroup
 	 */
 	public void updateVisibility(float charX, float charY)
 	{
-		if (baseItsa != null)
+		for (final IndexedGeometryArray baseItsa : baseItsas)
 		{
 			Rectangle absBounds = Beth32LodManager.getBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
 
@@ -123,63 +118,9 @@ public class MorphingLandscape extends BranchGroup
 		}
 	}
 
-	private static ShaderProgram shaderProgram = null;
-
-	private static ShaderAttributeSet shaderAttributeSet = null;
-
-	private static String vertexProgram = null;
-
-	private static String fragmentProgram = null;
-
 	protected static Appearance createAppearance(Texture tex)
 	{
-		Appearance app = null;
-		if (!NifToJ3d.USE_SHADERS)
-		{
-			app = new Appearance();
-		}
-		else
-		{
-			app = new ShaderAppearance();
-
-			if (shaderProgram == null)
-			{
-				try
-				{
-					vertexProgram = StringIO.readFully("./fixedpipeline.vert");
-					fragmentProgram = StringIO.readFully("./fixedpipeline.frag");
-				}
-				catch (IOException e)
-				{
-					System.err.println(e);
-				}
-
-				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram);
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram);
-				final String[] shaderAttrNames =
-				{ "tex" };
-				final Object[] shaderAttrValues =
-				{ new Integer(0) };
-				shaderProgram = new GLSLShaderProgram();
-				shaderProgram.setShaders(shaders);
-				shaderProgram.setShaderAttrNames(shaderAttrNames);
-
-				// Create the shader attribute set
-				shaderAttributeSet = new ShaderAttributeSet();
-				for (int i = 0; i < shaderAttrNames.length; i++)
-				{
-					ShaderAttribute shaderAttribute = new ShaderAttributeValue(shaderAttrNames[i], shaderAttrValues[i]);
-					shaderAttributeSet.put(shaderAttribute);
-				}
-
-				// Create shader appearance to hold the shader program and
-				// shader attributes
-			}
-			((ShaderAppearance) app).setShaderProgram(shaderProgram);
-			((ShaderAppearance) app).setShaderAttributeSet(shaderAttributeSet);
-
-		}
+		Appearance app = new Appearance();
 
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
@@ -189,6 +130,60 @@ public class MorphingLandscape extends BranchGroup
 
 		app.setMaterial(J3dLAND.getLandMaterial());
 		return app;
+	}
+
+	protected static Appearance createBasicWaterApp()
+	{
+		Appearance app = new Appearance();
+
+		PolygonAttributes pa = new PolygonAttributes();
+		pa.setCullFace(PolygonAttributes.CULL_NONE);
+		app.setPolygonAttributes(pa);
+		RenderingAttributes ra = new RenderingAttributes();
+		ra.setIgnoreVertexColors(true);//TODO: this is not working so fonv water is still white
+		app.setRenderingAttributes(ra);
+
+		TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.1f);
+		app.setTransparencyAttributes(trans);
+
+		Material mat = new Material();
+		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+		mat.setShininess(120.0f);
+		mat.setDiffuseColor(0.0f, 0.1f, 1f);
+		mat.setSpecularColor(0.5f, 0.5f, 0.6f);
+		app.setMaterial(mat);
+		return app;
+	}
+
+	protected static Shape3D createBasicWater(float rectWidth, float rectHeight)
+	{
+		// ready for prebaking coords if required
+		float x = 0;
+		float y = 0;
+		float z = 0;
+
+		float yPosition = 0f;
+
+		float[] verts1 =
+		{ x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2),//
+				x + (rectWidth / 2), y + yPosition, z + (rectHeight / 2),//
+				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2),//
+				x + (-rectWidth / 2), y + yPosition, z + (-rectHeight / 2) //
+		};
+
+		float[] normals =
+		{ 0f, 0f, 1f, //
+				0f, 0f, 1f, //
+				0f, 0f, 1f, //
+				0f, 0f, 1f, //
+		};
+
+		QuadArray rect = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.NORMALS);
+		rect.setCoordinates(0, verts1);
+		rect.setNormals(0, normals);
+
+		Shape3D shape = new Shape3D(rect, createBasicWaterApp());
+		return shape;
 	}
 
 }
