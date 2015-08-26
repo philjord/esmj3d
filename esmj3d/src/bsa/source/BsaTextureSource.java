@@ -237,8 +237,8 @@ public class BsaTextureSource implements TextureSource
 				texName = texName.substring(5);
 			}
 
-			// add the textures path part
-			if (!texName.startsWith("textures"))
+			// add the textures path part (unless tes3 bookart folder)
+			if (!texName.startsWith("textures") && !texName.startsWith("bookart"))
 			{
 				texName = "textures\\" + texName;
 			}
