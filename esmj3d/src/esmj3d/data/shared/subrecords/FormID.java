@@ -10,7 +10,7 @@ public class FormID
 	public FormID(byte[] bytes)
 	{
 		if (bytes.length < 4 || bytes.length > 4)
-			new Throwable("bad bytes for form Id " + new String(bytes));
+			new Throwable("bad bytes for form Id " + new String(bytes)).printStackTrace();
 
 		formId = ESMByteConvert.extractInt(bytes, 0);
 		//if (formId < -1 || formId > 5000000)

@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.FormID;
+import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.ZString;
 
 public class CommonWRLD extends RECO
 {
 	public ZString EDID = null;
 
-	public FormID FULL = null;
+	public LString FULL = null;
 
 	public FormID WNAM = null;//parent world
 
@@ -36,7 +37,7 @@ public class CommonWRLD extends RECO
 			}
 			else if (sr.getType().equals("FULL"))
 			{
-				FULL = new FormID(bs);
+				FULL = new LString(bs);
 			}
 			else if (sr.getType().equals("WNAM"))
 			{

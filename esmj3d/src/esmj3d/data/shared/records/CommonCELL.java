@@ -65,7 +65,7 @@ public class CommonCELL extends InstRECO
 			}
 			else if (sr.getType().equals("XCLR"))
 			{
-				XCLRs.add(new FormID(bs));
+//				XCLRs.add(new FormID(bs));
 			}
 			else if (sr.getType().equals("XCLW"))
 			{
