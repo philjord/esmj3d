@@ -30,7 +30,7 @@ public class LODNif extends Group
 	{
 		//TODO: bake in the coords now too
 
-		//TODO: can I optomise this liek the X form ones
+		//TODO: can I optomise this like the X form ones
 		// need to make a generic lod nif loading system, fallout uses this for all lod things
 		//return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
 		TextureSource textureSource = mediaSources.getTextureSource();
@@ -54,7 +54,7 @@ public class LODNif extends Group
 					{
 						J3dNiTriBasedGeom ntbg = null;
 
-						if (child instanceof NiTriShape || child instanceof BSLODTriShape)
+						if (child instanceof NiTriShape)
 						{
 							NiTriShape niTriShape = (NiTriShape) child;
 							ntbg = new J3dNiTriShape(niTriShape, niToJ3dData, textureSource);
