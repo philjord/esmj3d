@@ -68,6 +68,20 @@ public class LTEX extends RECO
 			{
 
 			}
+			//TES3 only
+			else if (sr.getType().equals("NAME"))
+			{
+				EDID = new ZString(bs);
+			}
+			else if (sr.getType().equals("INTV"))
+			{
+				//ltex id = ESMByteConvert.extractInt(bs, 0);used in the edid
+			}
+			else if (sr.getType().equals("DATA"))
+			{
+				ICON = new ZString(bs);
+			}
+			
 			else
 			{
 				System.out.println("unhandled : " + sr.getType() + " in record " + recordData + " in " + this);

@@ -149,7 +149,7 @@ public class BsaTextureSource implements TextureSource
 			}
 		}
 		System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
-		new Throwable().printStackTrace();
+		//new Throwable().printStackTrace();
 		return null;
 	}
 
