@@ -16,6 +16,8 @@ import esmj3d.data.shared.subrecords.FormID;
  */
 public class LAND extends InstRECO
 {
+	public boolean tes3 = false;
+
 	public DATA DATA = null;
 
 	public byte[] VNML = null;
@@ -24,19 +26,34 @@ public class LAND extends InstRECO
 
 	public byte[] VHGT = null;
 
+	//TES3
+	public short[] VTEXshorts;
+
+	//VTEX (512 bytes) optional
+	//A 16x16 array of short texture indices (from a LTEX record I think).
+
+	//TES4+
 	public BTXT[] BTXTs = new BTXT[4];
 
 	public ATXT[] ATXTs;
 
-	public FormID[] VTEXs;
+	public FormID[] VTEXids;
 
 	public LAND(Record recordData)
 	{
+		this(recordData, false);
+	}
+
+	public LAND(Record recordData, boolean tes3)
+	{
 		super(recordData);
+		this.tes3 = tes3;
 
 		ArrayList<BTXT> BTXTsv = new ArrayList<BTXT>();
 		ArrayList<ATXT> ATXTsv = new ArrayList<ATXT>();
-		ArrayList<FormID> VTEXsv = new ArrayList<FormID>();
+		ArrayList<FormID> VTEXidsv = new ArrayList<FormID>();
+
+		ArrayList<Short> VTEXshortsv = new ArrayList<Short>();
 
 		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
@@ -60,11 +77,27 @@ public class LAND extends InstRECO
 			{
 				VCLR = bs;
 			}
-			else if (sr.getType().equals("BTXT"))
+			else if (tes3 && sr.getType().equals("INTV"))
+			{
+				//landX = ESMByteConvert.extractInt(bs, 0);
+				//landY = ESMByteConvert.extractInt(bs, 4);
+			}
+			else if (tes3 && sr.getType().equals("VTEX"))
+			{
+				for (int f = 0; f < bs.length; f += 2)
+				{
+					VTEXshortsv.add((short) ESMByteConvert.extractShort(bs, f));
+				}
+			}
+			else if (tes3 && sr.getType().equals("WNAM"))
+			{
+
+			}
+			else if (!tes3 && sr.getType().equals("BTXT"))
 			{
 				BTXTsv.add(new BTXT(bs));
 			}
-			else if (sr.getType().equals("ATXT"))
+			else if (!tes3 & sr.getType().equals("ATXT"))
 			{
 				ATXT atxt = new ATXT(bs);
 				//TODO: use next()
@@ -81,18 +114,18 @@ public class LAND extends InstRECO
 				}
 				ATXTsv.add(atxt);
 			}
-			else if (sr.getType().equals("VTEX"))
+			else if (!tes3 & sr.getType().equals("VTEX"))
 			{
 				//VTEX (Optional): Texture FormIDs: A sequence of LTEX FormIDs. 
 				//Many may be NULL values. (Variable length, but always multiples of 4 bytes).
-				
+
 				for (int f = 0; f < bs.length; f += 4)
 				{
 					byte[] fbs = new byte[4];
 					System.arraycopy(bs, f, fbs, 0, 4);
-					VTEXsv.add(new FormID(fbs));					
+					VTEXidsv.add(new FormID(fbs));
 				}
-				 
+
 				//it's 64 ints long, is that 8 layers by 4 quadrants but last 32 are 0?
 				//there is one in anvil world and I note that this land has a shape that doesn't fit it's neighbours	
 				//land id 96329 it only has subs of DATA VNML, VHGT, VCLR no texture data	so therefore no VTXT for transparency
@@ -111,33 +144,44 @@ public class LAND extends InstRECO
 
 		}
 
-		//now make the BTXT and ATXT ordered
-		for (int j = 0; j < BTXTsv.size(); j++)
+		if (tes3)
 		{
-			BTXT btxt = BTXTsv.get(j);
-			BTXTs[btxt.quadrant] = btxt;
-		}
-
-		ATXTs = new ATXT[ATXTsv.size()];
-		for (int j = 0; j < ATXTsv.size(); j++)
-		{
-			ATXTs[j] = ATXTsv.get(j);
-		}
-
-		VTEXs = new FormID[VTEXsv.size()];
-		for (int j = 0; j < VTEXsv.size(); j++)
-		{
-			VTEXs[j] = VTEXsv.get(j);
-		}
-
-		Arrays.sort(ATXTs, new Comparator<ATXT>()
-		{
-			public int compare(ATXT a1, ATXT a2)
+			VTEXshorts = new short[VTEXshortsv.size()];
+			for (int j = 0; j < VTEXshortsv.size(); j++)
 			{
-				return a1.layer < a2.layer ? -1 : a1.layer == a2.layer ? 0 : 1;
+				VTEXshorts[j] = VTEXshortsv.get(j);
 			}
-		});
+		}
+		else
+		{
 
+			//now make the BTXT and ATXT ordered
+			for (int j = 0; j < BTXTsv.size(); j++)
+			{
+				BTXT btxt = BTXTsv.get(j);
+				BTXTs[btxt.quadrant] = btxt;
+			}
+
+			ATXTs = new ATXT[ATXTsv.size()];
+			for (int j = 0; j < ATXTsv.size(); j++)
+			{
+				ATXTs[j] = ATXTsv.get(j);
+			}
+
+			VTEXids = new FormID[VTEXidsv.size()];
+			for (int j = 0; j < VTEXidsv.size(); j++)
+			{
+				VTEXids[j] = VTEXidsv.get(j);
+			}
+
+			Arrays.sort(ATXTs, new Comparator<ATXT>()
+			{
+				public int compare(ATXT a1, ATXT a2)
+				{
+					return a1.layer < a2.layer ? -1 : a1.layer == a2.layer ? 0 : 1;
+				}
+			});
+		}
 	}
 
 	public String showDetails()

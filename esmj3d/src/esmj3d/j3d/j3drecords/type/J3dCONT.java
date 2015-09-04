@@ -23,6 +23,7 @@ public class J3dCONT extends J3dRECOType
 		}
 		else
 		{
+
 			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, mediaSources.getMeshSource(), mediaSources.getTextureSource())
 					.getVisualRoot();
 		}

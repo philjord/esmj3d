@@ -1,21 +1,11 @@
 package esmj3d.j3d.j3drecords.inst;
 
-import java.io.IOException;
-
 import javax.media.j3d.Appearance;
-import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.IndexedTriangleStripArray;
 import javax.media.j3d.Material;
-import javax.media.j3d.Shader;
-import javax.media.j3d.ShaderAppearance;
-import javax.media.j3d.ShaderAttribute;
-import javax.media.j3d.ShaderAttributeSet;
-import javax.media.j3d.ShaderAttributeValue;
-import javax.media.j3d.ShaderProgram;
 import javax.media.j3d.Shape3D;
-import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureAttributes;
 import javax.media.j3d.TransparencyAttributes;
@@ -23,20 +13,17 @@ import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
-import nif.NifToJ3d;
-
 import org.j3d.geom.GeometryData;
 
 import tools.io.ESMByteConvert;
-import utils.ESConfig;
 import utils.PhysAppearance;
 import utils.source.TextureSource;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
-import com.sun.j3d.utils.shader.StringIO;
 
 import esmLoader.common.data.record.IRecordStore;
 import esmLoader.common.data.record.Record;
+import esmj3d.data.shared.records.InstRECO;
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.ATXT;
 import esmj3d.data.shared.records.LAND.BTXT;
@@ -48,10 +35,14 @@ import esmj3d.j3d.TESLANDGen;
 
 public class J3dLAND extends J3dRECOStatInst
 {
+	public static int GRID_COUNT = 32;
+
+	public static final float TERRIAN_SQUARE_SIZE = 2.56f;// confirmed empirically
+
 	//	NOTE nif x,y,z to j3d x,z,-y
 	public static float HEIGHT_TO_J3D_SCALE = 0.04f; //where does this come from? 1/25th?
 
-	public static float LAND_SIZE = ESConfig.TERRIAN_GRID_SQUARE_COUNT * ESConfig.TERRIAN_SQUARE_SIZE; //= (32*2.56) = 81.92
+	public static float LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE; //= (32*2.56) = 81.92
 
 	//LOD tristrip in 5.12 increments (2.56?)
 	//public static float HEIGHT_TO_J3D_SCALE = 0.057f;
@@ -70,7 +61,61 @@ public class J3dLAND extends J3dRECOStatInst
 	 Confused? I certainly have been for the past couple of hours! 
 	 http://cs.elderscrolls.com/constwiki/index.php/Oblivion_Units */
 
+	/* TES3
+	  37: LAND =  1390 (    28,  27374.14,  30243)
+	Landscape
+	INTV (8 bytes)
+		long CellX
+		long CellY
+			The cell coordinates of the cell.
+	DATA (4 bytes)
+		long Unknown (default of 0x09)
+			Changing this value makes the land 'disappear' in the editor.			
+	VNML (12675 bytes)
+		struct {
+		  signed byte X
+		  signed byte Y
+		  signed byte Z
+		} normals[65][65];
+			A RGB color map 65x65 pixels in size representing the land normal vectors.
+			The signed value of the 'color' represents the vector's component. Blue
+			is vertical (Z), Red the X direction and Green the Y direction. Note that
+			the y-direction of the data is from the bottom up.
+	VHGT (4232 bytes)
+		float Unknown1
+			A height offset for the entire cell. Decreasing this value will shift the
+			entire cell land down.
+		byte Unknown2 (0x00)
+		signed byte  HeightData[65][65]
+			Contains the height data for the cell in the form of a 65x65 pixel array. The
+			height data is not absolute values but uses differences between adjacent pixels.
+			Thus a pixel value of 0 means it has the same height as the last pixel. Note that
+			the y-direction of the data is from the bottom up.
+		short Unknown2 (0x0000)
+	WNAM (81 bytes)
+		byte Data[9][9]
+			Unknown byte data.		
+	VCLR (12675 bytes) optional
+		Vertex color array, looks like another RBG image 65x65 pixels in size.
+	VTEX (512 bytes) optional
+		A 16x16 array of short texture indices (from a LTEX record I think).
+		*/
+
 	private GeometryInfo gi;//for Bullet later
+
+	public static void setTes3()
+	{
+		GRID_COUNT = 64;//64 not 32
+		LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE;//refresh
+	}
+
+	/**
+	 * for tes3 extendor
+	 */
+	public J3dLAND(InstRECO instRECO, boolean a, boolean b)
+	{
+		super(instRECO, false, false);
+	}
 
 	/**
 	 * Makes the physics version of land
@@ -86,7 +131,8 @@ public class J3dLAND extends J3dRECOStatInst
 
 			//now translate the heights into a nice mesh, 82 has been confirmed empirically			
 			//Note that 33 by 33 sets of point equals 32 by 32 sets of triangles between them
-			TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, 33, 33, heights, null, null, null);
+			TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights,
+					null, null, null);
 			GeometryData terrainData = new GeometryData();
 			gridGenerator.generateIndexedTriangleStrips(terrainData);
 
@@ -156,15 +202,15 @@ public class J3dLAND extends J3dRECOStatInst
 				app.setMaterial(getLandMaterial());
 				app.setTextureAttributes(textureAttributesBase);
 
-				//oddly btxt are optional
-				BTXT btxt = land.BTXTs[quadrant];
-				if (btxt != null && btxt.textureFormID != 0)
+				app.setTexture(getDefaultTexture(textureSource));
+				if (!land.tes3)
 				{
-					app.setTexture(getTexture(btxt.textureFormID, master, textureSource));
-				}
-				else
-				{
-					app.setTexture(getDefaultTexture(textureSource));
+					//oddly btxt are optional
+					BTXT btxt = land.BTXTs[quadrant];
+					if (btxt != null && btxt.textureFormID != 0)
+					{
+						app.setTexture(getTexture(btxt.textureFormID, master, textureSource));
+					}
 				}
 
 				Shape3D baseQuadShape = new Shape3D();
@@ -174,142 +220,92 @@ public class J3dLAND extends J3dRECOStatInst
 
 			}
 
-			//If I add transparency attributes to the base grid I see the texture itself has transparency
-			// So I need to ignore the textures transparency in all cases
-			// and this is how it's done!			
-			TextureAttributes textureAttributes = new TextureAttributes();
-			textureAttributes.setTextureMode(TextureAttributes.COMBINE);
-
-			textureAttributes.setCombineRgbMode(TextureAttributes.COMBINE_MODULATE);
-			textureAttributes.setCombineRgbSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
-			textureAttributes.setCombineRgbSource(1, TextureAttributes.COMBINE_TEXTURE_COLOR);
-
-			textureAttributes.setCombineAlphaMode(TextureAttributes.COMBINE_REPLACE);
-			textureAttributes.setCombineAlphaSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
-
-			TransparencyAttributes ta = new TransparencyAttributes();
-			ta.setTransparencyMode(TransparencyAttributes.BLENDED);
-
-			ta.setTransparency(0.0f);
-
-			if (land.VTEXs.length > 0)
+			if (!land.tes3)
 			{
-				System.out.println("VTEXs in LAND");
-				for (int a = 0; a < land.VTEXs.length; a++)
+				//If I add transparency attributes to the base grid I see the texture itself has transparency
+				// So I need to ignore the textures transparency in all cases
+				// and this is how it's done!			
+				TextureAttributes textureAttributes = new TextureAttributes();
+				textureAttributes.setTextureMode(TextureAttributes.COMBINE);
+
+				textureAttributes.setCombineRgbMode(TextureAttributes.COMBINE_MODULATE);
+				textureAttributes.setCombineRgbSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
+				textureAttributes.setCombineRgbSource(1, TextureAttributes.COMBINE_TEXTURE_COLOR);
+
+				textureAttributes.setCombineAlphaMode(TextureAttributes.COMBINE_REPLACE);
+				textureAttributes.setCombineAlphaSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
+
+				TransparencyAttributes ta = new TransparencyAttributes();
+				ta.setTransparencyMode(TransparencyAttributes.BLENDED);
+
+				ta.setTransparency(0.0f);
+
+				if (land.VTEXids.length > 0)
 				{
-					FormID texForm = land.VTEXs[a];
-					if (texForm.formId != 0)
+					System.out.println("VTEXs in LAND");
+					for (int a = 0; a < land.VTEXids.length; a++)
 					{
-						// these are in 4 quadrant groups then up each layer
-						int quadrant = (int) Math.floor(a % 4);
+						FormID texForm = land.VTEXids[a];
+						if (texForm.formId != 0)
+						{
+							// these are in 4 quadrant groups then up each layer
+							int quadrant = (int) Math.floor(a % 4);
+							Appearance app = createAppearance();
+							app.setMaterial(getLandMaterial());
+							app.setTextureAttributes(textureAttributes);
+
+							app.setTransparencyAttributes(ta);
+
+							app.setTexture(getTexture(texForm.formId, master, textureSource));
+
+							Shape3D aTxtShape = new Shape3D();
+							aTxtShape.setAppearance(app);
+							aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, null));
+							quadrantBaseGroups[quadrant].addChild(aTxtShape);
+						}
+					}
+				}
+				else
+				{
+
+					//These are per sorted by layer in LAND RECO
+					for (int a = 0; a < land.ATXTs.length; a++)
+					{
+						ATXT atxt = land.ATXTs[a];
+
+						int quadrant = atxt.quadrant;
 						Appearance app = createAppearance();
 						app.setMaterial(getLandMaterial());
 						app.setTextureAttributes(textureAttributes);
 
 						app.setTransparencyAttributes(ta);
 
-						app.setTexture(getTexture(texForm.formId, master, textureSource));
+						if (atxt.textureFormID != 0)
+						{
+							app.setTexture(getTexture(atxt.textureFormID, master, textureSource));
+						}
+						else
+						{
+							app.setTexture(getDefaultTexture(textureSource));
+						}
 
 						Shape3D aTxtShape = new Shape3D();
 						aTxtShape.setAppearance(app);
-						aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, null));
+						aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, atxt.vtxt));
 						quadrantBaseGroups[quadrant].addChild(aTxtShape);
 					}
 				}
 			}
 			else
 			{
-
-				//These are per sorted by layer in LAND RECO
-				for (int a = 0; a < land.ATXTs.length; a++)
-				{
-					ATXT atxt = land.ATXTs[a];
-
-					int quadrant = atxt.quadrant;
-					Appearance app = createAppearance();
-					app.setMaterial(getLandMaterial());
-					app.setTextureAttributes(textureAttributes);
-
-					app.setTransparencyAttributes(ta);
-
-					if (atxt.textureFormID != 0)
-					{
-						app.setTexture(getTexture(atxt.textureFormID, master, textureSource));
-					}
-					else
-					{
-						app.setTexture(getDefaultTexture(textureSource));
-					}
-
-					Shape3D aTxtShape = new Shape3D();
-					aTxtShape.setAppearance(app);
-					aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, atxt.vtxt));
-					quadrantBaseGroups[quadrant].addChild(aTxtShape);
-				}
+				//TODO: tes3 short system???
 			}
 		}
 	}
 
-	private static ShaderProgram shaderProgram = null;
-
-	private static ShaderAttributeSet shaderAttributeSet = null;
-
-	private static String vertexProgram = null;
-
-	private static String fragmentProgram = null;
-
-	private Appearance createAppearance()
+	protected Appearance createAppearance()
 	{
-		//TODO: I think the material color is being set to white when color is bad?
-
-		if (!NifToJ3d.USE_SHADERS)
-		{
-			return new Appearance();
-		}
-		else
-		{
-			ShaderAppearance app = new ShaderAppearance();
-
-			if (shaderProgram == null)
-			{
-				try
-				{
-					vertexProgram = StringIO.readFully("./land.vert");
-					fragmentProgram = StringIO.readFully("./land.frag");
-				}
-				catch (IOException e)
-				{
-					System.err.println(e);
-				}
-
-				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram);
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram);
-				final String[] shaderAttrNames =
-				{ "tex" };
-				final Object[] shaderAttrValues =
-				{ new Integer(0) };
-				shaderProgram = new GLSLShaderProgram();
-				shaderProgram.setShaders(shaders);
-				shaderProgram.setShaderAttrNames(shaderAttrNames);
-
-				// Create the shader attribute set
-				shaderAttributeSet = new ShaderAttributeSet();
-				for (int i = 0; i < shaderAttrNames.length; i++)
-				{
-					ShaderAttribute shaderAttribute = new ShaderAttributeValue(shaderAttrNames[i], shaderAttrValues[i]);
-					shaderAttributeSet.put(shaderAttribute);
-				}
-
-				// Create shader appearance to hold the shader program and
-				// shader attributes
-			}
-			app.setShaderProgram(shaderProgram);
-			app.setShaderAttributeSet(shaderAttributeSet);
-
-			return app;
-
-		}
+		return new Appearance();
 	}
 
 	private static Material landMaterial = null;
@@ -328,7 +324,7 @@ public class J3dLAND extends J3dRECOStatInst
 		return landMaterial;
 	}
 
-	private static Vector3f quadOffSet(int quadrant)
+	protected static Vector3f quadOffSet(int quadrant)
 	{
 		float pos = LAND_SIZE / 4f;
 		if (quadrant == 0)
@@ -342,9 +338,9 @@ public class J3dLAND extends J3dRECOStatInst
 		return null;
 	}
 
-	private static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrant)
+	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrant)
 	{
-		int quadrantSquareCount = (ESConfig.TERRIAN_GRID_SQUARE_COUNT / 2) + 1;
+		int quadrantSquareCount = (GRID_COUNT / 2) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
 		Vector3f[][] quadrantNormals = new Vector3f[quadrantSquareCount][quadrantSquareCount];
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
@@ -384,7 +380,7 @@ public class J3dLAND extends J3dRECOStatInst
 	private static GeometryArray makeQuadrantLayerSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrant,
 			VTXT vtxt)
 	{
-		int quadrantSquareCount = (ESConfig.TERRIAN_GRID_SQUARE_COUNT / 2) + 1;
+		int quadrantSquareCount = (GRID_COUNT / 2) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
 		Vector3f[][] quadrantNormals = new Vector3f[quadrantSquareCount][quadrantSquareCount];
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
@@ -405,7 +401,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 			for (int v = 0; v < vtxt.count; v++)
 			{
-				int rowno = 16 - (vtxt.position[v] / quadrantSquareCount);
+				int rowno = (GRID_COUNT / 2) - (vtxt.position[v] / quadrantSquareCount);
 				int colno = (vtxt.position[v] % quadrantSquareCount);
 
 				quadrantColors[rowno][colno].w = vtxt.opacity[v];
@@ -453,12 +449,12 @@ public class J3dLAND extends J3dRECOStatInst
 	private static void makeQuadrantData(int quadrant, float[][] baseHeights, Vector3f[][] baseNormals, Color4f[][] baseColors,
 			float[][] quadrantHeights, Vector3f[][] quadrantNormals, Color4f[][] quadrantColors, TexCoord2f[][] quadrantTexCoords)
 	{
-		for (int row = 0; row < 17; row++)
+		for (int row = 0; row < (GRID_COUNT / 2) + 1; row++)
 		{
-			for (int col = 0; col < 17; col++)
+			for (int col = 0; col < (GRID_COUNT / 2) + 1; col++)
 			{
-				int baseRow = row + ((quadrant == 0 || quadrant == 1) ? 16 : 0);
-				int baseCol = col + ((quadrant == 1 || quadrant == 3) ? 16 : 0);
+				int baseRow = row + ((quadrant == 0 || quadrant == 1) ? (GRID_COUNT / 2) : 0);
+				int baseCol = col + ((quadrant == 1 || quadrant == 3) ? (GRID_COUNT / 2) : 0);
 				quadrantHeights[row][col] = baseHeights[baseRow][baseCol];
 				quadrantNormals[row][col] = baseNormals[baseRow][baseCol];
 				quadrantColors[row][col] = new Color4f(baseColors[baseRow][baseCol]);//copy to allow modification
@@ -497,7 +493,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private static Texture defaultTex = null;
 
-	private static Texture getDefaultTexture(TextureSource textureSource)
+	protected static Texture getDefaultTexture(TextureSource textureSource)
 	{
 		//Skyrim //textures\\landscape\\dirt01.dds
 		//FO3 //textures\\landscape\\dirt01.dds
@@ -512,6 +508,10 @@ public class J3dLAND extends J3dRECOStatInst
 			{
 				defaultTex = textureSource.getTexture("Landscape\\default.dds");
 			}
+			else if (textureSource.textureFileExists("tx_ac_dirt_01.dds"))
+			{
+				defaultTex = textureSource.getTexture("tx_ac_dirt_01.dds");
+			}
 			else
 			{
 				System.out.println("BUM, no default LAND texture found somehow?");
@@ -520,20 +520,20 @@ public class J3dLAND extends J3dRECOStatInst
 		return defaultTex;
 	}
 
-	private static float[][] extractHeights(byte[] heightBytes)
+	protected static float[][] extractHeights(byte[] heightBytes)
 	{
 		// extract the heights
-		float[][] heights = new float[33][33];
+		float[][] heights = new float[(GRID_COUNT + 1)][(GRID_COUNT + 1)];
 
 		float startHeightOffset = ESMByteConvert.extractFloat(heightBytes, 0);
 
 		float startRowHeight = (startHeightOffset * 4);
-		for (int row = 0; row < 33; row++)
+		for (int row = 0; row < (GRID_COUNT + 1); row++)
 		{
 			float height = startRowHeight;
-			for (int col = 0; col < 33; col++)
+			for (int col = 0; col < (GRID_COUNT + 1); col++)
 			{
-				int idx = col + (row * 33) + 4;
+				int idx = col + (row * (GRID_COUNT + 1)) + 4;//+4 is start float
 				height += heightBytes[idx] * 4;
 
 				// start next row relative to the start of this row
@@ -541,7 +541,7 @@ public class J3dLAND extends J3dRECOStatInst
 					startRowHeight = height;
 
 				// note reverse order, due to x,y,z => x,z,-y
-				heights[32 - row][col] = (height * J3dLAND.HEIGHT_TO_J3D_SCALE);
+				heights[GRID_COUNT - row][col] = (height * HEIGHT_TO_J3D_SCALE);
 			}
 		}
 
@@ -553,49 +553,49 @@ public class J3dLAND extends J3dRECOStatInst
 
 	}
 
-	private static Vector3f[][] extractNormals(byte[] normalBytes)
+	protected static Vector3f[][] extractNormals(byte[] normalBytes)
 	{
-		Vector3f[][] normals = new Vector3f[33][33];
-		for (int row = 0; row < 33; row++)
+		Vector3f[][] normals = new Vector3f[(GRID_COUNT + 1)][(GRID_COUNT + 1)];
+		for (int row = 0; row < (GRID_COUNT + 1); row++)
 		{
-			for (int col = 0; col < 33; col++)
+			for (int col = 0; col < (GRID_COUNT + 1); col++)
 			{
-				byte x = normalBytes[(col + (row * 33)) * 3 + 0];
-				byte y = normalBytes[(col + (row * 33)) * 3 + 1];
-				byte z = normalBytes[(col + (row * 33)) * 3 + 2];
+				byte x = normalBytes[(col + (row * (GRID_COUNT + 1))) * 3 + 0];
+				byte y = normalBytes[(col + (row * (GRID_COUNT + 1))) * 3 + 1];
+				byte z = normalBytes[(col + (row * (GRID_COUNT + 1))) * 3 + 2];
 
 				Vector3f v = new Vector3f(x & 0xff, z & 0xff, -y & 0xff);
 				v.normalize();
 				// note reverse order, due to x,y,z => x,z,-y
-				normals[32 - row][col] = v;
+				normals[GRID_COUNT - row][col] = v;
 			}
 		}
 		return normals;
 	}
 
-	private static Color4f[][] extractColors(byte[] colorBytes)
+	protected static Color4f[][] extractColors(byte[] colorBytes)
 	{
 
-		Color4f[][] colors = new Color4f[33][33];
+		Color4f[][] colors = new Color4f[(GRID_COUNT + 1)][(GRID_COUNT + 1)];
 
-		for (int row = 0; row < 33; row++)
+		for (int row = 0; row < (GRID_COUNT + 1); row++)
 		{
-			for (int col = 0; col < 33; col++)
+			for (int col = 0; col < (GRID_COUNT + 1); col++)
 			{
 				if (colorBytes != null)
 				{
-					float r = (colorBytes[(col + (row * 33)) * 3 + 0] & 0xff) / 255f;
-					float g = (colorBytes[(col + (row * 33)) * 3 + 1] & 0xff) / 255f;
-					float b = (colorBytes[(col + (row * 33)) * 3 + 2] & 0xff) / 255f;
+					float r = (colorBytes[(col + (row * (GRID_COUNT + 1))) * 3 + 0] & 0xff) / 255f;
+					float g = (colorBytes[(col + (row * (GRID_COUNT + 1))) * 3 + 1] & 0xff) / 255f;
+					float b = (colorBytes[(col + (row * (GRID_COUNT + 1))) * 3 + 2] & 0xff) / 255f;
 					Color4f c = new Color4f(r, g, b, 1.0f);//note hard coded opaque
 
 					// note reverse order, due to x,y,z => x,z,-y
-					colors[32 - row][col] = c;
+					colors[GRID_COUNT - row][col] = c;
 				}
 				else
 				{
 					// no colors let's try white
-					colors[32 - row][col] = new Color4f(1.0f, 1.0f, 1.0f, 1.0f);
+					colors[GRID_COUNT - row][col] = new Color4f(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 
 			}
