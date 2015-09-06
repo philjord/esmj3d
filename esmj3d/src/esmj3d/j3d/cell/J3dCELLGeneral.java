@@ -13,9 +13,10 @@ import utils.source.MediaSources;
 import esmLoader.common.data.record.IRecordStore;
 import esmLoader.common.data.record.Record;
 import esmj3d.data.shared.records.InstRECO;
-import esmj3d.j3d.Water;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
+import esmj3d.j3d.water.Water;
+import esmj3d.j3d.water.WaterApp;
 
 public abstract class J3dCELLGeneral extends BranchGroup
 {
@@ -44,9 +45,9 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 	}
-	
+
 	public abstract Node makeJ3dRECOFar(Record record);
-	
+
 	public abstract J3dRECOInst makeJ3dRECO(Record record);
 
 	protected void setCell(InstRECO instCell)
@@ -67,16 +68,24 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		return j3dRECOs;
 	}
 
-	protected void makeWater(float waterLevel, String texture)
+	protected void makeWater(float waterLevel, WaterApp waterApp)
 	{
+
 		if (waterLevel == Float.NEGATIVE_INFINITY)
 		{
 			waterLevel = 0;
 		}
-
-		if (waterLevel != Float.NEGATIVE_INFINITY)
+		else if (waterLevel > 100000)
 		{
-			Water water = new Water(J3dLAND.LAND_SIZE, texture, mediaSources.getTextureSource());
+			//6.8056466E36 is weird skyrim water level (possibly meaning use default) but == no work for floats
+			// default in WRLD record but by testing here it is
+			waterLevel = -280;
+		}
+
+		if (waterLevel != Float.POSITIVE_INFINITY && waterLevel != 0x7F7FFFFF && waterLevel != 0x4F7FFFC9)
+		{
+
+			Water water = new Water(J3dLAND.LAND_SIZE, waterApp);
 
 			TransformGroup transformGroup = new TransformGroup();
 			Transform3D transform = new Transform3D();

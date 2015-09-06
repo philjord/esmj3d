@@ -1,14 +1,14 @@
-package esmj3d.j3d;
+package esmj3d.j3d.water;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.media.j3d.Appearance;
+import javax.media.j3d.Behavior;
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.GLSLShaderProgram;
-import javax.media.j3d.GeometryArray;
-import javax.media.j3d.Group;
 import javax.media.j3d.Material;
 import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.QuadArray;
 import javax.media.j3d.Shader;
 import javax.media.j3d.ShaderAppearance;
 import javax.media.j3d.ShaderAttribute;
@@ -17,18 +17,15 @@ import javax.media.j3d.ShaderAttributeObject;
 import javax.media.j3d.ShaderAttributeSet;
 import javax.media.j3d.ShaderAttributeValue;
 import javax.media.j3d.ShaderProgram;
-import javax.media.j3d.Shape3D;
 import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
+import javax.media.j3d.WakeupOnElapsedTime;
 import javax.vecmath.Point2f;
 
 import nif.NifToJ3d;
-
-import org.j3d.geom.GeometryData;
-import org.j3d.geom.terrain.ElevationGridGenerator;
-
+import nif.j3d.J3dNiGeometry;
 import tools3d.utils.Utils3D;
 import utils.PerFrameUpdateBehavior;
 import utils.source.TextureSource;
@@ -37,45 +34,73 @@ import com.sun.j3d.utils.shader.StringIO;
 
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 
-public class Water extends Group//Link
+public class WaterApp extends BranchGroup
 {
-	private Group waterGroup;
+	private Appearance app;
 
 	private ShaderAttributeValue timeShaderAttribute = null;
 
 	private long start = System.currentTimeMillis();
 
-	public Water(float size, String defaultTexture, TextureSource textureSource)
+	private WaterTexBehavior waterTexBehavior;
+
+	private boolean USE_SHADERS = NifToJ3d.USE_SHADERS;
+
+	public WaterApp(String defaultTexture, TextureSource textureSource)
 	{
-		if (waterGroup == null)
+		this(new String[]
+		{ defaultTexture }, textureSource);
+	}
+
+	public WaterApp(String[] textureStrings, TextureSource textureSource)
+	{
+		USE_SHADERS = true;
+
+		setCapability(BranchGroup.ALLOW_DETACH);
+
+		Texture tex = textureSource.getTexture(textureStrings[0]);
+		app = createAppearance(tex);
+		if (textureStrings.length > 1)
 		{
-			waterGroup = new Group();
+			// we need a flip controller type thing now
+			Texture[] textures = new Texture[textureStrings.length];
 
-			Texture tex = textureSource.getTexture(defaultTexture);
-			Appearance app = createAppearance(tex);
+			for (int t = 0; t < textureStrings.length; t++)
+			{
+				textures[t] = J3dNiGeometry.loadTexture(textureStrings[t], textureSource);
+			}
 
-			PolygonAttributes pa = new PolygonAttributes();
-			pa.setCullFace(PolygonAttributes.CULL_NONE);
-			app.setPolygonAttributes(pa);
+			if (app.getTextureUnitCount() > 0)
+			{
+				app.getTextureUnitState(0).setCapability(TextureUnitState.ALLOW_STATE_WRITE);
+			}
+			else
+			{
+				app.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
+			}
 
-			TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.5f);
-			app.setTransparencyAttributes(trans);
-
-			Material mat = new Material();
-			mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
-			mat.setShininess(20.0f);
-			//mat.setDiffuseColor(0.4f, 0.4f, 0.4f);
-			mat.setSpecularColor(0.5f, 0.5f, 0.6f);
-			app.setMaterial(mat);
-
-			QuadArray quads = createQuad(size);
-
-			waterGroup.addChild(new Shape3D(quads, app));
+			waterTexBehavior = new WaterTexBehavior(app, textures);
+			waterTexBehavior.setEnable(true);
+			waterTexBehavior.setSchedulingBounds(Utils3D.defaultBounds);
+			addChild(waterTexBehavior);
 		}
 
-		//setSharedGroup(waterGroup);
-		addChild(waterGroup);
-		if (NifToJ3d.USE_SHADERS)
+		PolygonAttributes pa = new PolygonAttributes();
+		pa.setCullFace(PolygonAttributes.CULL_NONE);
+		app.setPolygonAttributes(pa);
+
+		//TODO: if the texture is not transparent we need to use the vertex color transparency
+		TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.5f);
+		app.setTransparencyAttributes(trans);
+
+		Material mat = new Material();
+		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+		mat.setShininess(20.0f);
+		//mat.setDiffuseColor(0.4f, 0.4f, 0.4f);
+		mat.setSpecularColor(0.5f, 0.5f, 0.6f);
+		app.setMaterial(mat);
+
+		if (USE_SHADERS)
 		{
 			PerFrameUpdateBehavior pfub = new PerFrameUpdateBehavior(new PerFrameUpdateBehavior.CallBack()
 			{
@@ -88,12 +113,16 @@ public class Water extends Group//Link
 						timeShaderAttribute.setValue(new Float((System.currentTimeMillis() - start) / 1000f));
 					}
 				}
-
 			});
 			pfub.setSchedulingBounds(Utils3D.defaultBounds);
 			pfub.setEnable(true);
 			addChild(pfub);
 		}
+	}
+
+	public Appearance getApp()
+	{
+		return app;
 	}
 
 	private static ShaderProgram shaderProgram = null;
@@ -104,9 +133,8 @@ public class Water extends Group//Link
 
 	protected Appearance createAppearance(Texture tex)
 	{
-
-		Appearance app = null;
-		if (!NifToJ3d.USE_SHADERS)
+		app = null;
+		if (!USE_SHADERS)
 		{
 			app = new Appearance();
 		}
@@ -182,10 +210,9 @@ public class Water extends Group//Link
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
 		tus0.setTexture(tex);
-		
-		
+
 		//TextureCubeMap textureCubeMap = new TextureCubeMap();
-		
+
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);
 
@@ -198,41 +225,45 @@ public class Water extends Group//Link
 		return (float) (d + (Math.random() * (e - d)));
 	}
 
-	private static QuadArray createQuad(float size)
+	private class WaterTexBehavior extends Behavior
 	{
-	/*	QuadArray quads = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.TEXTURE_COORDINATE_2
-				| GeometryArray.COLOR_4);
+		private Appearance app2;
 
-		quads.setCoordinate(0, new Point3f(-size / 2f, 0, -size / 2f));
-		quads.setCoordinate(1, new Point3f(-size / 2f, 0, size / 2f));
-		quads.setCoordinate(2, new Point3f(size / 2f, 0, size / 2f));
-		quads.setCoordinate(3, new Point3f(size / 2f, 0, -size / 2f));
-		quads.setNormal(0, new Vector3f(0f, 1f, 0f));
-		quads.setNormal(1, new Vector3f(0f, 1f, 0f));
-		quads.setNormal(2, new Vector3f(0f, 1f, 0f));
-		quads.setNormal(3, new Vector3f(0f, 1f, 0f));
-		quads.setTextureCoordinate(0, 0, new TexCoord2f(0f, 0f));
-		quads.setTextureCoordinate(0, 1, new TexCoord2f(0f, 4f));
-		quads.setTextureCoordinate(0, 2, new TexCoord2f(4f, 4f));
-		quads.setTextureCoordinate(0, 3, new TexCoord2f(4f, 0f));
-		quads.setColor(0, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
-		quads.setColor(1, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
-		quads.setColor(2, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
-		quads.setColor(3, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));*/
+		private Texture[] textures;
 
-		ElevationGridGenerator elevationGridGenerator = new ElevationGridGenerator(size, size, 30, 30);
-		GeometryData gd = new GeometryData();
-		gd.geometryType = GeometryData.QUADS;
-		gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
-		float[] flatHeights = new float[900];
-		elevationGridGenerator.setTerrainDetail(flatHeights, 0);
-		elevationGridGenerator.generate(gd);
-		QuadArray quads = new QuadArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.TEXTURE_COORDINATE_2);
-		quads.setCoordinates(0, gd.coordinates);
-		quads.setNormals(0, gd.normals);
-		quads.setTextureCoordinates(0, 0, gd.textureCoordinates);
-		
+		private WakeupOnElapsedTime wakeUp;
 
-		return quads;
+		private int idx = 0;
+
+		public WaterTexBehavior(Appearance app, Texture[] textures)
+		{
+			this.app2 = app;
+			this.textures = textures;
+
+			wakeUp = new WakeupOnElapsedTime(50);
+		}
+
+		public void initialize()
+		{
+			wakeupOn(wakeUp);
+		}
+
+		@SuppressWarnings(
+		{ "unchecked", "rawtypes" })
+		public void processStimulus(Enumeration critiria)
+		{
+			idx++;
+			idx = ((idx >= textures.length) ? 0 : idx);
+			if (app2.getTextureUnitCount() > 0)
+			{
+				app2.getTextureUnitState(0).setTexture(textures[idx]);
+			}
+			else
+			{
+				app2.setTexture(textures[idx]);
+			}
+			//reset the wakeup
+			wakeupOn(wakeUp);
+		}
 	}
 }

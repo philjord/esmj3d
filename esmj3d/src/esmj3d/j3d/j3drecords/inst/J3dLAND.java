@@ -160,9 +160,9 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private static TextureAttributes textureAttributesBase = null;
 
-	private static TextureAttributes textureAttributes = null;
+	private static TextureAttributes textureAttributesLayer = null;
 
-	private static TransparencyAttributes ta = null;
+	private static TransparencyAttributes taLayer = null;
 
 	private Geometry[] quadrantBaseSubGeoms;
 
@@ -195,7 +195,7 @@ public class J3dLAND extends J3dRECOStatInst
 				textureAttributesBase.setTextureMode(TextureAttributes.MODULATE);
 			}
 
-			// make up some base land texture, pre sorted to btxt by quadrant
+			// make up some base quadrants
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
 				//this makes for no see throughs, the other 2 do odd things 
@@ -205,8 +205,13 @@ public class J3dLAND extends J3dRECOStatInst
 				quadrantBaseGroups[quadrant] = decalGroup;
 				addNodeChild(decalGroup);
 
-				//tes3 needs the base groups above but not the base quads below 
-				if (!land.tes3)
+				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant);
+			}
+
+			if (!land.tes3)
+			{
+				// make up some base land texture, pre sorted to btxt by quadrant
+				for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 				{
 					Appearance app = createAppearance();
 
@@ -223,32 +228,68 @@ public class J3dLAND extends J3dRECOStatInst
 
 					Shape3D baseQuadShape = new Shape3D();
 					baseQuadShape.setAppearance(app);
-					if (quadrantBaseSubGeoms[quadrant] == null)
-						quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant);
+
 					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
 					quadrantBaseGroups[quadrant].addChild(baseQuadShape);
 				}
+			}
+			else
+			{
+				//It's a 16x16 quadrant system! No transparency or smooth nothing
+				//IIRC the textures are not in a 16x16 grid, but in a 4x4 grid in a 4x4 grid.
+				for (int a = 0; a < land.VTEXshorts.length; a++)
+				{
+					short texFormId = land.VTEXshorts[a];
+					if (texFormId != 0)
+					{
+						int lqbx = (a / 16) % 4;
+						int lqix = a % 4;
+
+						int lqby = a / (4 * 16);
+						int lqiy = (a % 16) / 4;
+
+						//each y little box moves me 4 rows worth(4x16)
+						//each y little inner moves by 1 row (16)
+						//each x little box moves me across 4
+						//each x little inner moves me 1
+						int quadrant = (lqby * 4 * 16) + (lqiy * 16) + (lqbx * 4) + lqix;
+
+						Appearance app = createAppearance();
+						app.setMaterial(getLandMaterial());
+						app.setTextureAttributes(textureAttributesBase);
+
+						app.setTexture(getTextureTes3(texFormId, master, textureSource));
+
+						Shape3D aTxtShape = new Shape3D();
+						aTxtShape.setAppearance(app);
+
+						aTxtShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
+
+						quadrantBaseGroups[quadrant].addChild(aTxtShape);
+					}
+				}
+
 			}
 
 			//If I add transparency attributes to the base grid I see the texture itself has transparency
 			// So I need to ignore the textures transparency in all cases
 			// and this is how it's done!	
-			if (textureAttributes == null)
+			if (textureAttributesLayer == null)
 			{
-				textureAttributes = new TextureAttributes();
-				textureAttributes.setTextureMode(TextureAttributes.COMBINE);
+				textureAttributesLayer = new TextureAttributes();
+				textureAttributesLayer.setTextureMode(TextureAttributes.COMBINE);
 
-				textureAttributes.setCombineRgbMode(TextureAttributes.COMBINE_MODULATE);
-				textureAttributes.setCombineRgbSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
-				textureAttributes.setCombineRgbSource(1, TextureAttributes.COMBINE_TEXTURE_COLOR);
+				textureAttributesLayer.setCombineRgbMode(TextureAttributes.COMBINE_MODULATE);
+				textureAttributesLayer.setCombineRgbSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
+				textureAttributesLayer.setCombineRgbSource(1, TextureAttributes.COMBINE_TEXTURE_COLOR);
 
-				textureAttributes.setCombineAlphaMode(TextureAttributes.COMBINE_REPLACE);
-				textureAttributes.setCombineAlphaSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
+				textureAttributesLayer.setCombineAlphaMode(TextureAttributes.COMBINE_REPLACE);
+				textureAttributesLayer.setCombineAlphaSource(0, TextureAttributes.COMBINE_OBJECT_COLOR);
 
-				ta = new TransparencyAttributes();
-				ta.setTransparencyMode(TransparencyAttributes.BLENDED);
+				taLayer = new TransparencyAttributes();
+				taLayer.setTransparencyMode(TransparencyAttributes.BLENDED);
 
-				ta.setTransparency(0.0f);
+				taLayer.setTransparency(0.0f);
 			}
 
 			if (!land.tes3)
@@ -268,9 +309,8 @@ public class J3dLAND extends J3dRECOStatInst
 						int quadrant = atxt.quadrant;
 						Appearance app = createAppearance();
 						app.setMaterial(getLandMaterial());
-						app.setTextureAttributes(textureAttributes);
-
-						app.setTransparencyAttributes(ta);
+						app.setTextureAttributes(textureAttributesLayer);
+						app.setTransparencyAttributes(taLayer);
 
 						if (atxt.textureFormID != 0)
 						{
@@ -283,52 +323,18 @@ public class J3dLAND extends J3dRECOStatInst
 
 						Shape3D aTxtShape = new Shape3D();
 						aTxtShape.setAppearance(app);
-						aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrant, atxt.vtxt));
+						aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, atxt.vtxt));
 						quadrantBaseGroups[quadrant].addChild(aTxtShape);
 					}
 				}
 			}
 			else
 			{
-				//It's a 16x16 quadrant system! No transparency or smooth nothing
+				// there is no layer data in morrowind, but a little one grid square fading layer
+				// with teh neighbours texture might make them blend better
 
-
-				//IIRC the textures are not in a 16x16 grid, but in a 4x4 grid in a 4x4 grid.
-				for (int a = 0; a < land.VTEXshorts.length; a++)
-				{
-					short texFormId = land.VTEXshorts[a];
-					if (texFormId != 0)
-					{
-						int lqbx = (a / 16) % 4;
-						int lqix = a % 4;
-
-						int lqby = a / (4 * 16);
-						int lqiy = (a % 16) / 4;
-
-						//each y little box moves me 4 rows worth(4x16)
-						//each y little inner moves by 1 row (16)
-						//each x little box moves me across 4
-						//each x little inner moves me 1
-						int quadrant = (lqby * 4 * 16) + (lqiy * 16) + (lqbx * 4) + lqix;
-						
-
-						Appearance app = createAppearance();
-						app.setMaterial(getLandMaterial());
-						app.setTextureAttributes(textureAttributesBase);
-
-						app.setTexture(getTextureTes3(texFormId, master, textureSource));
-
-						Shape3D aTxtShape = new Shape3D();
-						aTxtShape.setAppearance(app);
-
-						if (quadrantBaseSubGeoms[quadrant] == null)
-							quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant);
-						aTxtShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-
-						quadrantBaseGroups[quadrant].addChild(aTxtShape);
-					}
-				}
 			}
+
 		}
 	}
 
@@ -409,16 +415,16 @@ public class J3dLAND extends J3dRECOStatInst
 
 	}
 
-	private static GeometryArray makeQuadrantLayerSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrant,
-			VTXT vtxt)
+	private static GeometryArray makeQuadrantLayerSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
+			int quadrantsPerSide, int quadrant, VTXT vtxt)
 	{
-		int quadrantSquareCount = (GRID_COUNT / 2) + 1;
+		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
 		Vector3f[][] quadrantNormals = new Vector3f[quadrantSquareCount][quadrantSquareCount];
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
 		TexCoord2f[][] quadrantTexCoords = new TexCoord2f[quadrantSquareCount][quadrantSquareCount];
 
-		makeQuadrantData(2, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
+		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		if (vtxt != null)
 		{
@@ -433,21 +439,21 @@ public class J3dLAND extends J3dRECOStatInst
 
 			for (int v = 0; v < vtxt.count; v++)
 			{
-				int rowno = (GRID_COUNT / 2) - (vtxt.position[v] / quadrantSquareCount);
+				int rowno = (GRID_COUNT / quadrantsPerSide) - (vtxt.position[v] / quadrantSquareCount);
 				int colno = (vtxt.position[v] % quadrantSquareCount);
 
 				quadrantColors[rowno][colno].w = vtxt.opacity[v];
 			}
 		}
 
-		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / 2f, LAND_SIZE / 2f, quadrantSquareCount, quadrantSquareCount,
+		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount, quadrantSquareCount,
 				quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
 		gridGenerator.generateIndexedTriangleStrips(terrainData);
 
 		//offset for quadrant
-		Vector3f offset = quadOffSet(2, quadrant);
+		Vector3f offset = quadOffSet(quadrantsPerSide, quadrant);
 		for (int i = 0; i < terrainData.coordinates.length; i += 3)
 		{
 			terrainData.coordinates[i + 0] += offset.x;

@@ -25,6 +25,8 @@ public class CommonCELL extends InstRECO
 	0x7F7FFFFF reserved as ID for "no water present", it is also the maximum positive float.
 	0x4F7FFFC9 is a bug in the CK, this is the maximum unsigned integer 2^32-1 cast to a float and means the same as above
 	0xCF000000 could be a bug as well, this is the maximum signed negative integer -2^31 cast to a float
+	
+	//6.8056466E36 is weird skyrim water level (possibly meaning use default from WRLD)
 	 */
 	public float XCLW = Float.NEGATIVE_INFINITY; //water height if not 0
 
