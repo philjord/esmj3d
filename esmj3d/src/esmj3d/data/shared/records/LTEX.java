@@ -75,7 +75,7 @@ public class LTEX extends RECO
 			}
 			else if (sr.getType().equals("INTV"))
 			{
-				//ltex id = ESMByteConvert.extractInt(bs, 0);used in the edid
+				//ltexid = ESMByteConvert.extractInt(bs, 0);//used in the edid
 			}
 			else if (sr.getType().equals("DATA"))
 			{

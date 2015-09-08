@@ -189,7 +189,7 @@ public class LAND extends InstRECO
 		return "LAND : (" + formId + "|" + Integer.toHexString(formId) + ") ";
 	}
 
-	public class DATA
+	public static class DATA
 	{
 		public byte[] data;
 
@@ -199,7 +199,7 @@ public class LAND extends InstRECO
 		}
 	}
 
-	public class ATXT
+	public static class ATXT
 	{
 		public int textureFormID = 0;
 
@@ -211,6 +211,12 @@ public class LAND extends InstRECO
 
 		public VTXT vtxt;
 
+		//for tes3 faked up
+		public ATXT()
+		{
+
+		}
+
 		public ATXT(byte[] bytes)
 		{
 			textureFormID = ESMByteConvert.extractInt(bytes, 0);
@@ -220,7 +226,7 @@ public class LAND extends InstRECO
 		}
 	}
 
-	public class BTXT
+	public static class BTXT
 	{
 		public int textureFormID = 0;
 
@@ -242,7 +248,7 @@ public class LAND extends InstRECO
 		}
 	}
 
-	public class VTXT
+	public static class VTXT
 	{
 		public int count = 0;
 
@@ -253,6 +259,12 @@ public class LAND extends InstRECO
 		public byte[] unknownByte2;
 
 		public float[] opacity;
+
+		//for tes3 faked up
+		public VTXT()
+		{
+
+		}
 
 		public VTXT(byte[] bytes)
 		{
