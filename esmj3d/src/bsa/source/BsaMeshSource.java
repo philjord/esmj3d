@@ -59,63 +59,65 @@ public class BsaMeshSource implements MeshSource
 	@Override
 	public NifFile getNifFile(String nifName)
 	{
-
-		if (!nifName.toLowerCase().startsWith("meshes"))
+		if (nifName.length() > 0)
 		{
-			nifName = "Meshes\\" + nifName;
-		}
-
-		for (ArchiveFile archiveFile : bsas)
-		{
-			ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
-			if (archiveEntry != null)
+			if (!nifName.toLowerCase().startsWith("meshes"))
 			{
-				try
+				nifName = "Meshes\\" + nifName;
+			}
+
+			for (ArchiveFile archiveFile : bsas)
+			{
+				ArchiveEntry archiveEntry = archiveFile.getEntry(nifName);
+				if (archiveEntry != null)
 				{
-					NifFile nifFile = null;
-					InputStream inputStream = archiveFile.getInputStream(archiveEntry);
-					//String fileName = archiveEntry.getName();
-	
 					try
 					{
-						nifFile = NifFileReader.readNif(nifName, inputStream);
-					}
-					catch (IOException e)
-					{
-						System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
-					}
-					finally
-					{
+						NifFile nifFile = null;
+						InputStream inputStream = archiveFile.getInputStream(archiveEntry);
+						//String fileName = archiveEntry.getName();
+
 						try
 						{
-							if (inputStream != null)
-								inputStream.close();
+							nifFile = NifFileReader.readNif(nifName, inputStream);
 						}
 						catch (IOException e)
 						{
-							e.printStackTrace();
+							System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
+						}
+						finally
+						{
+							try
+							{
+								if (inputStream != null)
+									inputStream.close();
+							}
+							catch (IOException e)
+							{
+								e.printStackTrace();
+							}
+						}
+
+						if (nifFile != null)
+						{
+							return nifFile;
 						}
 					}
-
-					if (nifFile != null)
+					catch (IOException e)
 					{
-						return nifFile;
+						System.out.println("BsaMeshSource  " + nifName + " " + e + " " + e.getStackTrace()[0]);
 					}
-				}
-				catch (IOException e)
-				{
-					System.out.println("BsaMeshSource  " + nifName + " " + e + " " + e.getStackTrace()[0]);
-				}
 
+				}
 			}
-		}
 
-		System.out.print("nif " + nifName + " not found in archive bsas ");
-		for (ArchiveFile archiveFile : bsas)
-		{
-			System.out.print(" checked: " + archiveFile.getName() + ", ");
+			System.out.print("nif " + nifName + " not found in archive bsas");
+			for (ArchiveFile archiveFile : bsas)
+			{
+				System.out.print(" checked: " + archiveFile.getName() + ", ");
+			}
+			System.out.println("");
 		}
-		System.out.println("");
 		return null;
 	}
 

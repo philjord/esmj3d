@@ -256,7 +256,7 @@ public class Beth32_4LodManager extends BethLodManager
 		return new Point(charLodX, charLodY);
 	}
 
-	public static Rectangle getNearBounds(float charX, float charY, int nearLoadGridCount)
+	public Rectangle getGridBounds(float charX, float charY, int nearLoadGridCount)
 	{
 		// the 4x4 limit removed, morph like oblivion
 

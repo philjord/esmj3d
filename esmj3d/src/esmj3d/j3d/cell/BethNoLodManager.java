@@ -1,5 +1,7 @@
 package esmj3d.j3d.cell;
 
+import java.awt.Rectangle;
+
 import javax.media.j3d.LinearFog;
 import javax.vecmath.Color3f;
 
@@ -27,4 +29,8 @@ public class BethNoLodManager extends BethLodManager
 	{
 	}
 
+	public Rectangle getGridBounds(float charX, float charY, int nearLoadGridCount)
+	{
+		return Beth32LodManager.getBounds(charX, charY, nearLoadGridCount);
+	}
 }

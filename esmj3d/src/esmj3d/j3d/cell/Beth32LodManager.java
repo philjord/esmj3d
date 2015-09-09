@@ -92,6 +92,11 @@ public class Beth32LodManager extends BethLodManager
 	 * 4 ints represent the near grid x,y locations (not floats of real points)
 	 * @return
 	 */
+	public Rectangle getGridBounds(float charX, float charY, int loadGridCount)
+	{
+		return getBounds(charX, charY, loadGridCount);
+	}
+
 	public static Rectangle getBounds(float charX, float charY, int loadGridCount)
 	{
 		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);

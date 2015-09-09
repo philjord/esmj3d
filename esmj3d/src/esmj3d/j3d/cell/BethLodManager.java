@@ -1,5 +1,7 @@
 package esmj3d.j3d.cell;
 
+import java.awt.Rectangle;
+
 import javax.media.j3d.BranchGroup;
 
 public abstract class BethLodManager extends BranchGroup
@@ -12,4 +14,6 @@ public abstract class BethLodManager extends BranchGroup
 	public abstract void updateGross(float charX, float charY);
 
 	public abstract void setWorldFormId(int worldFormId);
+
+	public abstract Rectangle getGridBounds(float charX, float charY, int nearLoadGridCount);
 }
