@@ -13,7 +13,6 @@ import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
 
-import tools.io.ESMByteConvert;
 import utils.source.TextureSource;
 import esmLoader.common.data.record.IRecordStore;
 import esmj3d.data.shared.records.LAND;
@@ -22,6 +21,8 @@ import esmj3d.j3d.TESLANDGen;
 
 public class J3dLANDFar extends J3dRECOStatInst
 {
+
+	private static final int REDUCE_FACTOR = 2; // 2 or 4 only (2 for non tes3) 2 for far 4 for lod 
 
 	/**
 	 * makes the visual version of land for farness (1/4 detail no layers)
@@ -46,15 +47,15 @@ public class J3dLANDFar extends J3dRECOStatInst
 		{
 			// extract the heights
 			byte[] heightBytes = land.VHGT;
-			float[][] heights = extractHeights(heightBytes);
+			float[][] heights = J3dLAND.extractHeights(heightBytes);
 
 			// extract the normals
 			byte[] normalBytes = land.VNML;
-			Vector3f[][] normals = extractNormals(normalBytes);
+			Vector3f[][] normals = J3dLAND.extractNormals(normalBytes);
 
 			// extract the colors
 			byte[] colorBytes = land.VCLR;
-			Color4f[][] colors = extractColors(colorBytes);
+			Color4f[][] colors = J3dLAND.extractColors(colorBytes);
 
 			if (textureAttributesBase == null)
 			{
@@ -65,12 +66,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 			// make up some base quadrants, keep seperate to allow frustrum culling
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
-				//this makes for no see throughs, the other 2 do odd things 
-				Group decalGroup = new Group();
-				//DecalGroup decalGroup = new DecalGroup();
-				//OrderedGroup decalGroup = new OrderedGroup();
-				quadrantBaseGroups[quadrant] = decalGroup;
-				addNodeChild(decalGroup);
+				Group g = new Group();
+				quadrantBaseGroups[quadrant] = g;
+				addNodeChild(g);
 
 				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant);
 			}
@@ -94,7 +92,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 					app.setTexture(J3dLAND.getDefaultTexture(textureSource));
 					//oddly btxt are optional
 					BTXT btxt = land.BTXTs[quadrant];
-					if (btxt != null && btxt.textureFormID != 0)
+					if (btxt != null)
 					{
 						app.setTexture(J3dLAND.getTexture(btxt.textureFormID, master, textureSource));
 					}
@@ -108,36 +106,25 @@ public class J3dLANDFar extends J3dRECOStatInst
 			}
 			else
 			{
-				//It's a 16x16 quadrant system! No transparency or smooth nothing
-				//IIRC the textures are not in a 16x16 grid, but in a 4x4 grid in a 4x4 grid.				 
-				for (int a = 0; a < land.VTEXshorts.length; a++)
+				if (land.VTEXshorts != null)
 				{
-					short texFormId = land.VTEXshorts[a];
+					for (int quadrant = 0; quadrant < land.VTEXshorts.length; quadrant++)
+					{
+						int texFormId = land.VTEXshorts[quadrant];
 
-					int lqbx = (a / 16) % 4;
-					int lqix = a % 4;
+						Appearance app = createAppearance();
+						app.setMaterial(J3dLAND.getLandMaterial());
+						app.setTextureAttributes(textureAttributesBase);
 
-					int lqby = a / (4 * 16);
-					int lqiy = (a % 16) / 4;
+						app.setTexture(J3dLAND.getTextureTes3(texFormId, master, textureSource));
 
-					//each y little box moves me 4 rows worth(4x16)
-					//each y little inner moves by 1 row (16)
-					//each x little box moves me across 4
-					//each x little inner moves me 1
-					int quadrant = (lqby * 4 * 16) + (lqiy * 16) + (lqbx * 4) + lqix;
+						Shape3D baseQuadShape = new Shape3D();
+						baseQuadShape.setAppearance(app);
 
-					Appearance app = createAppearance();
-					app.setMaterial(J3dLAND.getLandMaterial());
-					app.setTextureAttributes(textureAttributesBase);
+						baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
 
-					app.setTexture(J3dLAND.getTextureTes3(texFormId, master, textureSource));
-
-					Shape3D baseQuadShape = new Shape3D();
-					baseQuadShape.setAppearance(app);
-
-					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-
-					quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+						quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+					}
 				}
 			}
 		}
@@ -151,7 +138,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
 			int quadrantsPerSide, int quadrant)
 	{
-		int quadrantSquareCount = (J3dLAND.GRID_COUNT / quadrantsPerSide) + 1;
+		int quadrantSquareCount = ((J3dLAND.GRID_COUNT / REDUCE_FACTOR) / quadrantsPerSide) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
 		Vector3f[][] quadrantNormals = new Vector3f[quadrantSquareCount][quadrantSquareCount];
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
@@ -208,7 +195,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 		int qx = quadrant % quadrantsPerSide;
 		int qy = quadrant / quadrantsPerSide;
 
-		int quadrant_grid_count = (J3dLAND.GRID_COUNT / quadrantsPerSide);
+		int quadrant_grid_count = ((J3dLAND.GRID_COUNT / REDUCE_FACTOR) / quadrantsPerSide);
 
 		for (int row = 0; row < quadrant_grid_count + 1; row++)
 		{
@@ -216,101 +203,13 @@ public class J3dLANDFar extends J3dRECOStatInst
 			{
 				int baseRow = row + (((quadrantsPerSide - 1) - qy) * quadrant_grid_count);
 				int baseCol = col + ((qx) * quadrant_grid_count);
+				baseRow *= REDUCE_FACTOR;
+				baseCol *= REDUCE_FACTOR;
 				quadrantHeights[row][col] = baseHeights[baseRow][baseCol];
 				quadrantNormals[row][col] = baseNormals[baseRow][baseCol];
 				quadrantColors[row][col] = new Color4f(baseColors[baseRow][baseCol]);//copy to allow modification
 				quadrantTexCoords[row][col] = new TexCoord2f((row * J3dLAND.TEX_REPEAT), (col * J3dLAND.TEX_REPEAT));
 			}
 		}
-	}
-
-	protected static float[][] extractHeights(byte[] heightBytes)
-	{
-		// extract the heights
-		float[][] heights = new float[(J3dLAND.GRID_COUNT + 1)][(J3dLAND.GRID_COUNT + 1)];
-
-		float startHeightOffset = ESMByteConvert.extractFloat(heightBytes, 0);
-
-		float startRowHeight = (startHeightOffset * 4);
-		for (int row = 0; row < (J3dLAND.GRID_COUNT + 1); row++)
-		{
-			float height = startRowHeight;
-			for (int col = 0; col < (J3dLAND.GRID_COUNT + 1); col++)
-			{
-				int idx = col + (row * (J3dLAND.GRID_COUNT + 1)) + 4;//+4 is start float
-				height += heightBytes[idx] * 4;
-
-				// start next row relative to the start of this row
-				if (col == 0)
-					startRowHeight = height;
-
-				// note reverse order, due to x,y,z => x,z,-y
-				heights[J3dLAND.GRID_COUNT - row][col] = (height * J3dLAND.HEIGHT_TO_J3D_SCALE);
-			}
-		}
-
-		//last 3 bytes, what are they?
-		// Unknown. Haven't noticed any ill-effects just filling this with arbitrary values in TES3 or TES4. 
-		// This is probably just a 3-byte filler so that the entire subrecord's data can be aligned on a 4 byte word boundary.
-
-		return heights;
-
-	}
-
-	protected static Vector3f[][] extractNormals(byte[] normalBytes)
-	{
-		Vector3f[][] normals = new Vector3f[(J3dLAND.GRID_COUNT + 1)][(J3dLAND.GRID_COUNT + 1)];
-		for (int row = 0; row < (J3dLAND.GRID_COUNT + 1); row++)
-		{
-			for (int col = 0; col < (J3dLAND.GRID_COUNT + 1); col++)
-			{
-				byte x = normalBytes[(col + (row * (J3dLAND.GRID_COUNT + 1))) * 3 + 0];
-				byte y = normalBytes[(col + (row * (J3dLAND.GRID_COUNT + 1))) * 3 + 1];
-				byte z = normalBytes[(col + (row * (J3dLAND.GRID_COUNT + 1))) * 3 + 2];
-
-				Vector3f v = new Vector3f(x & 0xff, z & 0xff, -y & 0xff);
-				v.normalize();
-				// note reverse order, due to x,y,z => x,z,-y
-				normals[J3dLAND.GRID_COUNT - row][col] = v;
-			}
-		}
-		return normals;
-	}
-
-	protected static Color4f[][] extractColors(byte[] colorBytes)
-	{
-
-		Color4f[][] colors = new Color4f[(J3dLAND.GRID_COUNT + 1)][(J3dLAND.GRID_COUNT + 1)];
-
-		for (int row = 0; row < (J3dLAND.GRID_COUNT + 1); row++)
-		{
-			for (int col = 0; col < (J3dLAND.GRID_COUNT + 1); col++)
-			{
-				if (colorBytes != null)
-				{
-					float r = (colorBytes[(col + (row * (J3dLAND.GRID_COUNT + 1))) * 3 + 0] & 0xff) / 255f;
-					float g = (colorBytes[(col + (row * (J3dLAND.GRID_COUNT + 1))) * 3 + 1] & 0xff) / 255f;
-					float b = (colorBytes[(col + (row * (J3dLAND.GRID_COUNT + 1))) * 3 + 2] & 0xff) / 255f;
-					Color4f c = new Color4f(r, g, b, 1.0f);//note hard coded opaque
-
-					// note reverse order, due to x,y,z => x,z,-y
-					colors[J3dLAND.GRID_COUNT - row][col] = c;
-				}
-				else
-				{
-					// no colors let's try white
-					colors[J3dLAND.GRID_COUNT - row][col] = new Color4f(1.0f, 1.0f, 1.0f, 1.0f);
-				}
-
-			}
-		}
-
-		return colors;
-	}
-
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName();
 	}
 }

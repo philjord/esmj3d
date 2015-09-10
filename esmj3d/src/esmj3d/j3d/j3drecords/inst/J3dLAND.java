@@ -203,7 +203,7 @@ public class J3dLAND extends J3dRECOStatInst
 			// make up some base quadrants, keep seperate to allow frustrum culling
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
-				//this makes for no see throughs, the other 2 do odd things 
+				//this makes for no see throughs, the other 2 do odd things (though decal should be what I want)
 				Group decalGroup = new Group();
 				//DecalGroup decalGroup = new DecalGroup();
 				//OrderedGroup decalGroup = new OrderedGroup();
@@ -215,12 +215,6 @@ public class J3dLAND extends J3dRECOStatInst
 
 			if (!land.tes3)
 			{
-				//VTEXs a bad def that in fact should be only in the older tes3 system, I wager
-				if (land.VTEXids.length > 0)
-				{
-					System.out.println("***********************VTEXs in LAND");
-				}
-
 				// make up some base land texture, pre sorted to btxt by quadrant
 				for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 				{
@@ -232,7 +226,7 @@ public class J3dLAND extends J3dRECOStatInst
 					app.setTexture(getDefaultTexture(textureSource));
 					//oddly btxt are optional
 					BTXT btxt = land.BTXTs[quadrant];
-					if (btxt != null && btxt.textureFormID != 0)
+					if (btxt != null)
 					{
 						app.setTexture(getTexture(btxt.textureFormID, master, textureSource));
 					}
@@ -246,32 +240,25 @@ public class J3dLAND extends J3dRECOStatInst
 			}
 			else
 			{
-				//It's a 16x16 quadrant system! No transparency or smooth nothing
-				//IIRC the textures are not in a 16x16 grid, but in a 4x4 grid in a 4x4 grid.				 
-				for (int a = 0; a < land.VTEXshorts.length; a++)
+				if (land.VTEXshorts != null)
 				{
-					short texFormId = land.VTEXshorts[a];
+					for (int quadrant = 0; quadrant < land.VTEXshorts.length; quadrant++)
+					{
+						int texFormId = land.VTEXshorts[quadrant];
 
-					int lqbx = (a / 16) % 4;
-					int lqix = a % 4;
+						Appearance app = createAppearance();
+						app.setMaterial(getLandMaterial());
+						app.setTextureAttributes(textureAttributesBase);
 
-					int lqby = a / (4 * 16);
-					int lqiy = (a % 16) / 4;
+						app.setTexture(getTextureTes3(texFormId, master, textureSource));
 
-					int quadrant = translate4sto16s(lqby, lqiy, lqbx, lqix);
+						Shape3D baseQuadShape = new Shape3D();
+						baseQuadShape.setAppearance(app);
 
-					Appearance app = createAppearance();
-					app.setMaterial(getLandMaterial());
-					app.setTextureAttributes(textureAttributesBase);
+						baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
 
-					app.setTexture(getTextureTes3(texFormId, master, textureSource));
-
-					Shape3D baseQuadShape = new Shape3D();
-					baseQuadShape.setAppearance(app);
-
-					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-
-					quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+						quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+					}
 				}
 			}
 
@@ -324,14 +311,7 @@ public class J3dLAND extends J3dRECOStatInst
 				}
 				else
 				{
-					if (atxt.textureFormID != 0)
-					{
-						app.setTexture(getTexture(atxt.textureFormID, master, textureSource));
-					}
-					else
-					{
-						app.setTexture(getDefaultTexture(textureSource));
-					}
+					app.setTexture(getTexture(atxt.textureFormID, master, textureSource));
 				}
 
 				Shape3D aTxtShape = new Shape3D();
@@ -700,40 +680,33 @@ public class J3dLAND extends J3dRECOStatInst
 	 * @param VTEXs
 	 * @return
 	 */
-	private static ATXT[] createTes3ATXT(short[] VTEXs)
+	private static ATXT[] createTes3ATXT(int[] VTEXs)
 	{
 		if (rightVTXT == null)
 			createTes3VTXT();
 
+		int quadrantsPerSide = 16;
+
 		ArrayList<ATXT> atxts = new ArrayList<ATXT>();
 		for (int a = 0; a < VTEXs.length; a++)
 		{
-			short texFormId = VTEXs[a];
+			int texFormId = VTEXs[a];
 
-			int lqbx = (a / 16) % 4;
-			int lqix = a % 4;
+			int qx = a % quadrantsPerSide;
+			int qy = a / quadrantsPerSide;
 
-			int lqby = a / (4 * 16);
-			int lqiy = (a % 16) / 4;
-
-			// find each neighbour in 4 dirs (if still a valid quadrant)
+			// find each neighbour in 2 dirs (if still a valid quadrant)
 			// make a ATXT with my texture and the appropriate VTXT static
 
 			//up
-			int uplqby = lqby;
-			int uplqiy = lqiy - 1;
-			// move up a lqb
-			uplqby = uplqiy < 0 ? (uplqby - 1) : uplqby;
-			uplqiy = uplqiy < 0 ? 3 : uplqiy;
-
-			// did we move off the grid?
-			if (uplqby >= 0)
+			int upqy = qy - 1;
+			// did we not move off the grid?
+			if (upqy >= 0)
 			{
-
-				int upQuadrant = translate4sto16s(uplqby, uplqiy, lqbx, lqix);
+				int upQuadrant = (upqy * 16) + qx;
 				// don't bother if it's the same texture, notice upQuandrant is  NOT is (4x4)x(4x4)
 				// squares it's regular 16x16 style
-				short upTexFormId = VTEXs[translate16sto4s(upQuadrant)];
+				int upTexFormId = VTEXs[upQuadrant];
 				if (upTexFormId != texFormId)
 				{
 					ATXT atxt = new LAND.ATXT();
@@ -746,18 +719,14 @@ public class J3dLAND extends J3dRECOStatInst
 			}
 
 			//right
-			int llqbx = lqbx;
-			int llqix = lqix - 1;
-			// move up a lqb
-			llqbx = llqix < 0 ? (llqbx - 1) : llqbx;
-			llqix = llqix < 0 ? 3 : llqix;
+			int rqx = qx - 1;
 
-			// did we move off the grid?
-			if (llqbx >= 0)
+			// did we not move off the grid?
+			if (rqx >= 0)
 			{
-				int leftQuadrant = (lqby * 4 * 16) + (lqiy * 16) + (llqbx * 4) + llqix;
+				int leftQuadrant = (qy * 16) + rqx;
 				// don't bother if it's the same texture
-				short leftTexFormId = VTEXs[translate16sto4s(leftQuadrant)];
+				int leftTexFormId = VTEXs[leftQuadrant];
 				if (leftTexFormId != texFormId)
 				{
 					ATXT atxt = new LAND.ATXT();
@@ -772,28 +741,6 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 		ATXT[] ret = atxts.toArray(new ATXT[0]);
 		return ret;
-	}
-
-	private static int translate4sto16s(int q4boxy, int q4innery, int q4boxx, int q4innerx)
-	{
-		//each y little box moves me 4 rows worth(4x16)
-		//each y little inner moves by 1 row (16)
-		//each x little box moves me across 4
-		//each x little inner moves me 1
-		return (q4boxy * 4 * 16) + (q4innery * 16) + (q4boxx * 4) + q4innerx;
-	}
-
-	private static int translate16sto4s(int q)
-	{
-		int qx = q % 16;
-		int qy = q / 16;
-
-		int q4boxx = qx / 4;
-		int q4innerx = qx % 4;
-		int q4boxy = qy / 4;
-		int q4innery = qy % 4;
-
-		return (q4boxy * 4 * 16) + (q4innery * 4) + (q4boxx * 16) + q4innerx;
 	}
 
 	private static VTXT rightVTXT;

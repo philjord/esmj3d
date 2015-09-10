@@ -27,7 +27,7 @@ public class LAND extends InstRECO
 	public byte[] VHGT = null;
 
 	//TES3
-	public short[] VTEXshorts;
+	public int[] VTEXshorts;
 
 	//VTEX (512 bytes) optional
 	//A 16x16 array of short texture indices (from a LTEX record I think).
@@ -53,7 +53,7 @@ public class LAND extends InstRECO
 		ArrayList<ATXT> ATXTsv = new ArrayList<ATXT>();
 		ArrayList<FormID> VTEXidsv = new ArrayList<FormID>();
 
-		ArrayList<Short> VTEXshortsv = new ArrayList<Short>();
+		ArrayList<Integer> VTEXshortsv = new ArrayList<Integer>();
 
 		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
@@ -84,9 +84,10 @@ public class LAND extends InstRECO
 			}
 			else if (tes3 && sr.getType().equals("VTEX"))
 			{
+				// these occur in oblivion on rare occasion
 				for (int f = 0; f < bs.length; f += 2)
 				{
-					VTEXshortsv.add((short) ESMByteConvert.extractShort(bs, f));
+					VTEXshortsv.add(ESMByteConvert.extractShort(bs, f));
 				}
 			}
 			else if (tes3 && sr.getType().equals("WNAM"))
@@ -97,7 +98,7 @@ public class LAND extends InstRECO
 			{
 				BTXTsv.add(new BTXT(bs));
 			}
-			else if (!tes3 & sr.getType().equals("ATXT"))
+			else if (!tes3 && sr.getType().equals("ATXT"))
 			{
 				ATXT atxt = new ATXT(bs);
 				//TODO: use next()
@@ -114,7 +115,7 @@ public class LAND extends InstRECO
 				}
 				ATXTsv.add(atxt);
 			}
-			else if (!tes3 & sr.getType().equals("VTEX"))
+			else if (!tes3 && sr.getType().equals("VTEX"))
 			{
 				//VTEX (Optional): Texture FormIDs: A sequence of LTEX FormIDs. 
 				//Many may be NULL values. (Variable length, but always multiples of 4 bytes).
@@ -144,15 +145,29 @@ public class LAND extends InstRECO
 
 		}
 
-		if (tes3)
+		if (VTEXshortsv.size() > 0)
 		{
-			VTEXshorts = new short[VTEXshortsv.size()];
-			for (int j = 0; j < VTEXshortsv.size(); j++)
+			//I'm going to unroll them here because it's painful later on 
+			//IIRC the textures are not in a 16x16 grid, but in a 4x4 grid in a 4x4 grid.
+
+			VTEXshorts = new int[VTEXshortsv.size()];
+			for (int a = 0; a < VTEXshortsv.size(); a++)
 			{
-				VTEXshorts[j] = VTEXshortsv.get(j);
+				int lqbx = (a / 16) % 4;
+				int lqix = a % 4;
+
+				int lqby = a / (4 * 16);
+				int lqiy = (a % 16) / 4;
+
+				//each y little box moves me 4 rows worth(4x16)
+				//each y little inner moves by 1 row (16)
+				//each x little box moves me across 4
+				//each x little inner moves me 1
+				int quadrant = (lqby * 4 * 16) + (lqiy * 16) + (lqbx * 4) + lqix;
+				VTEXshorts[quadrant] = VTEXshortsv.get(a);
 			}
 		}
-		else
+		if (!tes3)
 		{
 
 			//now make the BTXT and ATXT ordered
