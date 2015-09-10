@@ -42,7 +42,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static final float TERRIAN_SQUARE_SIZE = 2.56f;// confirmed empirically
 
-	private static final float TEX_REPEAT = 0.5f;// suggests how many times to repeat the texture over a grid square
+	public static float TEX_REPEAT = 0.5f;// suggests how many times to repeat the texture over a grid square
 
 	//	NOTE nif x,y,z to j3d x,z,-y
 	public static float HEIGHT_TO_J3D_SCALE = 0.04f; //where does this come from? 1/25th?
@@ -112,6 +112,7 @@ public class J3dLAND extends J3dRECOStatInst
 	{
 		GRID_COUNT = 64;//64 not 32
 		LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE;//refresh
+		TEX_REPEAT = 0.25f;
 	}
 
 	/**
@@ -257,11 +258,7 @@ public class J3dLAND extends J3dRECOStatInst
 					int lqby = a / (4 * 16);
 					int lqiy = (a % 16) / 4;
 
-					//each y little box moves me 4 rows worth(4x16)
-					//each y little inner moves by 1 row (16)
-					//each x little box moves me across 4
-					//each x little inner moves me 1
-					int quadrant = (lqby * 4 * 16) + (lqiy * 16) + (lqbx * 4) + lqix;
+					int quadrant = translate4sto16s(lqby, lqiy, lqbx, lqix);
 
 					Appearance app = createAppearance();
 					app.setMaterial(getLandMaterial());
@@ -518,7 +515,7 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 	}
 
-	private Texture getTextureTes3(int textureID, IRecordStore master, TextureSource textureSource)
+	public static Texture getTextureTes3(int textureID, IRecordStore master, TextureSource textureSource)
 	{
 		//0 means default?
 		if (textureID > 0)
@@ -547,7 +544,7 @@ public class J3dLAND extends J3dRECOStatInst
 		return getDefaultTexture(textureSource);
 	}
 
-	private Texture getTexture(int textureFormID, IRecordStore master, TextureSource textureSource)
+	public static Texture getTexture(int textureFormID, IRecordStore master, TextureSource textureSource)
 	{
 		Record ltexRec = master.getRecord(textureFormID);
 		if (ltexRec.getRecordType().equals("LTEX"))
@@ -732,13 +729,20 @@ public class J3dLAND extends J3dRECOStatInst
 			// did we move off the grid?
 			if (uplqby >= 0)
 			{
-				int upQuadrant = (uplqby * 4 * 16) + (uplqiy * 16) + (lqbx * 4) + lqix;
-				ATXT atxt = new LAND.ATXT();
-				atxt.layer = 1;
-				atxt.textureFormID = texFormId;
-				atxt.quadrant = upQuadrant;
-				atxt.vtxt = downVTXT;
-				atxts.add(atxt);
+
+				int upQuadrant = translate4sto16s(uplqby, uplqiy, lqbx, lqix);
+				// don't bother if it's the same texture, notice upQuandrant is  NOT is (4x4)x(4x4)
+				// squares it's regular 16x16 style
+				short upTexFormId = VTEXs[translate16sto4s(upQuadrant)];
+				if (upTexFormId != texFormId)
+				{
+					ATXT atxt = new LAND.ATXT();
+					atxt.layer = 1;
+					atxt.textureFormID = texFormId;
+					atxt.quadrant = upQuadrant;
+					atxt.vtxt = downVTXT;
+					atxts.add(atxt);
+				}
 			}
 
 			//right
@@ -752,17 +756,44 @@ public class J3dLAND extends J3dRECOStatInst
 			if (llqbx >= 0)
 			{
 				int leftQuadrant = (lqby * 4 * 16) + (lqiy * 16) + (llqbx * 4) + llqix;
-				ATXT atxt = new LAND.ATXT();
-				atxt.layer = 1;
-				atxt.textureFormID = texFormId;
-				atxt.quadrant = leftQuadrant;
-				atxt.vtxt = rightVTXT;
-				atxts.add(atxt);
+				// don't bother if it's the same texture
+				short leftTexFormId = VTEXs[translate16sto4s(leftQuadrant)];
+				if (leftTexFormId != texFormId)
+				{
+					ATXT atxt = new LAND.ATXT();
+					atxt.layer = 1;
+					atxt.textureFormID = texFormId;
+					atxt.quadrant = leftQuadrant;
+					atxt.vtxt = rightVTXT;
+					atxts.add(atxt);
+				}
 			}
 
 		}
 		ATXT[] ret = atxts.toArray(new ATXT[0]);
 		return ret;
+	}
+
+	private static int translate4sto16s(int q4boxy, int q4innery, int q4boxx, int q4innerx)
+	{
+		//each y little box moves me 4 rows worth(4x16)
+		//each y little inner moves by 1 row (16)
+		//each x little box moves me across 4
+		//each x little inner moves me 1
+		return (q4boxy * 4 * 16) + (q4innery * 16) + (q4boxx * 4) + q4innerx;
+	}
+
+	private static int translate16sto4s(int q)
+	{
+		int qx = q % 16;
+		int qy = q / 16;
+
+		int q4boxx = qx / 4;
+		int q4innerx = qx % 4;
+		int q4boxy = qy / 4;
+		int q4innery = qy % 4;
+
+		return (q4boxy * 4 * 16) + (q4innery * 4) + (q4boxx * 16) + q4innerx;
 	}
 
 	private static VTXT rightVTXT;

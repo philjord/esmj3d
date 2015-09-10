@@ -36,6 +36,8 @@ public class BethRenderSettings
 
 	private static boolean showDistantTrees = true;
 
+	private static boolean isTes3 = false;
+
 	private static WeakListenerList<UpdateListener> updateListeners = new WeakListenerList<UpdateListener>();
 
 	public static interface UpdateListener
@@ -144,12 +146,12 @@ public class BethRenderSettings
 
 	public static int getFarLoadGridCount()
 	{
-		return FAR_LOAD_GRID_COUNT;
+		return isTes3() ? FAR_LOAD_GRID_COUNT / 2 : FAR_LOAD_GRID_COUNT;
 	}
 
 	public static int getNearLoadGridCount()
 	{
-		return NEAR_LOAD_GRID_COUNT;
+		return isTes3() ? NEAR_LOAD_GRID_COUNT / 2 : NEAR_LOAD_GRID_COUNT;
 	}
 
 	public static int getLOD_LOAD_DIST_MAX()
@@ -170,6 +172,21 @@ public class BethRenderSettings
 	public static int getObjectFade()
 	{
 		return objectFade;
+	}
+
+	public static boolean isTes3()
+	{
+		return isTes3;
+	}
+
+	/** 
+	 * true halves the grid counts returned
+	 * 
+	 * @param isTes3
+	 */
+	public static void setTes3(boolean isTes3)
+	{
+		BethRenderSettings.isTes3 = isTes3;
 	}
 
 }
