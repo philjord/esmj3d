@@ -22,7 +22,7 @@ import esmj3d.j3d.TESLANDGen;
 public class J3dLANDFar extends J3dRECOStatInst
 {
 
-	private static final int REDUCE_FACTOR = 2; // 2 or 4 only (2 for non tes3) 2 for far 4 for lod 
+	private int reduceFactor = 2; // 2 or 4 only (2 for non tes3) 2 for far 4 for lod 
 
 	/**
 	 * makes the visual version of land for farness (1/4 detail no layers)
@@ -36,7 +36,13 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource)
 	{
+		this(land, master, textureSource, 2);
+	}
+
+	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource, int reduceFactor2)
+	{
 		super(land, false, false);
+		this.reduceFactor = reduceFactor2;
 		int quadrantsPerSide = land.tes3 ? 16 : 2;
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 
@@ -70,7 +76,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 				quadrantBaseGroups[quadrant] = g;
 				addNodeChild(g);
 
-				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant);
+				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, reduceFactor);
 			}
 
 			if (!land.tes3)
@@ -136,16 +142,16 @@ public class J3dLANDFar extends J3dRECOStatInst
 	}
 
 	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
-			int quadrantsPerSide, int quadrant)
+			int quadrantsPerSide, int quadrant, int reduceFactor)
 	{
-		int quadrantSquareCount = ((J3dLAND.GRID_COUNT / REDUCE_FACTOR) / quadrantsPerSide) + 1;
+		int quadrantSquareCount = ((J3dLAND.GRID_COUNT / reduceFactor) / quadrantsPerSide) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
 		Vector3f[][] quadrantNormals = new Vector3f[quadrantSquareCount][quadrantSquareCount];
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
 		TexCoord2f[][] quadrantTexCoords = new TexCoord2f[quadrantSquareCount][quadrantSquareCount];
 
 		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors,
-				quadrantTexCoords);
+				quadrantTexCoords, reduceFactor);
 
 		//Note that 33 by 33 sets of point equals 32 by 32 set of triangles between them
 		TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE / quadrantsPerSide, J3dLAND.LAND_SIZE / quadrantsPerSide,
@@ -189,13 +195,13 @@ public class J3dLANDFar extends J3dRECOStatInst
 	 */
 	private static void makeQuadrantData(int quadrantsPerSide, int quadrant, float[][] baseHeights, Vector3f[][] baseNormals,
 			Color4f[][] baseColors, float[][] quadrantHeights, Vector3f[][] quadrantNormals, Color4f[][] quadrantColors,
-			TexCoord2f[][] quadrantTexCoords)
+			TexCoord2f[][] quadrantTexCoords, int reduceFactor)
 	{
 		//trust me on this madness
 		int qx = quadrant % quadrantsPerSide;
 		int qy = quadrant / quadrantsPerSide;
 
-		int quadrant_grid_count = ((J3dLAND.GRID_COUNT / REDUCE_FACTOR) / quadrantsPerSide);
+		int quadrant_grid_count = ((J3dLAND.GRID_COUNT / reduceFactor) / quadrantsPerSide);
 
 		for (int row = 0; row < quadrant_grid_count + 1; row++)
 		{
@@ -203,8 +209,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 			{
 				int baseRow = row + (((quadrantsPerSide - 1) - qy) * quadrant_grid_count);
 				int baseCol = col + ((qx) * quadrant_grid_count);
-				baseRow *= REDUCE_FACTOR;
-				baseCol *= REDUCE_FACTOR;
+				baseRow *= reduceFactor;
+				baseCol *= reduceFactor;
 				quadrantHeights[row][col] = baseHeights[baseRow][baseCol];
 				quadrantNormals[row][col] = baseNormals[baseRow][baseCol];
 				quadrantColors[row][col] = new Color4f(baseColors[baseRow][baseCol]);//copy to allow modification
