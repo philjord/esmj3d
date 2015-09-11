@@ -13,6 +13,7 @@ import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
 
+import tools.io.ESMByteConvert;
 import utils.source.TextureSource;
 import esmLoader.common.data.record.IRecordStore;
 import esmj3d.data.shared.records.LAND;
@@ -34,6 +35,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 	private Geometry[] quadrantBaseSubGeoms;
 
+	private float lowestHeight = Float.MAX_VALUE;
+
 	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		this(land, master, textureSource, 2);
@@ -53,7 +56,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 		{
 			// extract the heights
 			byte[] heightBytes = land.VHGT;
-			float[][] heights = J3dLAND.extractHeights(heightBytes);
+			float[][] heights = extractHeights(heightBytes);
 
 			// extract the normals
 			byte[] normalBytes = land.VNML;
@@ -217,5 +220,47 @@ public class J3dLANDFar extends J3dRECOStatInst
 				quadrantTexCoords[row][col] = new TexCoord2f((row * J3dLAND.TEX_REPEAT), (col * J3dLAND.TEX_REPEAT));
 			}
 		}
+	}
+
+	private float[][] extractHeights(byte[] heightBytes)
+	{
+		// extract the heights
+		float[][] heights = new float[(J3dLAND.GRID_COUNT + 1)][(J3dLAND.GRID_COUNT + 1)];
+
+		float startHeightOffset = ESMByteConvert.extractFloat(heightBytes, 0);
+
+		float startRowHeight = (startHeightOffset * 4);
+		for (int row = 0; row < (J3dLAND.GRID_COUNT + 1); row++)
+		{
+			float height = startRowHeight;
+			for (int col = 0; col < (J3dLAND.GRID_COUNT + 1); col++)
+			{
+				int idx = col + (row * (J3dLAND.GRID_COUNT + 1)) + 4;//+4 is start float
+				height += heightBytes[idx] * 4;
+
+				// start next row relative to the start of this row
+				if (col == 0)
+					startRowHeight = height;
+
+				// note reverse order, due to x,y,z => x,z,-y
+				float h = (height * J3dLAND.HEIGHT_TO_J3D_SCALE);
+				heights[J3dLAND.GRID_COUNT - row][col] = h;
+
+				//update lowest
+				lowestHeight = h < lowestHeight ? h : lowestHeight;
+			}
+		}
+
+		//last 3 bytes, what are they?
+		// Unknown. Haven't noticed any ill-effects just filling this with arbitrary values in TES3 or TES4. 
+		// This is probably just a 3-byte filler so that the entire subrecord's data can be aligned on a 4 byte word boundary.
+
+		return heights;
+
+	}
+
+	public float getLowestHeight()
+	{
+		return lowestHeight;
 	}
 }

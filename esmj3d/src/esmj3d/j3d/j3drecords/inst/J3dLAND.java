@@ -3,6 +3,7 @@ package esmj3d.j3d.j3drecords.inst;
 import java.util.ArrayList;
 
 import javax.media.j3d.Appearance;
+import javax.media.j3d.DecalGroup;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
@@ -106,14 +107,14 @@ public class J3dLAND extends J3dRECOStatInst
 		A 16x16 array of short texture indices (from a LTEX record I think).
 		*/
 
-	private GeometryInfo gi;//for Bullet later
-
 	public static void setTes3()
 	{
 		GRID_COUNT = 64;//64 not 32
 		LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE;//refresh
 		TEX_REPEAT = 0.25f;
 	}
+
+	private GeometryInfo gi;//for Bullet later
 
 	/**
 	 * Makes the physics version of land
@@ -171,6 +172,8 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private Geometry[] quadrantBaseSubGeoms;
 
+	private float lowestHeight = Float.MAX_VALUE;
+
 	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		super(land, false, false);
@@ -204,8 +207,8 @@ public class J3dLAND extends J3dRECOStatInst
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
 				//this makes for no see throughs, the other 2 do odd things (though decal should be what I want)
-				Group decalGroup = new Group();
-				//DecalGroup decalGroup = new DecalGroup();
+				//Group decalGroup = new Group();
+				DecalGroup decalGroup = new DecalGroup();
 				//OrderedGroup decalGroup = new OrderedGroup();
 				quadrantBaseGroups[quadrant] = decalGroup;
 				addNodeChild(decalGroup);
@@ -526,28 +529,30 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static Texture getTexture(int textureFormID, IRecordStore master, TextureSource textureSource)
 	{
-		Record ltexRec = master.getRecord(textureFormID);
-		if (ltexRec.getRecordType().equals("LTEX"))
+		if (textureFormID > 0)
 		{
-			LTEX ltex = new LTEX(ltexRec);
-			int texSetId = ltex.textureSetId;
-			//obliv uses simpler system
-			if (texSetId != -1)
+			Record ltexRec = master.getRecord(textureFormID);
+			if (ltexRec.getRecordType().equals("LTEX"))
 			{
-				Record texSetRec = master.getRecord(texSetId);
-				TXST textureSet = new TXST(texSetRec);
-				return textureSource.getTexture(textureSet.TX00.str);
+				LTEX ltex = new LTEX(ltexRec);
+				int texSetId = ltex.textureSetId;
+				//obliv uses simpler system
+				if (texSetId != -1)
+				{
+					Record texSetRec = master.getRecord(texSetId);
+					TXST textureSet = new TXST(texSetRec);
+					return textureSource.getTexture(textureSet.TX00.str);
+				}
+				else if (ltex.ICON != null)
+				{
+					return textureSource.getTexture("Landscape\\" + ltex.ICON.str);
+				}
 			}
-			else if (ltex.ICON != null)
+			else
 			{
-				return textureSource.getTexture("Landscape\\" + ltex.ICON.str);
+				System.out.println("Bad textureFormID " + textureFormID + " type is not LTEX but " + ltexRec.getRecordType());
 			}
 		}
-		else
-		{
-			System.out.println("Bad textureFormID " + textureFormID + " type is not LTEX but " + ltexRec.getRecordType());
-		}
-
 		return getDefaultTexture(textureSource);
 
 	}
@@ -581,7 +586,7 @@ public class J3dLAND extends J3dRECOStatInst
 		return defaultTex;
 	}
 
-	protected static float[][] extractHeights(byte[] heightBytes)
+	private float[][] extractHeights(byte[] heightBytes)
 	{
 		// extract the heights
 		float[][] heights = new float[(GRID_COUNT + 1)][(GRID_COUNT + 1)];
@@ -602,7 +607,11 @@ public class J3dLAND extends J3dRECOStatInst
 					startRowHeight = height;
 
 				// note reverse order, due to x,y,z => x,z,-y
-				heights[GRID_COUNT - row][col] = (height * HEIGHT_TO_J3D_SCALE);
+				float h = (height * HEIGHT_TO_J3D_SCALE);
+				heights[GRID_COUNT - row][col] = h;
+
+				//update lowest
+				lowestHeight = h < lowestHeight ? h : lowestHeight;
 			}
 		}
 
@@ -764,5 +773,10 @@ public class J3dLAND extends J3dRECOStatInst
 		downVTXT.opacity = new float[]
 		{ 0.5f, 1f, 1f, 1f, 0.5f };
 
+	}
+
+	public float getLowestHeight()
+	{
+		return lowestHeight;
 	}
 }

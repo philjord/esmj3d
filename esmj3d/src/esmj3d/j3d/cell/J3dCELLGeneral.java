@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.Group;
 import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3f;
 
+import utils.ESConfig;
 import utils.source.MediaSources;
 import esmLoader.common.data.record.IRecordStore;
 import esmLoader.common.data.record.Record;
@@ -68,23 +70,34 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		return j3dRECOs;
 	}
 
-	protected void makeWater(float waterLevel, WaterApp waterApp)
+	protected static float getWaterLevel(float cellWaterLevel)
 	{
 
-		if (waterLevel == Float.NEGATIVE_INFINITY)
+		if (cellWaterLevel == Float.NEGATIVE_INFINITY)
 		{
-			waterLevel = 0;
+			return 0;
 		}
-		else if (waterLevel > 100000)
+		else if (cellWaterLevel > 100000)
 		{
 			//6.8056466E36 is weird skyrim water level (possibly meaning use default) but == no work for floats
 			// default in WRLD record but by testing here it is
-			waterLevel = -280;
+			return -280;
 		}
-
-		if (waterLevel != Float.POSITIVE_INFINITY && waterLevel != 0x7F7FFFFF && waterLevel != 0x4F7FFFC9)
+		else if (cellWaterLevel != Float.POSITIVE_INFINITY && cellWaterLevel != 0x7F7FFFFF && cellWaterLevel != 0x4F7FFFC9)
 		{
 
+			return cellWaterLevel * ESConfig.ES_TO_METERS_SCALE;
+		}
+
+		return Float.POSITIVE_INFINITY;
+
+	}
+
+	protected Group makeWater(float waterLevel, WaterApp waterApp)
+	{
+		if (waterLevel != Float.POSITIVE_INFINITY)
+		{
+			//TODO: could bake in transform coords
 			Water water = new Water(J3dLAND.LAND_SIZE, waterApp);
 
 			TransformGroup transformGroup = new TransformGroup();
@@ -97,7 +110,8 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 			transformGroup.setTransform(transform);
 			transformGroup.addChild(water);
-			addChild(transformGroup);
+			return transformGroup;
 		}
+		return null;
 	}
 }
