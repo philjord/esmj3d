@@ -149,8 +149,8 @@ public class WaterApp extends BranchGroup
 			{
 				try
 				{
-					vertexProgram = StringIO.readFully("./water.vert");
-					fragmentProgram = StringIO.readFully("./water.frag");
+					vertexProgram = StringIO.readFully("./shaders/water.vert");
+					fragmentProgram = StringIO.readFully("./shaders/water.frag");
 				}
 				catch (IOException e)
 				{
