@@ -95,7 +95,7 @@ public class Beth32_4LodManager extends BethLodManager
 			}
 
 			if ((System.currentTimeMillis() - start) > 50)
-				System.out.println("Beth32_4LodManager.updateGross " + (System.currentTimeMillis() - start));
+				System.out.println("Beth32_4LodManager.updateGross in " + (System.currentTimeMillis() - start) + "ms");
 		}
 	}
 

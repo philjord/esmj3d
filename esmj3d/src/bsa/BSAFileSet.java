@@ -83,7 +83,6 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 
 		if (this.size() == 0)
 		{
-			//TODO: misleading
 			System.out.println("BSAFileSet loaded no files using root: " + rootFilenames[0]);
 		}
 	}

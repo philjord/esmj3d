@@ -64,7 +64,7 @@ public class Beth32LodManager extends BethLodManager
 				}
 			}
 			if ((System.currentTimeMillis() - start) > 50)
-				System.out.println("Beth32LodManager.setWorldFormId " + (System.currentTimeMillis() - start));
+				System.out.println("Beth32LodManager.setWorldFormId in " + (System.currentTimeMillis() - start) + "ms");
 		}
 	}
 
@@ -85,7 +85,7 @@ public class Beth32LodManager extends BethLodManager
 		}
 
 		if ((System.currentTimeMillis() - start) > 50)
-			System.out.println("Beth32LodManager.updateGross " + (System.currentTimeMillis() - start));
+			System.out.println("Beth32LodManager.updateGross in " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	/**
