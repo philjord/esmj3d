@@ -50,7 +50,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 
 		quadrantBaseSubGeoms = new Geometry[totalQuadrants];
-		Group[] quadrantBaseGroups = new Group[totalQuadrants];
+		//Group[] quadrantBaseGroups = new Group[totalQuadrants];
 
 		if (land.VHGT != null)
 		{
@@ -75,9 +75,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 			// make up some base quadrants, keep seperate to allow frustrum culling
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
-				Group g = new Group();
-				quadrantBaseGroups[quadrant] = g;
-				addNodeChild(g);
+				//Group g = new Group();
+				//quadrantBaseGroups[quadrant] = g;
+				//addNodeChild(g);
 
 				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, reduceFactor);
 			}
@@ -110,7 +110,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 					baseQuadShape.setAppearance(app);
 
 					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-					quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+					//quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+					addNodeChild(baseQuadShape);
 				}
 			}
 			else
@@ -132,7 +133,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 						baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
 
-						quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+						//quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+						addNodeChild(baseQuadShape);
 					}
 				}
 			}

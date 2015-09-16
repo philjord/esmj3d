@@ -9,6 +9,7 @@ import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.IndexedTriangleStripArray;
 import javax.media.j3d.Material;
+import javax.media.j3d.OrderedGroup;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureAttributes;
@@ -181,7 +182,11 @@ public class J3dLAND extends J3dRECOStatInst
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 
 		quadrantBaseSubGeoms = new Geometry[totalQuadrants];
+		//tes3 doesn't use these as a very dfferent format, gets a big perf improve from just one
 		Group[] quadrantBaseGroups = new Group[totalQuadrants];
+
+		OrderedGroup orderedGroup = new OrderedGroup();
+		addNodeChild(orderedGroup);
 
 		if (land.VHGT != null)
 		{
@@ -210,7 +215,9 @@ public class J3dLAND extends J3dRECOStatInst
 				//Group decalGroup = new Group();
 				DecalGroup decalGroup = new DecalGroup();
 				//OrderedGroup decalGroup = new OrderedGroup();
-				quadrantBaseGroups[quadrant] = decalGroup;
+
+				if (!land.tes3)
+					quadrantBaseGroups[quadrant] = decalGroup;
 				addNodeChild(decalGroup);
 
 				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant);
@@ -245,7 +252,7 @@ public class J3dLAND extends J3dRECOStatInst
 			{
 				if (land.VTEXshorts != null)
 				{
-					for (int quadrant = 0; quadrant < land.VTEXshorts.length; quadrant++)
+					for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 					{
 						int texFormId = land.VTEXshorts[quadrant];
 
@@ -260,7 +267,11 @@ public class J3dLAND extends J3dRECOStatInst
 
 						baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
 
-						quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+						if (!land.tes3)
+							quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+						else
+							orderedGroup.addChild(baseQuadShape);
+
 					}
 				}
 			}
@@ -320,7 +331,10 @@ public class J3dLAND extends J3dRECOStatInst
 				Shape3D aTxtShape = new Shape3D();
 				aTxtShape.setAppearance(app);
 				aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, atxt.vtxt));
-				quadrantBaseGroups[quadrant].addChild(aTxtShape);
+				if (!land.tes3)
+					quadrantBaseGroups[quadrant].addChild(aTxtShape);
+				else
+					orderedGroup.addChild(aTxtShape);
 			}
 
 		}
