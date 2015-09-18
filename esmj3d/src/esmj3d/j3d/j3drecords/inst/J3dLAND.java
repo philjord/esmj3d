@@ -7,6 +7,8 @@ import javax.media.j3d.DecalGroup;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
+import javax.media.j3d.IndexedGeometryArray;
+import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.IndexedTriangleStripArray;
 import javax.media.j3d.Material;
 import javax.media.j3d.OrderedGroup;
@@ -19,6 +21,7 @@ import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
 import nif.j3d.J3dNiGeometry;
+import nif.j3d.J3dNiTriBasedGeom;
 
 import org.j3d.geom.GeometryData;
 
@@ -50,6 +53,10 @@ public class J3dLAND extends J3dRECOStatInst
 	public static float HEIGHT_TO_J3D_SCALE = 0.04f; //where does this come from? 1/25th?
 
 	public static float LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE; //= (32*2.56) = 81.92
+
+	public static boolean INTERLEAVE = true;
+
+	public static boolean STRIPIFY = true;
 
 	//LOD tristrip in 5.12 increments (2.56?)
 	//public static float HEIGHT_TO_J3D_SCALE = 0.057f;
@@ -113,6 +120,8 @@ public class J3dLAND extends J3dRECOStatInst
 		GRID_COUNT = 64;//64 not 32
 		LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE;//refresh
 		TEX_REPEAT = 0.25f;
+		INTERLEAVE = false;
+		STRIPIFY = false;
 	}
 
 	private GeometryInfo gi;//for Bullet later
@@ -183,10 +192,12 @@ public class J3dLAND extends J3dRECOStatInst
 
 		quadrantBaseSubGeoms = new Geometry[totalQuadrants];
 		//tes3 doesn't use these as a very dfferent format, gets a big perf improve from just one
+
 		Group[] quadrantBaseGroups = new Group[totalQuadrants];
 
 		OrderedGroup orderedGroup = new OrderedGroup();
-		addNodeChild(orderedGroup);
+		if (land.tes3)
+			addNodeChild(orderedGroup);
 
 		if (land.VHGT != null)
 		{
@@ -211,14 +222,15 @@ public class J3dLAND extends J3dRECOStatInst
 			// make up some base quadrants, keep seperate to allow frustrum culling
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
-				//this makes for no see throughs, the other 2 do odd things (though decal should be what I want)
-				//Group decalGroup = new Group();
-				DecalGroup decalGroup = new DecalGroup();
-				//OrderedGroup decalGroup = new OrderedGroup();
-
 				if (!land.tes3)
+				{
+					//this makes for no see throughs, the other 2 do odd things (though decal should be what I want)
+					//Group decalGroup = new Group();
+					DecalGroup decalGroup = new DecalGroup();
+					//OrderedGroup decalGroup = new OrderedGroup();
 					quadrantBaseGroups[quadrant] = decalGroup;
-				addNodeChild(decalGroup);
+					addNodeChild(decalGroup);
+				}
 
 				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant);
 			}
@@ -331,6 +343,7 @@ public class J3dLAND extends J3dRECOStatInst
 				Shape3D aTxtShape = new Shape3D();
 				aTxtShape.setAppearance(app);
 				aTxtShape.setGeometry(makeQuadrantLayerSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, atxt.vtxt));
+
 				if (!land.tes3)
 					quadrantBaseGroups[quadrant].addChild(aTxtShape);
 				else
@@ -393,7 +406,10 @@ public class J3dLAND extends J3dRECOStatInst
 				quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
-		gridGenerator.generateIndexedTriangleStrips(terrainData);
+		if (STRIPIFY)
+			gridGenerator.generateIndexedTriangleStrips(terrainData);
+		else
+			gridGenerator.generateIndexedTriangles(terrainData);
 
 		//offset for quadrant
 		Vector3f offset = quadOffSet(quadrantsPerSide, quadrant);
@@ -404,16 +420,7 @@ public class J3dLAND extends J3dRECOStatInst
 			terrainData.coordinates[i + 2] += offset.z;
 		}
 
-		IndexedTriangleStripArray itsa = new IndexedTriangleStripArray(terrainData.vertexCount, GeometryArray.COORDINATES
-				| GeometryArray.NORMALS | GeometryArray.COLOR_4 | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_COORD_INDEX_ONLY,
-				terrainData.indexesCount, terrainData.stripCounts);
-		itsa.setCoordinates(0, terrainData.coordinates);
-		itsa.setCoordinateIndices(0, terrainData.indexes);
-		itsa.setNormals(0, terrainData.normals);
-		itsa.setColors(0, terrainData.colors);
-		itsa.setTextureCoordinates(0, 0, terrainData.textureCoordinates);
-
-		return itsa;
+		return createGA(terrainData);
 
 	}
 
@@ -453,7 +460,10 @@ public class J3dLAND extends J3dRECOStatInst
 				quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
-		gridGenerator.generateIndexedTriangleStrips(terrainData);
+		if (STRIPIFY)
+			gridGenerator.generateIndexedTriangleStrips(terrainData);
+		else
+			gridGenerator.generateIndexedTriangles(terrainData);
 
 		//offset for quadrant
 		Vector3f offset = quadOffSet(quadrantsPerSide, quadrant);
@@ -464,16 +474,7 @@ public class J3dLAND extends J3dRECOStatInst
 			terrainData.coordinates[i + 2] += offset.z;
 		}
 
-		IndexedTriangleStripArray itsa = new IndexedTriangleStripArray(terrainData.vertexCount, GeometryArray.COORDINATES
-				| GeometryArray.NORMALS | GeometryArray.COLOR_4 | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_COORD_INDEX_ONLY,
-				terrainData.indexesCount, terrainData.stripCounts);
-		itsa.setCoordinates(0, terrainData.coordinates);
-		itsa.setCoordinateIndices(0, terrainData.indexes);
-		itsa.setNormals(0, terrainData.normals);
-		itsa.setColors(0, terrainData.colors);
-		itsa.setTextureCoordinates(0, 0, terrainData.textureCoordinates);
-
-		return itsa;
+		return createGA(terrainData);
 
 	}
 
@@ -686,6 +687,63 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 
 		return colors;
+	}
+
+	public static GeometryArray createGA(GeometryData terrainData)
+	{
+		int basicFormat = GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.COLOR_4 //
+				| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_COORD_INDEX_ONLY //
+		;//| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE; //
+
+		IndexedGeometryArray iga;
+		if (INTERLEAVE)
+		{
+			if (STRIPIFY)
+			{
+				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat// 
+						| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE | GeometryArray.INTERLEAVED,//
+						terrainData.indexesCount, terrainData.stripCounts);
+			}
+			else
+			{
+				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat// 
+						| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE | GeometryArray.INTERLEAVED,//
+						terrainData.indexesCount);
+			}
+			iga.setCoordIndicesRef(terrainData.indexes);
+
+			float[] vertexData = J3dNiTriBasedGeom.interleave(1, 2, new float[][]
+			{ terrainData.textureCoordinates }, null, terrainData.colors, terrainData.normals, terrainData.coordinates);
+			iga.setInterleavedVertices(vertexData);
+
+		}
+		else
+		{
+			if (STRIPIFY)
+			{
+				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat,//
+						terrainData.indexesCount, terrainData.stripCounts);
+			}
+			else
+			{
+				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat,//
+						terrainData.indexesCount);
+			}
+
+			iga.setCoordinates(0, terrainData.coordinates);
+			iga.setCoordinateIndices(0, terrainData.indexes);
+			iga.setNormals(0, terrainData.normals);
+			iga.setColors(0, terrainData.colors);
+			iga.setTextureCoordinates(0, 0, terrainData.textureCoordinates);
+			/*iga.setCoordRefFloat(terrainData.coordinates);
+			iga.setCoordIndicesRef(terrainData.indexes);
+			iga.setNormalRefFloat(terrainData.normals);
+			iga.setColorRefFloat(terrainData.colors);
+			iga.setTexCoordRefFloat(0, terrainData.textureCoordinates);*/
+
+		}
+		return iga;
+
 	}
 
 	@Override

@@ -4,7 +4,6 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
-import javax.media.j3d.IndexedTriangleStripArray;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TextureAttributes;
 import javax.vecmath.Color4f;
@@ -50,7 +49,13 @@ public class J3dLANDFar extends J3dRECOStatInst
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 
 		quadrantBaseSubGeoms = new Geometry[totalQuadrants];
-		//Group[] quadrantBaseGroups = new Group[totalQuadrants];
+		//tes3 doesn't use these as a very dfferent format, gets a big perf improve from just one
+		Group[] quadrantBaseGroups = new Group[totalQuadrants];
+
+		// not in fact ordered for fars
+		Group orderedGroup = new Group();
+		if (land.tes3)
+			addNodeChild(orderedGroup);
 
 		if (land.VHGT != null)
 		{
@@ -75,9 +80,12 @@ public class J3dLANDFar extends J3dRECOStatInst
 			// make up some base quadrants, keep seperate to allow frustrum culling
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
-				//Group g = new Group();
-				//quadrantBaseGroups[quadrant] = g;
-				//addNodeChild(g);
+				if (!land.tes3)
+				{
+					Group decalGroup = new Group();
+					quadrantBaseGroups[quadrant] = decalGroup;
+					addNodeChild(decalGroup);
+				}
 
 				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, reduceFactor);
 			}
@@ -110,8 +118,10 @@ public class J3dLANDFar extends J3dRECOStatInst
 					baseQuadShape.setAppearance(app);
 
 					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-					//quadrantBaseGroups[quadrant].addChild(baseQuadShape);
-					addNodeChild(baseQuadShape);
+					if (!land.tes3)
+						quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+					else
+						orderedGroup.addChild(baseQuadShape);
 				}
 			}
 			else
@@ -163,7 +173,10 @@ public class J3dLANDFar extends J3dRECOStatInst
 				quadrantSquareCount, quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
-		gridGenerator.generateIndexedTriangleStrips(terrainData);
+		if (J3dLAND.STRIPIFY)
+			gridGenerator.generateIndexedTriangleStrips(terrainData);
+		else
+			gridGenerator.generateIndexedTriangles(terrainData);
 
 		//offset for quadrant
 		Vector3f offset = J3dLAND.quadOffSet(quadrantsPerSide, quadrant);
@@ -174,20 +187,12 @@ public class J3dLANDFar extends J3dRECOStatInst
 			terrainData.coordinates[i + 2] += offset.z;
 		}
 
-		IndexedTriangleStripArray itsa = new IndexedTriangleStripArray(terrainData.vertexCount, GeometryArray.COORDINATES
-				| GeometryArray.NORMALS | GeometryArray.COLOR_4 | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_COORD_INDEX_ONLY,
-				terrainData.indexesCount, terrainData.stripCounts);
-		itsa.setCoordinates(0, terrainData.coordinates);
-		itsa.setCoordinateIndices(0, terrainData.indexes);
-		itsa.setNormals(0, terrainData.normals);
-		itsa.setColors(0, terrainData.colors);
-		itsa.setTextureCoordinates(0, 0, terrainData.textureCoordinates);
-
-		return itsa;
+		return J3dLAND.createGA(terrainData);
 
 	}
 
-	/**Note colors might have the alpha adjusted so they are copies not references
+	/**NOT a copy of J3dLAND as wew skip each second
+	 * Note colors might have the alpha adjusted so they are copies not references
 	 * 
 	 * @param quadrant Specifies the quadrant this BTXT record applies to. 0 = bottom left. 1 = bottom right. 2 = upper-left. 3 = upper-right.
 	 * @param quadrant2 
