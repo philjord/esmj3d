@@ -1,5 +1,6 @@
 package esmj3d.j3d.water;
 
+
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -33,6 +34,7 @@ import utils.source.TextureSource;
 import com.sun.j3d.utils.shader.StringIO;
 
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
+
 
 public class WaterApp extends BranchGroup
 {
@@ -90,14 +92,14 @@ public class WaterApp extends BranchGroup
 		app.setPolygonAttributes(pa);
 
 		//TODO: if the texture is not transparent we need to use the vertex color transparency
-		TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.5f);
+		TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.3f);
 		app.setTransparencyAttributes(trans);
 
 		Material mat = new Material();
 		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
 		mat.setShininess(20.0f);
-		//mat.setDiffuseColor(0.4f, 0.4f, 0.4f);
-		mat.setSpecularColor(0.5f, 0.5f, 0.6f);
+		mat.setDiffuseColor(0.4f, 0.4f, 0.45f);
+		mat.setSpecularColor(0.8f, 0.8f, 0.9f);
 		app.setMaterial(mat);
 
 		if (USE_SHADERS)
