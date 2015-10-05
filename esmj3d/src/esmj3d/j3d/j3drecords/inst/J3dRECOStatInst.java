@@ -216,6 +216,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	@Override
 	public String toString()
 	{
-		return this.getClass().getSimpleName() + " from " + instRECO;
+		return this.getClass().getSimpleName() + " from " + instRECO + " - " + j3dRECOType;
 	}
 }

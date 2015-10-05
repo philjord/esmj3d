@@ -20,7 +20,7 @@ public class SkyrimTreeLookup
 
 	public static String getLookup(String sptFileName)
 	{
-		//TODO: do we have skyrim data? if not no mapping thanks
+		//TODO: do we have skyrim data in a bsa file? if not no mapping thanks
 		if (map == null)
 			init();
 
@@ -37,6 +37,7 @@ public class SkyrimTreeLookup
 		key = key.toLowerCase();
 
 		String newTreeName = map.get(key);
+		
 		if (newTreeName == null)
 		{
 			// this is fine for now, assume shrubs or something

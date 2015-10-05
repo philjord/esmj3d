@@ -110,7 +110,6 @@ public class TreeMaker
 
 			//TODO: tree models themselves have cool animated and non-animated version inside,
 			//must work out how to switch
-
 			String treeLodFlat = nifTreeFileName.substring(0, nifTreeFileName.indexOf(".nif")) + "_lod_flat.nif";
 
 			if (!makePhys && mediaSources.getMeshSource().nifFileExists(treeLodFlat))
