@@ -12,8 +12,15 @@ public class Water extends Group
 {
 	public Water(float size, WaterApp waterApp)
 	{
-		QuadArray quads = createQuad(size);
-		addChild(new Shape3D(quads, waterApp.getApp()));
+		if (waterApp != null)
+		{
+			QuadArray quads = createQuad(size);
+			addChild(new Shape3D(quads, waterApp.getApp()));
+		}
+		else
+		{
+			System.err.println("No water App");
+		}
 	}
 
 	private static QuadArray createQuad(float size)
