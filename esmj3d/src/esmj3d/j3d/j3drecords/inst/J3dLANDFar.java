@@ -118,10 +118,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 					baseQuadShape.setAppearance(app);
 
 					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-					if (!land.tes3)
-						quadrantBaseGroups[quadrant].addChild(baseQuadShape);
-					else
-						orderedGroup.addChild(baseQuadShape);
+					
+					quadrantBaseGroups[quadrant].addChild(baseQuadShape);
+					
 				}
 			}
 			else
@@ -143,7 +142,6 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 						baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
 
-						//quadrantBaseGroups[quadrant].addChild(baseQuadShape);
 						addNodeChild(baseQuadShape);
 					}
 				}

@@ -73,10 +73,9 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	@Override
 	public void renderSettingsUpdated()
 	{
-		//TODO: different render settings for  different types
 		if (fader && dl != null)
 		{
-			dl.setDistance(0, BethRenderSettings.getItemFade());
+			dl.setDistance(0, BethRenderSettings.getObjectFade());
 		}
 		if (j3dRECOType != null)
 		{
@@ -118,7 +117,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 			Group parent = new Group();
 			transformGroup.addChild(parent);
 			dl = new BetterDistanceLOD(parent, myNodes, new float[]
-			{ BethRenderSettings.getItemFade() });
+			{ BethRenderSettings.getObjectFade() });
 			transformGroup.addChild(dl);//Note must use super here
 			dl.setSchedulingBounds(Utils3D.defaultBounds);
 			dl.setEnable(true);

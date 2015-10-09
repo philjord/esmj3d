@@ -17,13 +17,11 @@ import com.sun.j3d.utils.geometry.ColorCube;
 
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
-import esmj3d.j3d.j3drecords.type.J3dRECOType;
+import esmj3d.j3d.j3drecords.type.J3dRECOTypeCha;
 
-public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst
+public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst
 {
 	public static boolean SHOW_FADE_OUT_MARKER = false;
-
-	private boolean fader = true;
 
 	private BetterDistanceLOD dl;
 
@@ -31,14 +29,13 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 
 	protected TransformGroup transformGroup = new TransformGroup();
 
-	protected J3dRECOType j3dRECOType;
+	protected J3dRECOTypeCha j3dRECOType;
 
 	private InstRECO instRECO = null;
 
-	public J3dRECODynInst(InstRECO instRECO, boolean enableSimpleFade, boolean makePhys)
+	//Notice fader is ALWAYS true and physics is ALWAYS false
+	public J3dRECOChaInst(InstRECO instRECO)
 	{
-		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
-
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		super.addChild(transformGroup);//Note must use super here
@@ -46,10 +43,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 		setLocation(instRECO);
 		this.instRECO = instRECO;
 
-		if (fader)
-		{
-			BethRenderSettings.addUpdateListener(this);
-		}
+		BethRenderSettings.addUpdateListener(this);
 
 	}
 
@@ -74,57 +68,37 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	@Override
 	public void renderSettingsUpdated()
 	{
-		if (fader && dl != null)
+		if (dl != null)
 		{
-			dl.setDistance(0, BethRenderSettings.getItemFade());
+			dl.setDistance(0, BethRenderSettings.getActorFade());
 		}
+
 		if (j3dRECOType != null)
 		{
 			j3dRECOType.renderSettingsUpdated();
 		}
 	}
 
-	public void addNodeChild(Node node)
-	{
-		if (fader)
-		{
-			throw new UnsupportedOperationException("addNodeChild with fader! " + this);
-		}
-		else
-		{
-			transformGroup.addChild(node);
-		}
-	}
-
-	public void setJ3dRECOType(J3dRECOType j3dRECOType)
-	{
-		BranchGroup bg = new BranchGroup();// empty group for no rendering
-		bg.addChild(SHOW_FADE_OUT_MARKER ? new ColorCube(0.1) : new BranchGroup());
-		setJ3dRECOType(j3dRECOType, bg);
-	}
-
-	private void setJ3dRECOType(J3dRECOType j3dRECOType, BranchGroup j3dRECOTypeFar)
+	public void setJ3dRECOType(J3dRECOTypeCha j3dRECOType)
 	{
 		this.j3dRECOType = j3dRECOType;
-		if (fader)
-		{
-			myNodes.add(j3dRECOType);
-			myNodes.add(j3dRECOTypeFar);
-			Group parent = new Group();
-			transformGroup.addChild(parent);
-			dl = new BetterDistanceLOD(parent, myNodes, new float[]
-			{ BethRenderSettings.getItemFade() });
-			transformGroup.addChild(dl);//Note must use super here
-			dl.setSchedulingBounds(Utils3D.defaultBounds);
-			dl.setEnable(true);
-		}
-		else
-		{
-			transformGroup.addChild(j3dRECOType);
-		}
+
+		BranchGroup far = new BranchGroup();// empty group for no rendering
+		far.addChild(SHOW_FADE_OUT_MARKER ? new ColorCube(0.1) : new BranchGroup());
+
+		myNodes.add(j3dRECOType);
+		myNodes.add(far);
+		Group parent = new Group();
+		transformGroup.addChild(parent);
+		dl = new BetterDistanceLOD(parent, myNodes, new float[]
+		{ BethRenderSettings.getActorFade() });
+		transformGroup.addChild(dl);
+		dl.setSchedulingBounds(Utils3D.defaultBounds);
+		dl.setEnable(true);
 	}
 
-	public J3dRECOType getJ3dRECOType()
+	@Override
+	public J3dRECOTypeCha getJ3dRECOType()
 	{
 		return j3dRECOType;
 	}

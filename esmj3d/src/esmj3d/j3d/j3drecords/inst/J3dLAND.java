@@ -191,7 +191,8 @@ public class J3dLAND extends J3dRECOStatInst
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 
 		quadrantBaseSubGeoms = new Geometry[totalQuadrants];
-		//tes3 doesn't use these as a very dfferent format, gets a big perf improve from just one
+		//tes3 doesn't use these as a very dfferent format, gets a big perf improve from just one 
+		//(really? later testing doesn't show this)
 
 		Group[] quadrantBaseGroups = new Group[totalQuadrants];
 
@@ -279,10 +280,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 						baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
 
-						if (!land.tes3)
-							quadrantBaseGroups[quadrant].addChild(baseQuadShape);
-						else
-							orderedGroup.addChild(baseQuadShape);
+						orderedGroup.addChild(baseQuadShape);
 
 					}
 				}

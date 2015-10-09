@@ -8,13 +8,13 @@ public class BethRenderSettings
 
 	public static final int ITEM_FADE_MAX = 1000;
 
-	public static final int OBJECT_FADE_MAX = 500;
+	public static final int OBJECT_FADE_MAX = 1000;
 
 	public static final int ACTOR_FADE_DEFAULT = 50;
 
-	public static final int ITEM_FADE_DEFAULT = 300;
+	public static final int ITEM_FADE_DEFAULT = 200;
 
-	public static final int OBJECT_FADE_DEFAULT = 300;
+	public static final int OBJECT_FADE_DEFAULT = 200;
 
 	private static int FAR_LOAD_GRID_COUNT = 8;// int in number of cells (82 meters each)
 
