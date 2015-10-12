@@ -30,7 +30,7 @@ public class BethRenderSettings
 
 	private static boolean showPhysics = true;
 
-	private static boolean showEditorMarkers = true;
+	private static boolean showEditorMarkers = false;
 
 	private static boolean showDistantBuildings = true;
 

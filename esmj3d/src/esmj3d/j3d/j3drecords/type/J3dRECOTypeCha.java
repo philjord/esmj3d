@@ -27,5 +27,5 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 			((Fadable) nifCharacter).fade(percent);
 		}
 
-	}
+	}		
 }

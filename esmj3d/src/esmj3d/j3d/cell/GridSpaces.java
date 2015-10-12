@@ -1,6 +1,7 @@
 package esmj3d.j3d.cell;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,11 +14,13 @@ import utils.ESConfig;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
 import esmj3d.data.shared.records.InstRECO;
+import esmj3d.j3d.BethRenderSettings;
+import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 
 public class GridSpaces extends BranchGroup
 {
-	public static int BUCKET_RANGE = 82;
+	public static int BUCKET_RANGE = (int) J3dLAND.LAND_SIZE;
 
 	private HashMap<Point, GridSpace> allGridSpaces = new HashMap<Point, GridSpace>();
 
@@ -39,7 +42,7 @@ public class GridSpaces extends BranchGroup
 
 	public void sortOutBucket(InstRECO reco, Record record)
 	{
- 
+
 		float recordX = reco.getTrans().x * ESConfig.ES_TO_METERS_SCALE;
 		float recordY = reco.getTrans().y * ESConfig.ES_TO_METERS_SCALE;
 		int xGridIdx = (int) Math.floor(recordX / BUCKET_RANGE);
@@ -58,9 +61,24 @@ public class GridSpaces extends BranchGroup
 		gridSpaceByRecordId.put(new Integer(record.getFormID()), gs);
 	}
 
-	public void update(float charX, float charY, float loadDist)
+	public void updateAll()
 	{
-		List<GridSpace> gridsToRemove = getGridSpacesToRemove(charX, charY, loadDist);
+		for (GridSpace gridSpace : allGridSpaces.values())
+		{
+			attachedGridSpaces.put(gridSpace.getKey(), gridSpace);
+			gridSpace.loadChildren();
+			gridSpace.compile();// better to be done not on the j3d thread?
+			addChild(gridSpace);
+
+		}
+	}
+
+	///TODO: for now the near system is used to load gridspaces to make it predictable (skyrim loads too many
+	public void update(float charX, float charY, BethLodManager bethLodManager)
+	{
+		Rectangle bounds = bethLodManager.getGridBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
+
+		List<GridSpace> gridsToRemove = getGridSpacesToRemove(bounds);
 		for (GridSpace gridSpace : gridsToRemove)
 		{
 			removeChild(gridSpace);
@@ -68,7 +86,7 @@ public class GridSpaces extends BranchGroup
 			attachedGridSpaces.remove(gridSpace.getKey());
 		}
 
-		List<GridSpace> gridsToAdd = getGridSpacesToAdd(charX, charY, loadDist);
+		List<GridSpace> gridsToAdd = getGridSpacesToAdd(bounds);
 		for (GridSpace gridSpace : gridsToAdd)
 		{
 			attachedGridSpaces.put(gridSpace.getKey(), gridSpace);
@@ -78,17 +96,12 @@ public class GridSpaces extends BranchGroup
 		}
 	}
 
-	public List<GridSpace> getGridSpacesToAdd(float charX, float charY, float loadDist)
+	public List<GridSpace> getGridSpacesToAdd(Rectangle bounds)
 	{
-		int newLowX = (int) Math.floor((charX - loadDist) / BUCKET_RANGE);
-		int newLowY = (int) Math.floor((charY - loadDist) / BUCKET_RANGE);
-		int newHighX = (int) Math.ceil((charX + loadDist) / BUCKET_RANGE);
-		int newHighY = (int) Math.ceil((charY + loadDist) / BUCKET_RANGE);
-
 		ArrayList<GridSpace> gridsToAdd = new ArrayList<GridSpace>();
-		for (int x = newLowX; x <= newHighX; x++)
+		for (int x = bounds.x; x <= bounds.x + bounds.width; x++)
 		{
-			for (int y = newLowY; y <= newHighY; y++)
+			for (int y = bounds.y; y <= bounds.y + bounds.height; y++)
 			{
 				Point key = new Point(x, y);
 
@@ -106,19 +119,14 @@ public class GridSpaces extends BranchGroup
 		return gridsToAdd;
 	}
 
-	public List<GridSpace> getGridSpacesToRemove(float charX, float charY, float loadDist)
+	public List<GridSpace> getGridSpacesToRemove(Rectangle bounds)
 	{
-		int newLowX = (int) Math.floor((charX - loadDist) / BUCKET_RANGE);
-		int newLowY = (int) Math.floor((charY - loadDist) / BUCKET_RANGE);
-		int newHighX = (int) Math.ceil((charX + loadDist) / BUCKET_RANGE);
-		int newHighY = (int) Math.ceil((charY + loadDist) / BUCKET_RANGE);
-
-		Iterator<Point> keys = attachedGridSpaces.keySet().iterator();
 		ArrayList<GridSpace> gridsToRemove = new ArrayList<GridSpace>();
+		Iterator<Point> keys = attachedGridSpaces.keySet().iterator();
 		while (keys.hasNext())
 		{
 			Point key = keys.next();
-			if (key.x < newLowX || key.x > newHighX || key.y < newLowY || key.y > newHighY)
+			if (key.x < bounds.x || key.x > bounds.x + bounds.width || key.y < bounds.y || key.y > bounds.y + bounds.height)
 			{
 				gridsToRemove.add(attachedGridSpaces.get(key));
 			}

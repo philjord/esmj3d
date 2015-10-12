@@ -28,10 +28,9 @@ public class GridSpace extends BranchGroup
 
 	private HashMap<Integer, Record> recordsById = new HashMap<Integer, Record>();
 
-	private HashMap<Integer, J3dRECOInst> j3dRECOsById = new HashMap<Integer, J3dRECOInst>()
-	{
-		public String name = "GridSpace";
-	};
+	private HashMap<Integer, J3dRECOInst> j3dRECOsById = new HashMap<Integer, J3dRECOInst>();
+
+	public String name = "GridSpace";
 
 	private J3dCELLGeneral j3dCELL;
 
@@ -136,7 +135,7 @@ public class GridSpace extends BranchGroup
 				J3dRECOInst j3dRECOInst = j3dCELL.makeJ3dRECO(record);
 				if (j3dRECOInst != null)
 				{
-					// now attach and record the j3dRECO
+					// now attach and record the j3dRECO					
 					j3dRECOsById.put(new Integer(record.getFormID()), j3dRECOInst);
 					children.addChild((Node) j3dRECOInst);
 				}

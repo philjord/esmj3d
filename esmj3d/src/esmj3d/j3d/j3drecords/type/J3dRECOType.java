@@ -21,9 +21,14 @@ public abstract class J3dRECOType extends BranchGroup
 		this.physNifFile = physNifFile;
 	}
 
-	public  void renderSettingsUpdated()
-	{}
-	
-	
-	
+	public void renderSettingsUpdated()
+	{
+	}
+
+	@Override
+	public String toString()
+	{
+		return "" + this.getClass().getSimpleName() + " id " + recordId + " : " + physNifFile;
+	}
+
 }
