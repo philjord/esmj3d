@@ -10,6 +10,7 @@ import javax.media.j3d.Group;
 import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.IndexedTriangleStripArray;
+import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Material;
 import javax.media.j3d.OrderedGroup;
 import javax.media.j3d.Shape3D;
@@ -26,6 +27,7 @@ import nif.j3d.J3dNiTriBasedGeom;
 import org.j3d.geom.GeometryData;
 
 import tools.io.ESMByteConvert;
+import tools3d.utils.Utils3D;
 import utils.PhysAppearance;
 import utils.source.TextureSource;
 
@@ -54,9 +56,13 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static float LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE; //= (32*2.56) = 81.92
 
-	public static boolean INTERLEAVE = true;
+	public static boolean BY_REF = false;
 
-	public static boolean STRIPIFY = true;
+	public static boolean BUFFERS = false;
+
+	public static boolean INTERLEAVE = false;
+
+	public static boolean STRIPIFY = false;
 
 	//LOD tristrip in 5.12 increments (2.56?)
 	//public static float HEIGHT_TO_J3D_SCALE = 0.057f;
@@ -122,6 +128,8 @@ public class J3dLAND extends J3dRECOStatInst
 		TEX_REPEAT = 0.25f;
 		INTERLEAVE = false;
 		STRIPIFY = false;
+		BY_REF = false;
+		BUFFERS = false;
 	}
 
 	private GeometryInfo gi;//for Bullet later
@@ -691,7 +699,8 @@ public class J3dLAND extends J3dRECOStatInst
 	{
 		int basicFormat = GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.COLOR_4 //
 				| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_COORD_INDEX_ONLY //
-		;//| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE; //
+				| (BY_REF ? (GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE) : 0)//
+				| (BUFFERS ? GeometryArray.USE_NIO_BUFFER : 0);
 
 		IndexedGeometryArray iga;
 		if (INTERLEAVE)
@@ -712,7 +721,15 @@ public class J3dLAND extends J3dRECOStatInst
 
 			float[] vertexData = J3dNiTriBasedGeom.interleave(1, 2, new float[][]
 			{ terrainData.textureCoordinates }, null, terrainData.colors, terrainData.normals, terrainData.coordinates);
-			iga.setInterleavedVertices(vertexData);
+
+			if (!BUFFERS)
+			{
+				iga.setInterleavedVertices(vertexData);
+			}
+			else
+			{
+				iga.setInterleavedVertexBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(vertexData)));
+			}
 
 		}
 		else
@@ -728,21 +745,41 @@ public class J3dLAND extends J3dRECOStatInst
 						terrainData.indexesCount);
 			}
 
-			iga.setCoordinates(0, terrainData.coordinates);
-			iga.setCoordinateIndices(0, terrainData.indexes);
-			iga.setNormals(0, terrainData.normals);
-			iga.setColors(0, terrainData.colors);
-			iga.setTextureCoordinates(0, 0, terrainData.textureCoordinates);
-			/*iga.setCoordRefFloat(terrainData.coordinates);
-			iga.setCoordIndicesRef(terrainData.indexes);
-			iga.setNormalRefFloat(terrainData.normals);
-			iga.setColorRefFloat(terrainData.colors);
-			iga.setTexCoordRefFloat(0, terrainData.textureCoordinates);*/
+			if (!BY_REF)
+			{
+				iga.setCoordinates(0, terrainData.coordinates);
+				iga.setCoordinateIndices(0, terrainData.indexes);
+				iga.setNormals(0, terrainData.normals);
+				iga.setColors(0, terrainData.colors);
+				iga.setTextureCoordinates(0, 0, terrainData.textureCoordinates);
+			}
+			else
+			{
+				if (!BUFFERS)
+				{
+					iga.setCoordRefFloat(terrainData.coordinates);
+					iga.setCoordIndicesRef(terrainData.indexes);
+					iga.setNormalRefFloat(terrainData.normals);
+					iga.setColorRefFloat(terrainData.colors);
+					iga.setTexCoordRefFloat(0, terrainData.textureCoordinates);
+				}
+				else
+				{
+
+					iga.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.coordinates)));
+					iga.setCoordIndicesRef(terrainData.indexes);
+					iga.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.normals)));
+					iga.setColorRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.colors)));
+					iga.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.textureCoordinates)));
+				}
+			}
 
 		}
 		return iga;
 
 	}
+
+	
 
 	@Override
 	public String toString()
