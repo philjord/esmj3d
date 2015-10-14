@@ -182,11 +182,14 @@ public class J3dLAND extends J3dRECOStatInst
 	 * @param master
 	 */
 
-	private static TextureAttributes textureAttributesBase = null;
+	//Notice none of the below are static, I don't want too much sharing of appearance parts
+	private Material landMaterial = null;
 
-	private static TextureAttributes textureAttributesLayer = null;
+	private TextureAttributes textureAttributesBase = null;
 
-	private static TransparencyAttributes taLayer = null;
+	private TextureAttributes textureAttributesLayer = null;
+
+	private TransparencyAttributes taLayer = null;
 
 	private Geometry[] quadrantBaseSubGeoms;
 
@@ -364,9 +367,7 @@ public class J3dLAND extends J3dRECOStatInst
 		return new Appearance();
 	}
 
-	private static Material landMaterial = null;
-
-	public static Material getLandMaterial()
+	public Material getLandMaterial()
 	{
 		if (landMaterial == null)
 		{
@@ -778,8 +779,6 @@ public class J3dLAND extends J3dRECOStatInst
 		return iga;
 
 	}
-
-	
 
 	@Override
 	public String toString()

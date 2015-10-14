@@ -23,7 +23,6 @@ import utils.ESConfig;
 import utils.source.MediaSources;
 import utils.source.TextureSource;
 import esmj3d.data.shared.records.InstRECO;
-import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
 import esmj3d.j3d.j3drecords.type.J3dRECOTypeGeneral;
 
@@ -335,7 +334,20 @@ public class TreeMaker
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);
 
-		app.setMaterial(J3dLAND.getLandMaterial());
+		app.setMaterial(getMaterial());
 		return app;
+	}
+
+	public static Material getMaterial()
+	{
+
+		Material m = new Material();
+
+		m.setShininess(1.0f); // trees is  very shiny, generally
+		m.setDiffuseColor(0.5f, 0.6f, 0.5f);
+		m.setSpecularColor(0.0f, 0.0f, 0.0f);
+		m.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+
+		return m;
 	}
 }

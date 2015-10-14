@@ -1,6 +1,5 @@
 package esmj3d.j3d.water;
 
-
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -32,9 +31,6 @@ import utils.PerFrameUpdateBehavior;
 import utils.source.TextureSource;
 
 import com.sun.j3d.utils.shader.StringIO;
-
-import esmj3d.j3d.j3drecords.inst.J3dLAND;
-
 
 public class WaterApp extends BranchGroup
 {
@@ -218,8 +214,21 @@ public class WaterApp extends BranchGroup
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);
 
-		app.setMaterial(J3dLAND.getLandMaterial());
+		app.setMaterial(getLandMaterial());
 		return app;
+	}
+
+	public Material getLandMaterial()
+	{
+
+		Material landMaterial = new Material();
+
+		landMaterial.setShininess(100.0f); // water is  very shiny, generally
+		landMaterial.setDiffuseColor(0.5f, 0.5f, 0.6f);
+		landMaterial.setSpecularColor(1.0f, 1.0f, 1.0f);
+		landMaterial.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+
+		return landMaterial;
 	}
 
 	private static float uniformRandomInRange(double d, double e)

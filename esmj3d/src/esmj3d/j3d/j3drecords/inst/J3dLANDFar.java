@@ -4,6 +4,7 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
+import javax.media.j3d.Material;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TextureAttributes;
 import javax.vecmath.Color4f;
@@ -24,17 +25,20 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 	private int reduceFactor = 2; // 2 or 4 only (2 for non tes3) 2 for far 4 for lod 
 
+	//Notice none of the below are static, I don't want too much sharing of appearance parts
+	private Material landMaterial = null;
+
+	private TextureAttributes textureAttributesBase = null;
+
+	private Geometry[] quadrantBaseSubGeoms;
+
+	private float lowestHeight = Float.MAX_VALUE;
+
 	/**
 	 * makes the visual version of land for farness (1/4 detail no layers)
 	 * @param land
 	 * @param master
 	 */
-
-	private static TextureAttributes textureAttributesBase = null;
-
-	private Geometry[] quadrantBaseSubGeoms;
-
-	private float lowestHeight = Float.MAX_VALUE;
 
 	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource)
 	{
@@ -103,7 +107,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 				{
 					Appearance app = createAppearance();
 
-					app.setMaterial(J3dLAND.getLandMaterial());
+					app.setMaterial(getLandMaterial());
 					app.setTextureAttributes(textureAttributesBase);
 
 					app.setTexture(J3dLAND.getDefaultTexture(textureSource));
@@ -118,9 +122,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 					baseQuadShape.setAppearance(app);
 
 					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-					
+
 					quadrantBaseGroups[quadrant].addChild(baseQuadShape);
-					
+
 				}
 			}
 			else
@@ -132,7 +136,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 						int texFormId = land.VTEXshorts[quadrant];
 
 						Appearance app = createAppearance();
-						app.setMaterial(J3dLAND.getLandMaterial());
+						app.setMaterial(getLandMaterial());
 						app.setTextureAttributes(textureAttributesBase);
 
 						app.setTexture(J3dLAND.getTextureTes3(texFormId, master, textureSource));
@@ -147,6 +151,20 @@ public class J3dLANDFar extends J3dRECOStatInst
 				}
 			}
 		}
+	}
+
+	public Material getLandMaterial()
+	{
+		if (landMaterial == null)
+		{
+			landMaterial = new Material();
+
+			landMaterial.setShininess(1.0f); // land is not very shiny, generally
+			landMaterial.setDiffuseColor(0.5f, 0.5f, 0.5f);
+			landMaterial.setSpecularColor(0.0f, 0.0f, 0.0f);// is the shiny value above not working?
+			landMaterial.setColorTarget(Material.AMBIENT_AND_DIFFUSE);//new
+		}
+		return landMaterial;
 	}
 
 	protected Appearance createAppearance()

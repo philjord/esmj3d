@@ -128,7 +128,12 @@ public class MorphingLandscape extends BranchGroup
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);
 
-		app.setMaterial(J3dLAND.getLandMaterial());
+		Material mat = new Material();
+		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+		mat.setShininess(1.0f);
+		mat.setDiffuseColor(0.5f, 0.6f, 0.5f);
+		mat.setSpecularColor(0.0f, 0.0f, 0.0f);
+		app.setMaterial(mat);
 		return app;
 	}
 
@@ -149,8 +154,8 @@ public class MorphingLandscape extends BranchGroup
 		Material mat = new Material();
 		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
 		mat.setShininess(120.0f);
-		mat.setDiffuseColor(0.0f, 0.1f, 1f);
-		mat.setSpecularColor(0.5f, 0.5f, 0.6f);
+		mat.setDiffuseColor(0.5f, 0.5f, 0.6f);
+		mat.setSpecularColor(0.9f, 0.9f, 1.0f);
 		app.setMaterial(mat);
 		return app;
 	}
