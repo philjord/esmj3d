@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,17 +123,24 @@ public class BsaTextureSource implements TextureSource
 					try
 					{
 
-						InputStream in = archiveFile.getInputStream(archiveEntry);
-						//String fileName = archiveEntry.getName();
-
-						if (texName.endsWith(".dds"))
+						if (texName.endsWith(".dds") && archiveEntry.isCompressed() == false)
 						{
+							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
 							tex = DDSTextureLoader.getTexture(texName, in);
 						}
 						else
 						{
-							TextureLoader tl = new TextureLoader(ImageIO.read(in));
-							tex = tl.getTexture();
+							InputStream in = archiveFile.getInputStream(archiveEntry);
+
+							if (texName.endsWith(".dds"))
+							{
+								tex = DDSTextureLoader.getTexture(texName, in);
+							}
+							else
+							{
+								TextureLoader tl = new TextureLoader(ImageIO.read(in));
+								tex = tl.getTexture();
+							}
 						}
 
 						if (tex != null)
