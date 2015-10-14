@@ -28,8 +28,6 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 	protected HashMap<Integer, J3dRECOInst> j3dRECOs = new HashMap<Integer, J3dRECOInst>();
 
-	public String name = "J3dCELLGeneral";
-
 	protected boolean makePhys;
 
 	protected MediaSources mediaSources;
@@ -40,6 +38,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 	public J3dCELLGeneral(IRecordStore master, List<Record> children, boolean makePhys, MediaSources mediaSources)
 	{
+		this.setName(this.getClass().getSimpleName());
 		this.master = master;
 		this.children = children;
 		this.makePhys = makePhys;

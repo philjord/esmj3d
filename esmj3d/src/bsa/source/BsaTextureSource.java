@@ -4,7 +4,6 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class BsaTextureSource implements TextureSource
 	public BsaTextureSource(List<ArchiveFile> allBsas)
 	{
 		this.bsas = new ArrayList<ArchiveFile>();
-		for (ArchiveFile archiveFile : allBsas)
+		for (ArchiveFile archiveFile : allBsas )
 		{
 			if (archiveFile.hasDDS())
 			{
@@ -119,28 +118,20 @@ public class BsaTextureSource implements TextureSource
 
 				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
 				if (archiveEntry != null)
-				{
+				{ 
 					try
-					{
+					{ 
+						//note that we want all disk activity now, (mappedbytebuffers can delay it until the j3d thread)
+						InputStream in = archiveFile.getInputStream(archiveEntry);
 
-						if (texName.endsWith(".dds") && archiveEntry.isCompressed() == false)
+						if (texName.endsWith(".dds"))
 						{
-							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
 							tex = DDSTextureLoader.getTexture(texName, in);
 						}
 						else
 						{
-							InputStream in = archiveFile.getInputStream(archiveEntry);
-
-							if (texName.endsWith(".dds"))
-							{
-								tex = DDSTextureLoader.getTexture(texName, in);
-							}
-							else
-							{
-								TextureLoader tl = new TextureLoader(ImageIO.read(in));
-								tex = tl.getTexture();
-							}
+							TextureLoader tl = new TextureLoader(ImageIO.read(in));
+							tex = tl.getTexture();
 						}
 
 						if (tex != null)
