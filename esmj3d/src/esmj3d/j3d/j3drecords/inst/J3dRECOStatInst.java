@@ -47,7 +47,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	 * @param enableSimpleFade
 	 * @param makePhys
 	 */
-	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType defaultJ3dRECOType, boolean enableSimpleFade, boolean makePhys)
+	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean makePhys)
 	{
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
 
@@ -55,18 +55,10 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 		setLocation(instRECO);
 		this.instRECO = instRECO;
-		if (defaultJ3dRECOType != null)
+
+		if (j3dRECOType != null)
 		{
-			if (fader)
-			{
-				setJ3dRECOType(defaultJ3dRECOType);
-			}
-			else
-			{
-				// attach non fading physic node as a type for bullet build
-				this.j3dRECOType = defaultJ3dRECOType;
-				transformGroup.addChild(defaultJ3dRECOType);
-			}
+			setJ3dRECOType(j3dRECOType);
 		}
 	}
 
@@ -102,9 +94,17 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	public void setJ3dRECOType(J3dRECOType j3dRECOType)
 	{
-		BranchGroup bg = new BranchGroup();// empty group for no rendering
-		bg.addChild(SHOW_FADE_OUT_MARKER ? new ColorCube(0.1) : new BranchGroup());
-		setJ3dRECOType(j3dRECOType, bg);
+		if (fader && SHOW_FADE_OUT_MARKER)
+		{
+			BranchGroup bg = new BranchGroup();// empty group for no rendering
+			bg.addChild(new ColorCube(0.1));
+			setJ3dRECOType(j3dRECOType, bg);
+		}
+		else
+		{
+			this.j3dRECOType = j3dRECOType;
+			transformGroup.addChild(j3dRECOType);
+		}
 	}
 
 	public void setJ3dRECOType(J3dRECOType j3dRECOType, BranchGroup j3dRECOTypeFar)

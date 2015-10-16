@@ -38,6 +38,12 @@ public class BethRenderSettings
 
 	private static boolean isTes3 = false;
 
+	private static boolean outlineChars = true;
+
+	private static boolean outlineDoors = false;
+
+	private static boolean outlineConts = false;
+
 	private static WeakListenerList<UpdateListener> updateListeners = new WeakListenerList<UpdateListener>();
 
 	public static interface UpdateListener
@@ -187,6 +193,39 @@ public class BethRenderSettings
 	public static void setTes3(boolean isTes3)
 	{
 		BethRenderSettings.isTes3 = isTes3;
+		// no fire updates as not possible after init
 	}
 
+	public static boolean isOutlineChars()
+	{
+		return outlineChars;
+	}
+
+	public static void setOutlineChars(boolean outlineChars)
+	{
+		BethRenderSettings.outlineChars = outlineChars;
+		fireUpdate();
+	}
+
+	public static boolean isOutlineDoors()
+	{
+		return outlineDoors;
+	}
+
+	public static void setOutlineDoors(boolean outlineDoors)
+	{
+		BethRenderSettings.outlineDoors = outlineDoors;
+		fireUpdate();
+	}
+
+	public static boolean isOutlineConts()
+	{
+		return outlineConts;
+	}
+
+	public static void setOutlineConts(boolean outlineConts)
+	{
+		BethRenderSettings.outlineConts = outlineConts;
+		fireUpdate();
+	}
 }

@@ -4,6 +4,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
 
+import javax.vecmath.Color3f;
+
 import nif.NifJ3dHavokRoot;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
@@ -14,13 +16,16 @@ import esmj3d.data.shared.records.RECO;
 
 public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 {
-	private J3dNiAVObject j3dNiAVObject;
 
 	public J3dRECOTypeGeneral(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources)
 	{
 		super(reco, nifFileName);
 		j3dNiAVObject = loadNif(nifFileName, makePhys, mediaSources);
-		addChild(j3dNiAVObject);
+		if (j3dNiAVObject != null)
+		{
+			addChild(j3dNiAVObject);
+			fireIdle();
+		}
 	}
 
 	@Override
@@ -38,6 +43,15 @@ public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 			((Fadable) j3dNiAVObject).fade(percent);
 		}
 
+	}
+	
+	@Override
+	public void setOutline(Color3f c)
+	{
+		if (j3dNiAVObject != null && j3dNiAVObject instanceof Fadable)
+		{
+			((Fadable) j3dNiAVObject).setOutline(c);
+		}
 	}
 
 	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MediaSources mediaSources)

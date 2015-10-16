@@ -1,16 +1,15 @@
 package esmj3d.j3d.j3drecords.type;
 
-import nif.NifJ3dHavokRoot;
-import nif.NifJ3dVisRoot;
+import javax.vecmath.Color3f;
+
 import nif.NifToJ3d;
-import nif.j3d.J3dNiAVObject;
+import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
 import esmj3d.data.shared.records.GenericDOOR;
+import esmj3d.j3d.BethRenderSettings;
 
 public class J3dDOOR extends J3dRECOType
 {
-	private J3dNiAVObject j3dNiAVObject;
-
 	private boolean isOpen = false;
 
 	public J3dDOOR(GenericDOOR reco, boolean makePhys, MediaSources mediaSources)
@@ -19,17 +18,41 @@ public class J3dDOOR extends J3dRECOType
 
 		if (makePhys)
 		{
-			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(reco.MODL.model.str, mediaSources.getMeshSource());
-			if (nhr != null)
-				j3dNiAVObject = nhr.getHavokRoot();
+			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model.str, mediaSources.getMeshSource()).getHavokRoot();
 		}
 		else
 		{
-			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(reco.MODL.model.str, mediaSources.getMeshSource(), mediaSources.getTextureSource());
-			if (nvr != null)
-				j3dNiAVObject = nvr.getVisualRoot();
+			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, mediaSources.getMeshSource(), mediaSources.getTextureSource())
+					.getVisualRoot();
 		}
-		addChild(j3dNiAVObject);
+
+		if (j3dNiAVObject != null)
+		{
+			//prep for possible outlines later
+			if (j3dNiAVObject instanceof Fadable)
+			{
+				((Fadable) j3dNiAVObject).setOutline(new Color3f(1.0f, 0.5f, 0f));
+				if (!BethRenderSettings.isOutlineDoors())
+					((Fadable) j3dNiAVObject).setOutline(null);
+			}
+
+			addChild(j3dNiAVObject);
+			fireIdle();
+		}
+
+	}
+
+	@Override
+	public void renderSettingsUpdated()
+	{
+		if (j3dNiAVObject != null)
+		{
+			if (j3dNiAVObject instanceof Fadable)
+			{
+				Color3f c = BethRenderSettings.isOutlineDoors() ? new Color3f(1.0f, 0.5f, 0f) : null;
+				((Fadable) j3dNiAVObject).setOutline(c);
+			}
+		}
 	}
 
 	public void toggleOpen()

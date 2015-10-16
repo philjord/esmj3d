@@ -10,6 +10,8 @@ import javax.media.j3d.Node;
 import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
+import esmj3d.j3d.BethRenderSettings;
+import esmj3d.j3d.BethRenderSettings.UpdateListener;
 import esmj3d.j3d.j3drecords.inst.J3dRECODynInst;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 
@@ -19,7 +21,7 @@ import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
  * @author Administrator
  *
  */
-public class GridSpace extends BranchGroup
+public class GridSpace extends BranchGroup implements UpdateListener
 {
 
 	private Point key;
@@ -49,6 +51,8 @@ public class GridSpace extends BranchGroup
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
+
+		BethRenderSettings.addUpdateListener(this);
 	}
 
 	public HashMap<Integer, J3dRECOInst> getJ3dRECOsById()
@@ -56,6 +60,18 @@ public class GridSpace extends BranchGroup
 
 		return j3dRECOsById;
 
+	}
+
+	@Override
+	public void renderSettingsUpdated()
+	{
+		if (!makePhys)
+		{
+			for (J3dRECOInst j3dRECOInst : j3dRECOsById.values())
+			{
+				j3dRECOInst.renderSettingsUpdated();
+			}
+		}
 	}
 
 	/**
