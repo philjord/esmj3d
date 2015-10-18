@@ -183,10 +183,13 @@ public class LAND extends InstRECO
 				ATXTs[j] = ATXTsv.get(j);
 			}
 
-			VTEXids = new FormID[VTEXidsv.size()];
-			for (int j = 0; j < VTEXidsv.size(); j++)
+			if (VTEXidsv.size() > 0)
 			{
-				VTEXids[j] = VTEXidsv.get(j);
+				VTEXids = new FormID[VTEXidsv.size()];
+				for (int j = 0; j < VTEXidsv.size(); j++)
+				{
+					VTEXids[j] = VTEXidsv.get(j);
+				}
 			}
 
 			Arrays.sort(ATXTs, new Comparator<ATXT>()

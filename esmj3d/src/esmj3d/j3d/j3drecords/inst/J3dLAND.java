@@ -13,6 +13,7 @@ import javax.media.j3d.IndexedTriangleStripArray;
 import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Material;
 import javax.media.j3d.OrderedGroup;
+import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureAttributes;
@@ -185,6 +186,8 @@ public class J3dLAND extends J3dRECOStatInst
 	//Notice none of the below are static, I don't want too much sharing of appearance parts
 	private Material landMaterial = null;
 
+	private RenderingAttributes landRA = null;
+
 	private TextureAttributes textureAttributesBase = null;
 
 	private TextureAttributes textureAttributesLayer = null;
@@ -249,20 +252,30 @@ public class J3dLAND extends J3dRECOStatInst
 
 			if (!land.tes3)
 			{
+
 				// make up some base land texture, pre sorted to btxt by quadrant
 				for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 				{
-					Appearance app = createAppearance();
-
-					app.setMaterial(getLandMaterial());
+					Appearance app = createAppearance();					
 					app.setTextureAttributes(textureAttributesBase);
 
-					app.setTexture(getDefaultTexture(textureSource));
 					//oddly btxt are optional
 					BTXT btxt = land.BTXTs[quadrant];
 					if (btxt != null)
 					{
 						app.setTexture(getTexture(btxt.textureFormID, master, textureSource));
+					}
+					else if (land.VTEXids != null)
+					{
+						if (quadrant < land.VTEXids.length)
+						{
+							int texFormId = land.VTEXids[quadrant].formId;
+							app.setTexture(getTexture(texFormId, master, textureSource));
+						}
+					}
+					else
+					{
+						app.setTexture(getDefaultTexture(textureSource));
 					}
 
 					Shape3D baseQuadShape = new Shape3D();
@@ -280,8 +293,7 @@ public class J3dLAND extends J3dRECOStatInst
 					{
 						int texFormId = land.VTEXshorts[quadrant];
 
-						Appearance app = createAppearance();
-						app.setMaterial(getLandMaterial());
+						Appearance app = createAppearance();						
 						app.setTextureAttributes(textureAttributesBase);
 
 						app.setTexture(getTextureTes3(texFormId, master, textureSource));
@@ -336,7 +348,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 				int quadrant = atxt.quadrant;
 				Appearance app = createAppearance();
-				app.setMaterial(getLandMaterial());
+
 				app.setTextureAttributes(textureAttributesLayer);
 				app.setTransparencyAttributes(taLayer);
 
@@ -362,12 +374,24 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 	}
 
-	protected Appearance createAppearance()
+	private Appearance createAppearance()
 	{
-		return new Appearance();
+		Appearance app = new Appearance();
+		app.setRenderingAttributes(getLandRA());
+		app.setMaterial(getLandMaterial());
+		return app;
 	}
 
-	public Material getLandMaterial()
+	private RenderingAttributes getLandRA()
+	{
+		if (landRA == null)
+		{
+			landRA = new RenderingAttributes();
+		}
+		return landRA;
+	}
+
+	private Material getLandMaterial()
 	{
 		if (landMaterial == null)
 		{

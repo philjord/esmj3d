@@ -5,6 +5,7 @@ import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.Material;
+import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TextureAttributes;
 import javax.vecmath.Color4f;
@@ -27,6 +28,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 	//Notice none of the below are static, I don't want too much sharing of appearance parts
 	private Material landMaterial = null;
+
+	private RenderingAttributes landRA = null;
 
 	private TextureAttributes textureAttributesBase = null;
 
@@ -97,7 +100,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 			if (!land.tes3)
 			{
 				//VTEXs a bad def that in fact should be only in the older tes3 system, I wager
-				if (land.VTEXids.length > 0)
+				if (land.VTEXids != null)
 				{
 					System.out.println("***********************VTEXs in LAND");
 				}
@@ -106,16 +109,17 @@ public class J3dLANDFar extends J3dRECOStatInst
 				for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 				{
 					Appearance app = createAppearance();
-
-					app.setMaterial(getLandMaterial());
 					app.setTextureAttributes(textureAttributesBase);
 
-					app.setTexture(J3dLAND.getDefaultTexture(textureSource));
 					//oddly btxt are optional
 					BTXT btxt = land.BTXTs[quadrant];
 					if (btxt != null)
 					{
 						app.setTexture(J3dLAND.getTexture(btxt.textureFormID, master, textureSource));
+					}
+					else
+					{
+						app.setTexture(J3dLAND.getDefaultTexture(textureSource));
 					}
 
 					Shape3D baseQuadShape = new Shape3D();
@@ -136,7 +140,6 @@ public class J3dLANDFar extends J3dRECOStatInst
 						int texFormId = land.VTEXshorts[quadrant];
 
 						Appearance app = createAppearance();
-						app.setMaterial(getLandMaterial());
 						app.setTextureAttributes(textureAttributesBase);
 
 						app.setTexture(J3dLAND.getTextureTes3(texFormId, master, textureSource));
@@ -153,7 +156,24 @@ public class J3dLANDFar extends J3dRECOStatInst
 		}
 	}
 
-	public Material getLandMaterial()
+	private Appearance createAppearance()
+	{
+		Appearance app = new Appearance();
+		app.setRenderingAttributes(getLandRA());
+		app.setMaterial(getLandMaterial());
+		return app;
+	}
+
+	private RenderingAttributes getLandRA()
+	{
+		if (landRA == null)
+		{
+			landRA = new RenderingAttributes();
+		}
+		return landRA;
+	}
+
+	private Material getLandMaterial()
 	{
 		if (landMaterial == null)
 		{
@@ -165,11 +185,6 @@ public class J3dLANDFar extends J3dRECOStatInst
 			landMaterial.setColorTarget(Material.AMBIENT_AND_DIFFUSE);//new
 		}
 		return landMaterial;
-	}
-
-	protected Appearance createAppearance()
-	{
-		return new Appearance();
 	}
 
 	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
