@@ -31,7 +31,7 @@ public class J3dCONT extends J3dRECOType
 		if (j3dNiAVObject != null)
 		{
 			//prep for possible outlines later
-			if (j3dNiAVObject instanceof Fadable)
+			if (j3dNiAVObject instanceof Fadable && !makePhys)
 			{
 				((Fadable) j3dNiAVObject).setOutline(new Color3f(0.5f, 0.4f, 0f));
 				if (!BethRenderSettings.isOutlineConts())

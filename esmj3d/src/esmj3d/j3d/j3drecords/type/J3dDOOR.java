@@ -29,7 +29,7 @@ public class J3dDOOR extends J3dRECOType
 		if (j3dNiAVObject != null)
 		{
 			//prep for possible outlines later
-			if (j3dNiAVObject instanceof Fadable)
+			if (j3dNiAVObject instanceof Fadable && !makePhys)
 			{
 				((Fadable) j3dNiAVObject).setOutline(new Color3f(1.0f, 0.5f, 0f));
 				if (!BethRenderSettings.isOutlineDoors())
