@@ -56,6 +56,15 @@ public class CommonCELL extends InstRECO
 			{
 				x = ESMByteConvert.extractInt(bs, 0);
 				y = ESMByteConvert.extractInt(bs, 4);
+				if (bs.length == 12)
+				{
+					/*	uint32 - flags (high bits look random)
+
+					    0x1 - Force Hide Land Quad 1
+					    0x2 - Force Hide Land Quad 2
+					    0x4 - Force Hide Land Quad 3
+					    0x8 - Force Hide Land Quad 4 */
+				}
 			}
 			else if (sr.getType().equals("XOWN"))
 			{
@@ -67,7 +76,7 @@ public class CommonCELL extends InstRECO
 			}
 			else if (sr.getType().equals("XCLR"))
 			{
-//				XCLRs.add(new FormID(bs));
+				//				XCLRs.add(new FormID(bs));
 			}
 			else if (sr.getType().equals("XCLW"))
 			{

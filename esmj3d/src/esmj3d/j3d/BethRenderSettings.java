@@ -44,6 +44,8 @@ public class BethRenderSettings
 
 	private static boolean outlineConts = false;
 
+	private static boolean outlineParts = false;
+
 	private static WeakListenerList<UpdateListener> updateListeners = new WeakListenerList<UpdateListener>();
 
 	public static interface UpdateListener
@@ -226,6 +228,17 @@ public class BethRenderSettings
 	public static void setOutlineConts(boolean outlineConts)
 	{
 		BethRenderSettings.outlineConts = outlineConts;
+		fireUpdate();
+	}
+	
+	public static boolean isOutlineParts()
+	{
+		return outlineParts;
+	}
+
+	public static void setOutlineParts(boolean outlineParts)
+	{
+		BethRenderSettings.outlineParts = outlineParts;
 		fireUpdate();
 	}
 }

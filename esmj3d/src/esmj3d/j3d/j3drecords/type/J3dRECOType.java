@@ -4,7 +4,9 @@ import javax.media.j3d.BranchGroup;
 
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.animation.J3dNiControllerSequence;
+import nif.j3d.particles.J3dNiParticleSystem;
 import esmj3d.data.shared.records.RECO;
+import esmj3d.j3d.BethRenderSettings;
 
 public abstract class J3dRECOType extends BranchGroup
 {
@@ -26,7 +28,8 @@ public abstract class J3dRECOType extends BranchGroup
 	}
 
 	public void renderSettingsUpdated()
-	{		
+	{
+		J3dNiParticleSystem.setSHOW_DEBUG_LINES(BethRenderSettings.isOutlineParts());
 	}
 
 	protected void fireIdle()
@@ -40,11 +43,12 @@ public abstract class J3dRECOType extends BranchGroup
 			{
 				if (seqName.toLowerCase().indexOf("idle") != -1)
 				{
-					J3dNiControllerSequence  seq = j3dNiAVObject.getJ3dNiControllerManager().getSequence(seqName);
-					if(seq.isNotRunning())
-					seq.fireSequence();
+					J3dNiControllerSequence seq = j3dNiAVObject.getJ3dNiControllerManager().getSequence(seqName);
+					if (seq.isNotRunning())
+						seq.fireSequence();
 					else
-					System.out.println("refiring " + seqName + " for " + j3dNiAVObject + " : " + j3dNiAVObject.getNiAVObject().nVer.fileName);
+						System.out.println("refiring " + seqName + " for " + j3dNiAVObject + " : "
+								+ j3dNiAVObject.getNiAVObject().nVer.fileName);
 					break;
 				}
 			}

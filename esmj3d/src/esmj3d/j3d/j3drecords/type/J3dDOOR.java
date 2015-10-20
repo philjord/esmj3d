@@ -45,6 +45,7 @@ public class J3dDOOR extends J3dRECOType
 	@Override
 	public void renderSettingsUpdated()
 	{
+		super.renderSettingsUpdated();
 		if (j3dNiAVObject != null)
 		{
 			if (j3dNiAVObject instanceof Fadable)

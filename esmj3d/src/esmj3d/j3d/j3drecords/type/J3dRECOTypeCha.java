@@ -19,6 +19,7 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 	@Override
 	public void renderSettingsUpdated()
 	{
+		super.renderSettingsUpdated();
 		if (nifCharacter != null)
 		{
 			Color3f c = BethRenderSettings.isOutlineChars() ? new Color3f(1.0f, 1.0f, 0f) : null;

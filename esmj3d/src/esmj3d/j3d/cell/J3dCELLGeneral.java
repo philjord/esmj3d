@@ -55,6 +55,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 	{
 		this.instCell = instCell;
 		float landSize = J3dLAND.LAND_SIZE;
+		//we don't use instCell.getTrans().z even if set
 		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0, -(instCell.getTrans().y * landSize)
 				- (landSize / 2f));
 	}
