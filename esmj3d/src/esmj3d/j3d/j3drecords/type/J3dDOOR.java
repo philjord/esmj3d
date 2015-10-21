@@ -59,7 +59,10 @@ public class J3dDOOR extends J3dRECOType
 	public void toggleOpen()
 	{
 		isOpen = !isOpen;
-		j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
+		if (j3dNiAVObject.getJ3dNiControllerManager() != null)
+			j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
+		else
+			System.out.println("Odd door with no controller, probably travel door");
 	}
 
 	public void setOpen(boolean isOpen)
