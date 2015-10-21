@@ -1,4 +1,4 @@
-package esmj3d.j3d;
+package esmj3d.j3d.trees;
 
 import java.util.HashMap;
 

@@ -1,4 +1,4 @@
-package esmj3d.j3d;
+package esmj3d.j3d.trees;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
@@ -23,6 +23,7 @@ import utils.ESConfig;
 import utils.source.MediaSources;
 import utils.source.TextureSource;
 import esmj3d.data.shared.records.InstRECO;
+import esmj3d.j3d.LODNif;
 import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
 import esmj3d.j3d.j3drecords.type.J3dRECOTypeGeneral;
 
@@ -144,6 +145,7 @@ public class TreeMaker
 
 	}
 
+	//NOTE! before you enable this bad boy notice that scale factors in the instRECO may be be handled properly
 	private static boolean ENABLE_SG = false;
 
 	private static WeakValueHashMap<String, SharedGroup> loadedFlatLodSharedGroups = new WeakValueHashMap<String, SharedGroup>();

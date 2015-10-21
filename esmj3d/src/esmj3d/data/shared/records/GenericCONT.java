@@ -6,12 +6,15 @@ import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.CNTO;
+import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.MODL;
 import esmj3d.data.shared.subrecords.ZString;
 
 public class GenericCONT extends RECO
 {
 	public ZString EDID;
+
+	public LString FULL;
 
 	public MODL MODL;
 

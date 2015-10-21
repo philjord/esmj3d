@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import tools.io.ESMByteConvert;
 import esmLoader.common.data.record.Record;
 import esmLoader.common.data.record.Subrecord;
+import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.MODL;
 import esmj3d.data.shared.subrecords.ZString;
 
 public class GenericDOOR extends RECO
 {
 	public ZString EDID;
+
+	public LString FULL;
 
 	public MODL MODL;
 
@@ -36,7 +39,6 @@ public class GenericDOOR extends RECO
 			{
 				EDID = new ZString(bs);
 			}
-
 			else if (sr.getType().equals("MODL"))
 			{
 				MODL = new MODL(bs);
