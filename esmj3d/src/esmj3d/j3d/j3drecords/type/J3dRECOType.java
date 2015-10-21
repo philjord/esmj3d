@@ -10,21 +10,26 @@ import esmj3d.j3d.BethRenderSettings;
 
 public abstract class J3dRECOType extends BranchGroup
 {
-	private int recordId = -1;
+	private RECO RECO = null;
 
 	public String physNifFile = "";
 
 	protected J3dNiAVObject j3dNiAVObject;
 
-	public int getRecordId()
-	{
-		return recordId;
-	}
-
 	public J3dRECOType(RECO RECO, String physNifFile)
 	{
-		recordId = RECO.getRecordId();
+		this.RECO = RECO;
 		this.physNifFile = physNifFile;
+	}
+
+	public RECO getRECO()
+	{
+		return RECO;
+	}
+
+	public int getRecordId()
+	{
+		return RECO.getRecordId();
 	}
 
 	public void renderSettingsUpdated()
@@ -58,7 +63,7 @@ public abstract class J3dRECOType extends BranchGroup
 	@Override
 	public String toString()
 	{
-		return "" + this.getClass().getSimpleName() + " id " + recordId + " : " + physNifFile;
+		return "" + this.getClass().getSimpleName() + " id " + RECO.getRecordId() + " : " + physNifFile;
 	}
 
 }
