@@ -84,9 +84,9 @@ public class CommonREFR extends InstRECO
 				{
 					EDID = new ZString(bs);
 				}
-				else if (sr.getType().equals("XTEL"))
+				else if (sr.getType().equals("XTEL") )
 				{
-					XTEL = new XTEL(bs);
+					XTEL = new XTEL(bs);				
 				}
 				else if (sr.getType().equals("ONAM"))
 				{

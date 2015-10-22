@@ -20,12 +20,25 @@ public class XTEL
 
 	public XTEL(byte[] bytes)
 	{
-		doorFormId = ESMByteConvert.extractInt(bytes, 0);
-		x = ESMByteConvert.extractFloat(bytes, 4);
-		y = ESMByteConvert.extractFloat(bytes, 8);
-		z = ESMByteConvert.extractFloat(bytes, 12);
-		rx = ESMByteConvert.extractFloat(bytes, 16);
-		ry = ESMByteConvert.extractFloat(bytes, 20);
-		rz = ESMByteConvert.extractFloat(bytes, 24);
+		//normal xtel or TES3 DODT version (doorFormId set later)
+		if (bytes.length == 28)
+		{
+			doorFormId = ESMByteConvert.extractInt(bytes, 0);
+			x = ESMByteConvert.extractFloat(bytes, 4);
+			y = ESMByteConvert.extractFloat(bytes, 8);
+			z = ESMByteConvert.extractFloat(bytes, 12);
+			rx = ESMByteConvert.extractFloat(bytes, 16);
+			ry = ESMByteConvert.extractFloat(bytes, 20);
+			rz = ESMByteConvert.extractFloat(bytes, 24);
+		}
+		else
+		{
+			x = ESMByteConvert.extractFloat(bytes, 0);
+			y = ESMByteConvert.extractFloat(bytes, 4);
+			z = ESMByteConvert.extractFloat(bytes, 8);
+			rx = ESMByteConvert.extractFloat(bytes, 12);
+			ry = ESMByteConvert.extractFloat(bytes, 16);
+			rz = ESMByteConvert.extractFloat(bytes, 20);
+		}
 	}
 }
