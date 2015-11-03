@@ -156,12 +156,31 @@ public class WaterApp extends BranchGroup
 				}
 
 				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram);
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram);
+				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram)
+				{
+					public String toString()
+					{
+						return "vertexProgram";
+					}
+				};
+				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram)
+				{
+					public String toString()
+					{
+						return "fragmentProgram";
+					}
+				};
+
 				final String[] shaderAttrNames =
 				{ "envMap", "numWaves", "amplitude", "wavelength", "speed", "direction", "time" };
 
-				shaderProgram = new GLSLShaderProgram();
+				shaderProgram = new GLSLShaderProgram()
+				{
+					public String toString()
+					{
+						return "Water Shader Program";
+					}
+				};
 				shaderProgram.setShaders(shaders);
 				shaderProgram.setShaderAttrNames(shaderAttrNames);
 
