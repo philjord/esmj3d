@@ -3,8 +3,8 @@ package esmj3d.j3d.cell;
 import javax.media.j3d.BranchGroup;
 
 import utils.source.MediaSources;
-import esmLoader.common.data.plugin.IMaster;
-import esmLoader.common.data.record.IRecordStore;
+import esmmanager.common.data.plugin.IMaster;
+import esmmanager.common.data.record.IRecordStore;
 
 public interface J3dICellFactory
 {

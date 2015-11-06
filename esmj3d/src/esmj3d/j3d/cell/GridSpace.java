@@ -8,12 +8,12 @@ import javax.media.j3d.Group;
 import javax.media.j3d.Node;
 
 import tools.io.ESMByteConvert;
-import esmLoader.common.data.record.Record;
-import esmLoader.common.data.record.Subrecord;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.BethRenderSettings.UpdateListener;
 import esmj3d.j3d.j3drecords.inst.J3dRECODynInst;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
+import esmmanager.common.data.record.Record;
+import esmmanager.common.data.record.Subrecord;
 
 /**
  * Note whilst this extends branchgroup these GridSpace objects are not discarded, so to keep memory down GridSpace

@@ -13,8 +13,8 @@ import nif.NifJ3dHavokRoot;
 import nif.NifToJ3d;
 import utils.ESConfig;
 import utils.source.MediaSources;
-import esmLoader.EsmFileLocations;
 import esmj3d.data.shared.records.CommonLIGH;
+import esmmanager.EsmFileLocations;
 
 public class J3dLIGH extends J3dRECOType
 {

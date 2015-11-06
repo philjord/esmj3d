@@ -34,8 +34,6 @@ import utils.source.TextureSource;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
 
-import esmLoader.common.data.record.IRecordStore;
-import esmLoader.common.data.record.Record;
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.ATXT;
 import esmj3d.data.shared.records.LAND.BTXT;
@@ -43,6 +41,8 @@ import esmj3d.data.shared.records.LAND.VTXT;
 import esmj3d.data.shared.records.LTEX;
 import esmj3d.data.shared.records.TXST;
 import esmj3d.j3d.TESLANDGen;
+import esmmanager.common.data.record.IRecordStore;
+import esmmanager.common.data.record.Record;
 
 public class J3dLAND extends J3dRECOStatInst
 {

@@ -3,8 +3,6 @@ package esmj3d.data.shared.records;
 import java.util.ArrayList;
 
 import tools.io.ESMByteConvert;
-import esmLoader.common.data.record.Record;
-import esmLoader.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.FNAM;
 import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.data.shared.subrecords.LString;
@@ -18,6 +16,8 @@ import esmj3d.data.shared.subrecords.XLOD;
 import esmj3d.data.shared.subrecords.XRNK;
 import esmj3d.data.shared.subrecords.XTEL;
 import esmj3d.data.shared.subrecords.ZString;
+import esmmanager.common.data.record.Record;
+import esmmanager.common.data.record.Subrecord;
 
 public class CommonREFR extends InstRECO
 {

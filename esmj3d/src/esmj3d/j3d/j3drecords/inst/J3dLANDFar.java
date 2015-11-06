@@ -16,10 +16,10 @@ import org.j3d.geom.GeometryData;
 
 import tools.io.ESMByteConvert;
 import utils.source.TextureSource;
-import esmLoader.common.data.record.IRecordStore;
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.BTXT;
 import esmj3d.j3d.TESLANDGen;
+import esmmanager.common.data.record.IRecordStore;
 
 public class J3dLANDFar extends J3dRECOStatInst
 {

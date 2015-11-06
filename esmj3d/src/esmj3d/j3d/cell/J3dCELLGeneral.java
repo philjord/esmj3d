@@ -12,13 +12,13 @@ import javax.vecmath.Vector3f;
 
 import utils.ESConfig;
 import utils.source.MediaSources;
-import esmLoader.common.data.record.IRecordStore;
-import esmLoader.common.data.record.Record;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 import esmj3d.j3d.water.Water;
 import esmj3d.j3d.water.WaterApp;
+import esmmanager.common.data.record.IRecordStore;
+import esmmanager.common.data.record.Record;
 
 public abstract class J3dCELLGeneral extends BranchGroup
 {

@@ -3,7 +3,7 @@ package esmj3d.data.shared.records;
 import javax.vecmath.Vector3f;
 
 import tools.io.ESMByteConvert;
-import esmLoader.common.data.record.Record;
+import esmmanager.common.data.record.Record;
 
 public abstract class InstRECO extends RECO
 {

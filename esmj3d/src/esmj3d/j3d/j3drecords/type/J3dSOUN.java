@@ -10,10 +10,10 @@ import javax.media.j3d.WakeupOnElapsedFrames;
 import nif.compound.NifKey;
 import nif.niobject.NiTextKeyExtraData;
 import utils.source.SoundSource;
-import esmLoader.common.data.record.IRecordStore;
-import esmLoader.common.data.record.Record;
 import esmj3d.data.shared.records.GenericSOUN;
 import esmj3d.data.shared.records.RECO;
+import esmmanager.common.data.record.IRecordStore;
+import esmmanager.common.data.record.Record;
 
 public class J3dSOUN extends J3dRECOType
 {
