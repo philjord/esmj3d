@@ -134,6 +134,9 @@ public class MorphingLandscape extends BranchGroup
 		mat.setDiffuseColor(0.5f, 0.6f, 0.5f);
 		mat.setSpecularColor(0.0f, 0.0f, 0.0f);
 		app.setMaterial(mat);
+		
+		app.setRenderingAttributes(new RenderingAttributes());
+		
 		return app;
 	}
 
