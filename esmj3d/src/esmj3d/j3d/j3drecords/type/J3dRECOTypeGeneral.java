@@ -16,6 +16,11 @@ public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 	public J3dRECOTypeGeneral(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources)
 	{
 		super(reco, nifFileName);
+
+		//ignore markers and targets for now
+		if (nifFileName.toLowerCase().contains("marker"))
+			return;
+
 		j3dNiAVObject = loadNif(nifFileName, makePhys, mediaSources);
 		if (j3dNiAVObject != null)
 		{

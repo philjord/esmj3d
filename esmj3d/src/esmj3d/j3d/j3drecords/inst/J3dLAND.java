@@ -620,9 +620,9 @@ public class J3dLAND extends J3dRECOStatInst
 			{
 				defaultTex = textureSource.getTexture("Landscape\\default.dds");
 			}
-			else if (textureSource.textureFileExists("tx_ac_dirt_01.dds"))
+			else if (textureSource.textureFileExists("_land_default.dds"))
 			{
-				defaultTex = textureSource.getTexture("tx_ac_dirt_01.dds");
+				defaultTex = textureSource.getTexture("_land_default.dds");
 			}
 			else
 			{
