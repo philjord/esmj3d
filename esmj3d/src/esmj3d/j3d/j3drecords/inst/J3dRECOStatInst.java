@@ -25,7 +25,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	private boolean fader = false;
 
-	private BetterDistanceLOD dl;
+	protected BetterDistanceLOD dl;
 
 	private ArrayList<BranchGroup> myNodes = new ArrayList<BranchGroup>();
 
