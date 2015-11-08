@@ -76,6 +76,9 @@ public class TreeMaker
 			String sptFileName = treeName;
 
 			String skyrimReplacer = SkyrimTreeLookup.getLookup(sptFileName);
+			//if we do not have the skyrim bsa or the cut down skyrimTrees bsa ignore
+			if (skyrimReplacer != null && !mediaSources.getMeshSource().nifFileExists(skyrimReplacer))
+				skyrimReplacer = null;
 
 			//fars always just show original far
 			if (!far && skyrimReplacer != null)

@@ -9,16 +9,16 @@ import nif.j3d.J3dNiAVObject;
 import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
 import esmj3d.data.shared.records.RECO;
+import esmj3d.j3d.BethRenderSettings;
 
 public class J3dRECOTypeGeneral extends J3dRECOType implements Fadable
 {
-
 	public J3dRECOTypeGeneral(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources)
 	{
 		super(reco, nifFileName);
 
-		//ignore markers and targets for now
-		if (nifFileName.toLowerCase().contains("marker"))
+		//ignore markers and targets for now (note only on load, not dynamic)
+		if (!BethRenderSettings.isShowEditorMarkers() && nifFileName.toLowerCase().contains("marker"))
 			return;
 
 		j3dNiAVObject = loadNif(nifFileName, makePhys, mediaSources);

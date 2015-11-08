@@ -56,39 +56,39 @@ public class SkyrimTreeLookup
 
 		// shrubs set back to X's
 		
-	/*{ "shrubvinemaplesu", "plants\\vinemaple01" }, //
+	{ "shrubvinemaplesu", "plants\\vinemaple01" }, //
 			{ "shrubazaleapinksu", "plants\\fallforestshrub01" }, //
 			{ "shrubazaleasu", "plants\\fallforestshrub02" }, //
-			{ "shrubboxwood", "plants\\fallforestferncluster01" }, //
-			{ "shrubboxwoodfa", "plants\\fallforestferncluster02" }, //
-			{ "shrubcamoranparadise01", "plants\\deadshrub01" }, //
+			{ "shrubboxwood", "plants\\thicket01" }, //
+			{ "shrubboxwoodfa", "plants\\thicket01" }, //
+			{ "shrubcamoranparadise01", "plants\\swordfern01" }, //
 			{ "shrubdaphnesu", "plants\\fallforestferncluster03" }, //
 			{ "shrubdeadbush", "plants\\deadshrub01" }, //
 			{ "shrubelderberry", "plants\\reachbush01" }, //
-			{ "shrubenglishholly", "plants\\deadshrub01" }, //
-			{ "shrubenglishhollysnow", "plants\\deadshrub01" }, //
-			{ "shrubeuonymussnow", "plants\\deadshrub01" }, //
+			{ "shrubenglishholly", "plants\\pineshrub01" }, //
+			{ "shrubenglishhollysnow", "plants\\pineshrub01snow" }, //
+			{ "shrubeuonymussnow", "plants\\deadshrub01snow" }, //
 			{ "shrubeuonymussu", "plants\\deadshrub01" }, //
 			{ "shrubforsythiasu", "plants\\deadshrub01" }, //
-			{ "shrubgenericbuckthornfa", "plants\\deadshrub01" }, //
-			{ "shrubgenericbuckthornsu", "plants\\deadshrub01" }, //
-			{ "shrubgenericdaphnefa", "plants\\deadshrub01" }, //
-			{ "shrubgenericdaphnesu", "plants\\deadshrub01" }, //
-			{ "shrubgenericelderberryfa", "plants\\deadshrub01" }, //
-			{ "shrubgenericelderberrysu", "plants\\deadshrub01" }, //
-			{ "shrubgenericinkberryfa", "plants\\deadshrub01" }, //
-			{ "shrubgenericinkberrysu", "plants\\deadshrub01" }, //
-			{ "shrubhydrangeabluesu", "plants\\deadshrub01" }, //
+			{ "shrubgenericbuckthornfa", "plants\\yellowshrub01" }, //
+			{ "shrubgenericbuckthornsu", "plants\\yellowshrub01" }, //
+			{ "shrubgenericdaphnefa", "plants\\yellowshrub02" }, //
+			{ "shrubgenericdaphnesu", "plants\\yellowshrub02" }, //
+			{ "shrubgenericelderberryfa", "plants\\yellowshrub03" }, //
+			{ "shrubgenericelderberrysu", "plants\\yellowshrub03" }, //
+			{ "shrubgenericinkberryfa", "plants\\yellowshrub01" }, //
+			{ "shrubgenericinkberrysu", "plants\\yellowshrub01" }, //
+			{ "shrubhydrangeabluesu", "plants\\tundrashrub07" }, //
 			{ "shrubinkberrysu", "plants\\deadshrub01" }, //
 			{ "shrubjaphoneysucklesu", "plants\\deadshrub01" }, //
-			{ "shrubms14boxwood", "plants\\deadshrub01" }, //
+			//{ "shrubms14boxwood", "plants\\deadshrub01" }, //
 			{ "shrubmugopine", "plants\\deadshrub01" }, //
 			{ "shrubmugopinefa", "plants\\deadshrub01" }, //
 			{ "shrubrhododendronsu", "plants\\deadshrub01" }, //
 			{ "shrubseabuckthornsu", "plants\\deadshrub01" }, //
 			{ "shrubvinemaplesnow", "plants\\vinemaple01snow" }, //
 			{ "shrubvinemaplesu", "plants\\vinemaple01" }, //
-			{ "shrubvinemaplewi", "plants\\deadshrub01" }, //*/
+			{ "shrubvinemaplewi", "plants\\deadshrub01" }, //
 			{ "treeblacklocust", "trees\\reachtree01" }, //
 			{ "treecamoranparadise01", "trees\\treeaspen01" }, //
 			{ "treecamoranparadise02", "trees\\treeaspen01" }, //
@@ -96,18 +96,18 @@ public class SkyrimTreeLookup
 			{ "treecottonwoodsu", "trees\\treeaspen01" }, //
 			{ "treecpginkgo", "trees\\treeaspen02" }, //
 			{ "treecpsnowgum", "trees\\treeaspen03" }, //
-			{ "treecpswampcypressforest01", "trees\\treeaspen04" }, //
+			{ "treecpswampcypressforest01", "trees\\treepineforestdead03" }, //
 			{ "treedeodar", "trees\\treeaspen05" }, //
-			{ "treedogwoodsu", "trees\\treeaspen06" }, //
+			{ "treedogwoodsu", "trees\\treeaspen04" }, //
 			{ "treeeasthemlock", "trees\\treepineforest01" }, //
-			{ "treeeasthemlockfa", "trees\\treepineforest01" }, //
-			{ "treeeasthemlocksnow", "trees\\treepineforest01" }, //
+			{ "treeeasthemlockfa", "trees\\treepineforestdead01" }, //
+			{ "treeeasthemlocksnow", "trees\\treepineforestsnow01" }, //
 			{ "treeenglishholly01", "trees\\treepineforest02" }, //
-			{ "treeenglishoakforest01fa", "trees\\treepineforest03" }, //
+			{ "treeenglishoakforest01fa", "trees\\treepineforestdead03" }, //
 			{ "treeenglishoakforest01su", "trees\\treepineforest03" }, //
-			{ "treeenglishoakforestfa", "trees\\treepineforest03" }, //
-			{ "treeenglishoakforestsu", "trees\\treepineforest03" }, //
-			{ "treeenglishoakfreesu", "trees\\treepineforest03" }, //
+			{ "treeenglishoakforestfa", "trees\\treepineforestdead02" }, //
+			{ "treeenglishoakforestsu", "trees\\treepineforest02" }, //
+			{ "treeenglishoakfreesu", "trees\\treepineforest01" }, //
 			{ "treeenglishoaksaplingfa", "trees\\reachtree01" }, //
 			{ "treeenglishoaksaplingsu", "trees\\reachtree01" }, //
 			{ "treeenglishoakunique01su", "trees\\reachtree01" }, //
@@ -117,66 +117,82 @@ public class SkyrimTreeLookup
 			{ "treeginkgo", "trees\\reachtree01" }, //
 			{ "treegreypoplarforestfa", "trees\\treepineforest04" }, //
 			{ "treegreypoplarforestsu", "trees\\treepineforest04" }, //
-			{ "treeironwoodsu", "trees\\treepineforest05" }, //
-			{ "treeironwoodwi", "trees\\treepineforest05" }, //
-			{ "treejapanesemaple", "trees\\treepineforest05" }, //
-			{ "treejuniper01", "trees\\treepineforest05" }, //
-			{ "treekvatchburnt", "trees\\treepineforest05" }, //
-			{ "treems14canvasfree", "trees\\treepineforest05" }, //
-			{ "treems14canvasfreesu", "trees\\treepineforest05" }, //
-			{ "treems14willowoakforest01su", "trees\\treepineforest05" }, //
-			{ "treems14willowoakforestsu", "trees\\treepineforest05" }, //
-			{ "treems14willowoakfreesu", "trees\\treepineforest05" }, //
-			{ "treems14willowoakyoungsu", "trees\\treepineforest05" }, //
-			{ "treequakingaspenforest01fa", "trees\\treepineforest05" }, //
-			{ "treequakingaspenforest01su", "trees\\treepineforest05" }, //
-			{ "treequakingaspenforestfa", "trees\\treepineforest05" }, //
-			{ "treequakingaspenforestsu", "trees\\treepineforest05" }, //
-			{ "treequakingaspenfreesu", "trees\\treepineforest05" }, //
-			{ "treequakingaspenyoungfa", "trees\\treepineforest05" }, //
-			{ "treequakingaspenyoungsu", "trees\\treepineforest05" }, //
-			{ "treeredwoodlarge", "trees\\treepineforest05" }, //
+			{ "treeironwoodsu", "trees\\treeaspen01" }, //
+			{ "treeironwoodwi", "trees\\treeaspen02" }, //
+			{ "treejapanesemaple", "trees\\treeaspen05" }, //
+			{ "treejuniper01", "trees\\treeaspen02" }, //
+			{ "treekvatchburnt", "trees\\wrtempletree01" }, //
+			//{ "treems14canvasfree", "trees\\treepineforest05" }, //
+			//{ "treems14canvasfreesu", "trees\\treepineforest05" }, //
+			//{ "treems14willowoakforest01su", "trees\\treepineforest05" }, //
+			//{ "treems14willowoakforestsu", "trees\\treepineforest05" }, //
+			//{ "treems14willowoakfreesu", "trees\\treepineforest05" }, //
+			//{ "treems14willowoakyoungsu", "trees\\treepineforest05" }, //
+			{ "treequakingaspenforest01fa", "trees\\treeaspen02" }, //
+			{ "treequakingaspenforest01su", "trees\\treeaspen03" }, //
+			{ "treequakingaspenforestfa", "trees\\treeaspen03" }, //
+			{ "treequakingaspenforestsu", "trees\\treeaspen03" }, //
+			{ "treequakingaspenfreesu", "trees\\treeaspen05" }, //
+			{ "treequakingaspenyoungfa", "trees\\treeaspen04" }, //
+			{ "treequakingaspenyoungsu", "trees\\treeaspen04" }, //
+			{ "treeredwoodlarge", "trees\\treepineforest04" }, //
 			{ "treeredwoodsmall", "trees\\treepineforest05" }, //
-			{ "treescotchpineforest", "trees\\treepineforest05" }, //
-			{ "treescotchpineforestsnow", "trees\\treepineforest05" }, //
-			{ "treesilverbirchforest01fa", "trees\\treepineforest05" }, //
-			{ "treesilverbirchforest01su", "trees\\treepineforest05" }, //
-			{ "treesilverbirchforestfa", "trees\\treepineforest05" }, //
-			{ "treesilverbirchforestsu", "trees\\treepineforest05" }, //
-			{ "treesilverbirchfreesu", "trees\\treepineforest05" }, //
-			{ "treesilverbirchyoungfa", "trees\\treepineforest05" }, //
-			{ "treesilverbirchyoungsu", "trees\\treepineforest05" }, //
-			{ "treesnowgumfree", "trees\\treepineforest05" }, //
-			{ "treesugarmapleforest01fa", "trees\\treepineforest05" }, //
-			{ "treesugarmapleforest01su", "trees\\treepineforest05" }, //
-			{ "treesugarmapleforestfa", "trees\\treepineforest05" }, //
-			{ "treesugarmapleforestsu", "trees\\treepineforest05" }, //
-			{ "treesugarmaplefreesu", "trees\\treepineforest05" }, //
-			{ "treesugarmaplesaplingfa", "trees\\treepineforest05" }, //
-			{ "treesugarmaplesaplingsu", "trees\\treepineforest05" }, //
-			{ "treesugarmapleyoungfa", "trees\\treepineforest05" }, //
-			{ "treesugarmapleyoungsu", "trees\\treepineforest05" }, //
-			{ "treeswampcypress", "trees\\treepineforest05" }, //
-			{ "treeswampcypressforest", "trees\\treepineforest05" }, //
-			{ "treeswampcypressforestfg08", "trees\\treepineforest05" }, //
-			{ "treetupelo", "trees\\treepineforest05" }, //
-			{ "treeweepingwillowsu", "trees\\treepineforest05" }, //
-			{ "treewhitepineforest", "trees\\treepineforest05" }, //
+			{ "treescotchpineforest", "trees\\treepineforestdead02" }, //
+			{ "treescotchpineforestsnow", "trees\\treepineforestdeadsnow03" }, //
+			{ "treesilverbirchforest01fa", "trees\\treeaspen01" }, //
+			{ "treesilverbirchforest01su", "trees\\treeaspen01" }, //
+			{ "treesilverbirchforestfa", "trees\\treeaspen02" }, //
+			{ "treesilverbirchforestsu", "trees\\treeaspen02" }, //
+			{ "treesilverbirchfreesu", "trees\\treeaspen03" }, //
+			{ "treesilverbirchyoungfa", "trees\\treeaspen04" }, //
+			{ "treesilverbirchyoungsu", "trees\\treeaspen04" }, //
+			{ "treesnowgumfree", "trees\\treepineforestdeadsnow03" }, //
+			{ "treesugarmapleforest01fa", "trees\\treeaspen01" }, //
+			{ "treesugarmapleforest01su", "trees\\treeaspen01" }, //
+			{ "treesugarmapleforestfa", "trees\\treeaspen02" }, //
+			{ "treesugarmapleforestsu", "trees\\treeaspen02" }, //
+			{ "treesugarmaplefreesu", "trees\\treeaspen03" }, //
+			{ "treesugarmaplesaplingfa", "trees\\treeaspen04" }, //
+			{ "treesugarmaplesaplingsu", "trees\\treeaspen04" }, //
+			{ "treesugarmapleyoungfa", "trees\\treeaspen05" }, //
+			{ "treesugarmapleyoungsu", "trees\\treeaspen05" }, //
+			{ "treeswampcypress", "trees\\reachtree01" }, //
+			{ "treeswampcypressforest", "trees\\reachtree02" }, //
+			{ "treeswampcypressforestfg08", "trees\\reachtree02" }, //
+			{ "treetupelo", "trees\\treeaspen01" }, //
+			{ "treeweepingwillowsu", "trees\\treeaspen01" }, //
+			{ "treewhitepineforest", "trees\\treepineforest01" }, //
 			{ "treewhitepineforest01", "trees\\treepineforest05" }, //
-			{ "treewhitepineforest01fa", "trees\\treepineforest05" }, //
-			{ "treewhitepineforestfa", "trees\\treepineforest05" }, //
-			{ "treewhitepinefree", "trees\\treepineforest05" }, //
-			{ "treewhitepinesnow", "trees\\treepineforest05" }, //
-			{ "treewhitepineyoung", "trees\\treepineforest05" }, //
+			{ "treewhitepineforest01fa", "trees\\treepineforest04" }, //
+			{ "treewhitepineforestfa", "trees\\treepineforest03" }, //
+			{ "treewhitepinefree", "trees\\treepineforest01" }, //
+			{ "treewhitepinesnow", "trees\\treepineforestdeadsnow01" }, //
+			{ "treewhitepineyoung", "trees\\treepineforest02" }, //
 			{ "treewhitepineyoungfa", "trees\\treepineforest05" }, //
-			{ "treewillowoakforest01su", "trees\\treepineforest05" }, //
-			{ "treewillowoakforestsu", "trees\\treepineforest05" }, //
-			{ "treewillowoakfreesu", "trees\\treepineforest05" }, //
-			{ "treewillowoakyoungsu", "trees\\treepineforest05" }, //
-			{ "treeyewforest", "trees\\treepineforest05" }, //
+			{ "treewillowoakforest01su", "trees\\treeaspen03" }, //
+			{ "treewillowoakforestsu", "trees\\treeaspen02" }, //
+			{ "treewillowoakfreesu", "trees\\treeaspen01" }, //
+			{ "treewillowoakyoungsu", "trees\\treeaspen04" }, //
+			{ "treeyewforest", "trees\\wrtempletree02" }, //
 			//////////////////////////////
 			
-			 
+			
+			//Oblivion styles
+			//tree whitepine free/forest [01] [young] su/fa/snow
+			
+			
+			
+			
+			//Skyrim styles 
+			//tree aspen 01-05
+			//tree pineforest 01-05 su/spring
+			//tree pineforestdead fa
+			//tree pineforestdeadsnowl snow
+			//tree pineforestdeadsnow deepwinter
+			
+			
+			
+			
 			// no fallout
 			/*{ "euonymusbush01", "trees\\reachtree01" }, //
 			{ "oasiselm01", "trees\\reachtree01" }, //
