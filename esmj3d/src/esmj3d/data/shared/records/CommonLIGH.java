@@ -16,7 +16,7 @@ public class CommonLIGH extends RECO
 	
 	public float fade = 0;
 	
-	public float falloffExponent = 1f;
+	public float falloffExponent = 0;
 
 	public float fieldOfView = -1f;
 

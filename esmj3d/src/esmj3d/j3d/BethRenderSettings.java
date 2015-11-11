@@ -4,6 +4,7 @@ import tools.WeakListenerList;
 
 public class BethRenderSettings
 {
+
 	public static final int ACTOR_FADE_MAX = 500;
 
 	public static final int ITEM_FADE_MAX = 1000;
@@ -16,6 +17,10 @@ public class BethRenderSettings
 
 	public static final int OBJECT_FADE_DEFAULT = 200;
 
+	public static final float GLOBAL_AMB_LIGHT_LEVEL_DEFAULT = 0.5f;
+
+	public static final float GLOBAL_DIR_LIGHT_LEVEL_DEFAULT = 0.5f;
+
 	private static int FAR_LOAD_GRID_COUNT = 8;// int in number of cells (82 meters each)
 
 	private static int NEAR_LOAD_GRID_COUNT = 2;// int in number of cells (82 meters each)
@@ -27,6 +32,12 @@ public class BethRenderSettings
 	private static int itemFade = ITEM_FADE_DEFAULT;//in meters
 
 	private static int objectFade = OBJECT_FADE_DEFAULT;//in meters
+
+	private static float globalAmbLightLevel = GLOBAL_AMB_LIGHT_LEVEL_DEFAULT;
+
+	private static float globalDirLightLevel = GLOBAL_DIR_LIGHT_LEVEL_DEFAULT;
+
+	private static boolean enablePlacedLights = true;
 
 	private static boolean showPhysics = true;
 
@@ -45,6 +56,8 @@ public class BethRenderSettings
 	private static boolean outlineConts = false;
 
 	private static boolean outlineParts = false;
+
+	private static boolean outlineFocused = false;
 
 	private static WeakListenerList<UpdateListener> updateListeners = new WeakListenerList<UpdateListener>();
 
@@ -230,7 +243,7 @@ public class BethRenderSettings
 		BethRenderSettings.outlineConts = outlineConts;
 		fireUpdate();
 	}
-	
+
 	public static boolean isOutlineParts()
 	{
 		return outlineParts;
@@ -241,4 +254,47 @@ public class BethRenderSettings
 		BethRenderSettings.outlineParts = outlineParts;
 		fireUpdate();
 	}
+
+	public static boolean isOutlineFocused()
+	{
+		return outlineFocused;
+	}
+
+	public static void setOutlineFocused(boolean outlineFocused)
+	{
+		BethRenderSettings.outlineFocused = outlineFocused;
+		fireUpdate();
+	}
+
+	public static boolean isEnablePlacedLights()
+	{
+		return enablePlacedLights;
+	}
+
+	public static void setEnablePlacedLights(boolean enablePlacedLights)
+	{
+		BethRenderSettings.enablePlacedLights = enablePlacedLights;
+		fireUpdate();
+	}
+
+	public static float getGlobalAmbLightLevel()
+	{
+		return globalAmbLightLevel;
+	}
+
+	public static void setGlobalAmbLightLevel(float globalAmbLightLevel)
+	{
+		BethRenderSettings.globalAmbLightLevel = globalAmbLightLevel;
+	}
+
+	public static float getGlobalDirLightLevel()
+	{
+		return globalDirLightLevel;
+	}
+
+	public static void setGlobalDirLightLevel(float globalDirLightLevel)
+	{
+		BethRenderSettings.globalDirLightLevel = globalDirLightLevel;
+	}
+
 }
