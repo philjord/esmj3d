@@ -3,7 +3,6 @@ package esmj3d.j3d.j3drecords.type;
 import javax.media.j3d.BoundingLeaf;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.Light;
-import javax.media.j3d.Node;
 import javax.media.j3d.PointLight;
 import javax.media.j3d.SpotLight;
 import javax.vecmath.Color3f;
@@ -14,7 +13,6 @@ import javax.vecmath.Vector3f;
 import nif.NifJ3dHavokRoot;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
-import nif.j3d.J3dNiAVObject;
 import nif.j3d.NiToJ3dData;
 import nif.niobject.NiAVObject;
 import nif.niobject.NiNode;
@@ -70,9 +68,9 @@ public class J3dLIGH extends J3dRECOType
 		if (!makePhys && BethRenderSettings.isEnablePlacedLights())
 		{
 			Color3f color = new Color3f(ligh.color.x / 255f, ligh.color.y / 255f, ligh.color.z / 255f);
-			System.out.println("new light " + color);
-			System.out.println("falls fade " + ligh.fade + " falloffExponent " + ligh.falloffExponent + " fieldOfView " + ligh.fieldOfView);
-			System.out.println("ligh.radius " + ligh.radius + " " + (ligh.radius * ESConfig.ES_TO_METERS_SCALE));
+			//System.out.println("new light " + color);
+			//System.out.println("falls fade " + ligh.fade + " falloffExponent " + ligh.falloffExponent + " fieldOfView " + ligh.fieldOfView);
+			//System.out.println("ligh.radius " + ligh.radius + " " + (ligh.radius * ESConfig.ES_TO_METERS_SCALE));
 			if (ligh.fieldOfView == -1 || ligh.fieldOfView >= 90f)
 			{
 				light = new PointLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent));
