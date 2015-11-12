@@ -49,7 +49,7 @@ public class BethRenderSettings
 
 	private static boolean isTes3 = false;
 
-	private static boolean outlineChars = true;
+	private static boolean outlineChars = false;
 
 	private static boolean outlineDoors = false;
 
@@ -57,7 +57,7 @@ public class BethRenderSettings
 
 	private static boolean outlineParts = false;
 
-	private static boolean outlineFocused = false;
+	private static boolean outlineFocused = true;
 
 	private static WeakListenerList<UpdateListener> updateListeners = new WeakListenerList<UpdateListener>();
 

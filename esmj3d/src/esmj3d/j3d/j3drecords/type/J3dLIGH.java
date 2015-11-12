@@ -89,6 +89,12 @@ public class J3dLIGH extends J3dRECOType
 
 	}
 
+	@Override
+	public void setOutlined(boolean b)
+	{
+		//Ignored for now
+	}
+
 	public Vector3f findAttachLight(NiAVObject niAVObject, NiToJ3dData niToJ3dData)
 	{
 		//TODO: this should be the classic multiply up the chain gear

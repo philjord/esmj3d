@@ -1,18 +1,26 @@
 package esmj3d.j3d.j3drecords.type;
 
 import javax.media.j3d.BranchGroup;
+import javax.vecmath.Color3f;
 
+import tools3d.utils.scenegraph.Fadable;
+import utils.source.MediaSources;
+import nif.NifJ3dHavokRoot;
+import nif.NifJ3dVisRoot;
+import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.animation.J3dNiControllerSequence;
 import nif.j3d.particles.J3dNiParticleSystem;
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
 
-public abstract class J3dRECOType extends BranchGroup
+public abstract class J3dRECOType extends BranchGroup implements Fadable
 {
 	private RECO RECO = null;
 
 	public String physNifFile = "";
+
+	public String shortName = "";//very temp helper
 
 	protected J3dNiAVObject j3dNiAVObject;
 
@@ -20,6 +28,8 @@ public abstract class J3dRECOType extends BranchGroup
 	{
 		this.RECO = RECO;
 		this.physNifFile = physNifFile;
+		if (physNifFile != null && physNifFile.lastIndexOf("\\") != -1)
+			shortName = physNifFile.substring(physNifFile.lastIndexOf("\\")+1, physNifFile.length() - 4);
 	}
 
 	public RECO getRECO()
@@ -35,6 +45,26 @@ public abstract class J3dRECOType extends BranchGroup
 	public void renderSettingsUpdated()
 	{
 		J3dNiParticleSystem.setSHOW_DEBUG_LINES(BethRenderSettings.isOutlineParts());
+	}
+
+	@Override
+	public void fade(float percent)
+	{
+		if (j3dNiAVObject != null && j3dNiAVObject instanceof Fadable)
+		{
+			((Fadable) j3dNiAVObject).fade(percent);
+		}
+	}
+
+	public abstract void setOutlined(boolean b);
+
+	@Override
+	public void setOutline(Color3f c)
+	{
+		if (j3dNiAVObject != null && j3dNiAVObject instanceof Fadable)
+		{
+			((Fadable) j3dNiAVObject).setOutline(c);
+		}
 	}
 
 	protected void fireIdle()
@@ -58,6 +88,29 @@ public abstract class J3dRECOType extends BranchGroup
 				}
 			}
 		}
+	}
+
+	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MediaSources mediaSources)
+	{
+		J3dNiAVObject j3dNiAVObject;
+
+		if (makePhys)
+		{
+			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
+			if (nhr == null)
+				return null;
+			j3dNiAVObject = nhr.getHavokRoot();
+		}
+		else
+		{
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
+			if (nvr == null)
+				return null;
+			j3dNiAVObject = nvr.getVisualRoot();
+		}
+
+		return j3dNiAVObject;
+
 	}
 
 	@Override

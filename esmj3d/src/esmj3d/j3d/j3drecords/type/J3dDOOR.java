@@ -20,7 +20,11 @@ public class J3dDOOR extends J3dRECOType
 
 	private TimedRunnableBehavior pivotBehavior = new TimedRunnableBehavior(10);
 
-	TransformGroup doorPivot = new TransformGroup();
+	private TransformGroup doorPivot = new TransformGroup();
+
+	private boolean outlineSetOn = false;
+
+	private Color3f outlineColor = new Color3f(1.0f, 0.5f, 0f);
 
 	public J3dDOOR(GenericDOOR reco, boolean makePhys, MediaSources mediaSources)
 	{
@@ -41,7 +45,7 @@ public class J3dDOOR extends J3dRECOType
 			//prep for possible outlines later
 			if (j3dNiAVObject instanceof Fadable && !makePhys)
 			{
-				((Fadable) j3dNiAVObject).setOutline(new Color3f(1.0f, 0.5f, 0f));
+				((Fadable) j3dNiAVObject).setOutline(outlineColor);
 				if (!BethRenderSettings.isOutlineDoors())
 					((Fadable) j3dNiAVObject).setOutline(null);
 			}
@@ -73,7 +77,21 @@ public class J3dDOOR extends J3dRECOType
 		{
 			if (j3dNiAVObject instanceof Fadable)
 			{
-				Color3f c = BethRenderSettings.isOutlineDoors() ? new Color3f(1.0f, 0.5f, 0f) : null;
+				Color3f c = BethRenderSettings.isOutlineDoors() || outlineSetOn ? outlineColor : null;
+				((Fadable) j3dNiAVObject).setOutline(c);
+			}
+		}
+	}
+
+	@Override
+	public void setOutlined(boolean b)
+	{
+		outlineSetOn = b;
+		if (j3dNiAVObject != null)
+		{
+			if (j3dNiAVObject instanceof Fadable)
+			{
+				Color3f c = BethRenderSettings.isOutlineDoors() || outlineSetOn ? outlineColor : null;
 				((Fadable) j3dNiAVObject).setOutline(c);
 			}
 		}

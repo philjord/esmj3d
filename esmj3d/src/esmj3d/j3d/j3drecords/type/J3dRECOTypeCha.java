@@ -11,6 +11,10 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 {
 	protected NifCharacter nifCharacter;
 
+	private boolean outlineSetOn = false;
+
+	private Color3f outlineColor = new Color3f(1.0f, 1.0f, 0f);
+
 	public J3dRECOTypeCha(RECO reco)
 	{
 		super(reco, null);
@@ -22,7 +26,7 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 		super.renderSettingsUpdated();
 		if (nifCharacter != null)
 		{
-			Color3f c = BethRenderSettings.isOutlineChars() ? new Color3f(1.0f, 1.0f, 0f) : null;
+			Color3f c = BethRenderSettings.isOutlineChars() || outlineSetOn ? outlineColor : null;
 			nifCharacter.setOutline(c);
 		}
 	}
@@ -42,6 +46,20 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 		if (nifCharacter != null)
 		{
 			((Fadable) nifCharacter).setOutline(c);
+		}
+	}
+
+	@Override
+	public void setOutlined(boolean b)
+	{
+		outlineSetOn = b;
+		if (j3dNiAVObject != null)
+		{
+			if (j3dNiAVObject instanceof Fadable)
+			{
+				Color3f c = BethRenderSettings.isOutlineChars() || outlineSetOn ? outlineColor : null;
+				((Fadable) j3dNiAVObject).setOutline(c);
+			}
 		}
 	}
 }

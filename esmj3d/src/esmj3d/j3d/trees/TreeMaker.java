@@ -25,7 +25,7 @@ import utils.source.TextureSource;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.LODNif;
 import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
-import esmj3d.j3d.j3drecords.type.J3dRECOTypeGeneral;
+import esmj3d.j3d.j3drecords.type.J3dRECOTypeStatic;
 
 public class TreeMaker
 {
@@ -121,7 +121,7 @@ public class TreeMaker
 				{
 					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, true, makePhys);
 					j3dinst.setJ3dRECOType(//
-							new J3dRECOTypeGeneral(inst, nifTreeFileName, makePhys, mediaSources),//							
+							new J3dRECOTypeStatic(inst, nifTreeFileName, makePhys, mediaSources),//							
 							makeFlatLodTree(treeLodFlat, mediaSources));
 					return j3dinst;
 				}
@@ -135,7 +135,7 @@ public class TreeMaker
 			else
 			{
 				J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, true, makePhys);
-				j3dinst.setJ3dRECOType(new J3dRECOTypeGeneral(inst, nifTreeFileName, makePhys, mediaSources));
+				j3dinst.setJ3dRECOType(new J3dRECOTypeStatic(inst, nifTreeFileName, makePhys, mediaSources));
 				return j3dinst;
 			}
 
@@ -164,7 +164,7 @@ public class TreeMaker
 			{
 				sg = new SharedGroup();
 
-				J3dNiAVObject nif = J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
+				J3dNiAVObject nif = J3dRECOTypeStatic.loadNif(nifFileName, false, mediaSources);
 				sg.addChild(nif);
 				loadedFlatLodSharedGroups.put(keyString, sg);
 
@@ -181,7 +181,7 @@ public class TreeMaker
 		}
 		else
 		{
-			return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources).getRootNode();
+			return J3dRECOTypeStatic.loadNif(nifFileName, false, mediaSources).getRootNode();
 		}
 	}
 

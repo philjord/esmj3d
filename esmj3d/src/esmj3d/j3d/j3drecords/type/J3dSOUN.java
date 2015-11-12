@@ -44,6 +44,12 @@ public class J3dSOUN extends J3dRECOType
 		}
 	}
 
+	@Override
+	public void setOutlined(boolean b)
+	{
+		//ignored
+	}
+
 	public void playSound(GenericSOUN soun, SoundSource soundSource)
 	{
 		//System.out.println("playing sound " + file);
@@ -143,6 +149,12 @@ public class J3dSOUN extends J3dRECOType
 				}
 
 			}
+		}
+
+		@Override
+		public void setOutlined(boolean b)
+		{
+			//ignored
 		}
 
 		private void playSound(File file, GenericSOUN soun)
