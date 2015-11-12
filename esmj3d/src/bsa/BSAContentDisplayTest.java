@@ -1,5 +1,10 @@
 package bsa;
 
+import gui.ArchiveNode;
+import gui.FileNode;
+import gui.FolderNode;
+import gui.StatusDialog;
+
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -30,13 +35,9 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import FO3Archive.ArchiveEntry;
-import FO3Archive.ArchiveFileFilter;
-import FO3Archive.ArchiveNode;
-import FO3Archive.FileNode;
-import FO3Archive.FolderNode;
-import FO3Archive.Main;
-import FO3Archive.StatusDialog;
+import archive.ArchiveEntry;
+import archive.ArchiveFileFilter;
+import archive.Main;
 
 // Referenced classes of package FO3Archive:
 //	            ArchiveNode, ArchiveFileFilter, StatusDialog, CreateTask, 

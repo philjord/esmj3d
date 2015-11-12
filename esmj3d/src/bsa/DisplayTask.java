@@ -5,6 +5,8 @@
 
 package bsa;
 
+import gui.StatusDialog;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,9 +23,8 @@ import tools.ddstexture.DDSTextureLoader;
 import tools.ddstexture.utils.DDSTextureLoaderTester;
 import tools.image.SimpleImageLoader;
 import utils.source.DummyTextureSource;
-import FO3Archive.ArchiveEntry;
-import FO3Archive.Main;
-import FO3Archive.StatusDialog;
+import archive.ArchiveEntry;
+import archive.Main;
 import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
 

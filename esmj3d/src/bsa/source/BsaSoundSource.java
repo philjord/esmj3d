@@ -8,11 +8,11 @@ import java.util.List;
 import javax.media.j3d.MediaContainer;
 import javax.media.j3d.SoundException;
 
+import archive.ArchiveEntry;
+import archive.ArchiveFile;
+import archive.ArchiveFile.Folder;
 import utils.source.SoundKeyToName;
 import utils.source.SoundSource;
-import FO3Archive.ArchiveEntry;
-import FO3Archive.ArchiveFile;
-import FO3Archive.ArchiveFile.Folder;
 
 public class BsaSoundSource implements SoundSource
 {

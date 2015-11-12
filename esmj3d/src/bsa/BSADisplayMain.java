@@ -7,7 +7,7 @@ import java.util.Properties;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import FO3Archive.Main;
+import archive.Main;
 
 public class BSADisplayMain extends Main
 {

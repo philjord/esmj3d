@@ -15,9 +15,9 @@ import tools.ddstexture.DDSTextureLoader;
 import tools.ddstexture.utils.DDSDecompressor;
 import tools.image.ImageFlip;
 import utils.source.TextureSource;
-import FO3Archive.ArchiveEntry;
-import FO3Archive.ArchiveFile;
-import FO3Archive.ArchiveFile.Folder;
+import archive.ArchiveEntry;
+import archive.ArchiveFile;
+import archive.ArchiveFile.Folder;
 
 import com.sun.j3d.utils.image.TextureLoader;
 

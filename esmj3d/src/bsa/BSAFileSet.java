@@ -1,15 +1,17 @@
 package bsa;
 
+import gui.ArchiveNode;
+import gui.StatusDialog;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import FO3Archive.ArchiveEntry;
-import FO3Archive.ArchiveFile;
-import FO3Archive.ArchiveNode;
-import FO3Archive.LoadTask;
-import FO3Archive.StatusDialog;
+import archive.ArchiveEntry;
+import archive.ArchiveFile;
+import archive.DBException;
+import archive.LoadTask;
 
 public class BSAFileSet extends ArrayList<ArchiveFile>
 {
@@ -97,54 +99,66 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 		// don't double load ever
 		for (ArchiveFile af : this)
 		{
-			if(af.getName().equals(file.getPath()))
+			if (af.getName().equals(file.getPath()))
 				return;
 		}
-		
+
 		System.out.println("BSA File Set loading " + file);
-		ArchiveFile archiveFile = new ArchiveFile(file);
 
 		try
 		{
-			if (loadNodes)
+			ArchiveFile archiveFile = ArchiveFile.createArchiveFile(file);
+
+			try
 			{
-				StatusDialog statusDialog = new StatusDialog(null, "Loading " + archiveFile.getName());
-				ArchiveNode archiveNode = new ArchiveNode(archiveFile);
-
-				LoadTask loadTask = new LoadTask(archiveFile, archiveNode, statusDialog);
-				loadTask.start();
-
-				int status = statusDialog.showDialog();
-				loadTask.join();
-				if (status == 1)
+				if (loadNodes)
 				{
-					add(archiveFile);
-					nodes.add(archiveNode);
+					StatusDialog statusDialog = new StatusDialog(null, "Loading " + archiveFile.getName());
+					ArchiveNode archiveNode = new ArchiveNode(archiveFile);
+
+					LoadTask loadTask = new LoadTask(archiveFile, archiveNode, statusDialog);
+					loadTask.start();
+
+					int status = statusDialog.showDialog();
+					loadTask.join();
+					if (status == 1)
+					{
+						add(archiveFile);
+						nodes.add(archiveNode);
+					}
+					else
+					{
+						System.out.println("status != 1 in bsa loader? " + status + " " + file.getAbsolutePath());
+					}
 				}
 				else
 				{
-					System.out.println("status != 1 in bsa loader? " + status + " " + file.getAbsolutePath());
+					LoadTask loadTask = new LoadTask(archiveFile, null);
+					add(archiveFile);
+					loadTask.start();
+					loadTasks.add(loadTask);
 				}
 			}
-			else
+			catch (InterruptedException e)
 			{
-				LoadTask loadTask = new LoadTask(archiveFile, null);
-				add(archiveFile);
-				loadTask.start();
-				loadTasks.add(loadTask);
+				e.printStackTrace();
+				try
+				{
+					archiveFile.close();
+				}
+				catch (IOException e2)
+				{
+					e2.printStackTrace();
+				}
 			}
 		}
-		catch (InterruptedException e)
+		catch (DBException e1)
 		{
-			e.printStackTrace();
-			try
-			{
-				archiveFile.close();
-			}
-			catch (IOException e2)
-			{
-				e2.printStackTrace();
-			}
+			e1.printStackTrace();
+		}
+		catch (IOException e1)
+		{
+			e1.printStackTrace();
 		}
 
 	}

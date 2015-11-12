@@ -5,12 +5,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import archive.ArchiveEntry;
+import archive.ArchiveFile;
+import archive.ArchiveFile.Folder;
 import nif.NifFile;
 import nif.NifFileReader;
 import utils.source.MeshSource;
-import FO3Archive.ArchiveEntry;
-import FO3Archive.ArchiveFile;
-import FO3Archive.ArchiveFile.Folder;
 
 public class BsaMeshSource implements MeshSource
 {
