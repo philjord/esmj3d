@@ -16,6 +16,7 @@ import nif.NifToJ3d;
 import nif.j3d.NiToJ3dData;
 import nif.niobject.NiAVObject;
 import nif.niobject.NiNode;
+import nif.niobject.NiObject;
 import utils.ESConfig;
 import utils.source.MediaSources;
 import esmj3d.data.shared.records.CommonLIGH;
@@ -109,12 +110,14 @@ public class J3dLIGH extends J3dRECOType
 			NiNode niNode = (NiNode) niAVObject;
 			for (int i = 0; i < niNode.numChildren; i++)
 			{
-				NiNode childNode = (NiNode) niToJ3dData.get(niNode.children[i]);
-				if (childNode != null)
+				NiObject o = niToJ3dData.get(niNode.children[i]);
+				if (o != null && o instanceof NiNode)
 				{
+					NiNode childNode = (NiNode) o;
 					Vector3f v = findAttachLight(childNode, niToJ3dData);
 					if (v != null)
 						return v;
+
 				}
 			}
 		}
