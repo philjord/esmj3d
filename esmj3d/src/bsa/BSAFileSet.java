@@ -49,7 +49,7 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 				name = rootFile.getAbsolutePath();
 				for (File file : rootFile.listFiles())
 				{
-					if (file.getName().toLowerCase().endsWith(".bsa"))
+					if (file.getName().toLowerCase().endsWith(".bsa") || file.getName().toLowerCase().endsWith(".ba2"))
 					{
 						loadFile(file, loadNodes);
 					}
@@ -58,7 +58,8 @@ public class BSAFileSet extends ArrayList<ArchiveFile>
 			}
 			else
 			{
-				if (!rootFile.isDirectory() && rootFile.getName().toLowerCase().endsWith(".bsa"))
+				if (!rootFile.isDirectory()
+						&& (rootFile.getName().toLowerCase().endsWith(".bsa") || rootFile.getName().toLowerCase().endsWith(".ba2")))
 				{
 					name = rootFile.getAbsolutePath();
 					loadFile(rootFile, loadNodes);

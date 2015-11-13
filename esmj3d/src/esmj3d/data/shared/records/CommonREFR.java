@@ -102,7 +102,7 @@ public class CommonREFR extends InstRECO
 				}
 				else if (sr.getType().equals("XOWN"))
 				{
-					XOWN = new FormID(bs);
+					//XOWN = new FormID(bs); //12 bytes in FO4
 				}
 				else if (sr.getType().equals("XGLB"))
 				{
