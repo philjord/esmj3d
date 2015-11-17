@@ -93,4 +93,9 @@ public abstract class RECO
 		else
 			return null;
 	}
+	
+	public String toString()
+	{
+		return "" + this.getClass() + " : (" + formId + "|" + Integer.toHexString(formId) + ") ";
+	}
 }
