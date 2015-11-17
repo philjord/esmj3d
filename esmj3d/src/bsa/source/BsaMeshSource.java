@@ -75,7 +75,7 @@ public class BsaMeshSource implements MeshSource
 					{
 						NifFile nifFile = null;
 						InputStream inputStream = archiveFile.getInputStream(archiveEntry);
-						//String fileName = archiveEntry.getName();
+						// String fileName = archiveEntry.getName();
 
 						try
 						{
@@ -139,5 +139,37 @@ public class BsaMeshSource implements MeshSource
 		}
 
 		return ret;
+	}
+
+	@Override
+	public InputStream getInputStreamForFile(String fileName)
+	{
+		if (fileName != null && fileName.length() > 0)
+		{
+			for (ArchiveFile archiveFile : bsas)
+			{
+				ArchiveEntry archiveEntry = archiveFile.getEntry(fileName);
+				if (archiveEntry != null)
+				{
+					try
+					{
+						return archiveFile.getInputStream(archiveEntry);
+					}
+					catch (IOException e)
+					{
+						System.out.println("BsaMeshSource  " + fileName + " " + e + " " + e.getStackTrace()[0]);
+					}
+
+				}
+			}
+
+			System.out.print("nif " + fileName + " not found in archive bsas");
+			for (ArchiveFile archiveFile : bsas)
+			{
+				System.out.print(" checked: " + archiveFile.getName() + ", ");
+			}
+			System.out.println("");
+		}
+		return null;
 	}
 }
