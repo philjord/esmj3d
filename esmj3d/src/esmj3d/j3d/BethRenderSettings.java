@@ -19,7 +19,7 @@ public class BethRenderSettings
 
 	public static final float GLOBAL_AMB_LIGHT_LEVEL_DEFAULT = 0.5f;
 
-	public static final float GLOBAL_DIR_LIGHT_LEVEL_DEFAULT = 0.5f;
+	public static final float GLOBAL_DIR_LIGHT_LEVEL_DEFAULT = 0.75f;
 
 	private static int FAR_LOAD_GRID_COUNT = 8;// int in number of cells (82 meters each)
 
