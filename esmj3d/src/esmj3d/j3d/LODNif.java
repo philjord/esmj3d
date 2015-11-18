@@ -4,6 +4,7 @@ import javax.media.j3d.Group;
 
 import nif.NifFile;
 import nif.NifToJ3d;
+import nif.j3d.J3dBSTriShape;
 import nif.j3d.J3dNiTriBasedGeom;
 import nif.j3d.J3dNiTriShape;
 import nif.j3d.J3dNiTriStrips;
@@ -15,12 +16,14 @@ import nif.niobject.NiTriShape;
 import nif.niobject.NiTriStrips;
 import nif.niobject.bs.BSFadeNode;
 import nif.niobject.bs.BSLODTriShape;
+import nif.niobject.bs.BSTriShape;
 import utils.source.MediaSources;
 import utils.source.TextureSource;
 
 /**
- * This class assumes a trival nif file suitable for a lod object
- * and attempts to optomise rendering (no groups, no transforms, no interesting appearence)
+ * This class assumes a trival nif file suitable for a lod object and attempts to optomise rendering (no groups, no
+ * transforms, no interesting appearence)
+ * 
  * @author phil
  *
  */
@@ -28,11 +31,11 @@ public class LODNif extends Group
 {
 	public LODNif(String nifFileName, MediaSources mediaSources)
 	{
-		//TODO: bake in the coords now too
+		// TODO: bake in the coords now too
 
-		//TODO: can I optomise this like the X form ones
+		// TODO: can I optomise this like the X form ones
 		// need to make a generic lod nif loading system, fallout uses this for all lod things
-		//return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
+		// return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
 		TextureSource textureSource = mediaSources.getTextureSource();
 		NifFile nifFile = NifToJ3d.loadNiObjects(nifFileName, mediaSources.getMeshSource());
 
@@ -45,7 +48,8 @@ public class LODNif extends Group
 
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
 
-				//j3dNiAVObjectRoot = J3dNiNode.createNiNode((BSFadeNode) root, niToJ3dData, mediaSources.getTextureSource(), false);
+				// j3dNiAVObjectRoot = J3dNiNode.createNiNode((BSFadeNode) root, niToJ3dData,
+				// mediaSources.getTextureSource(), false);
 
 				for (int i = 0; i < niNode.numChildren; i++)
 				{
@@ -68,6 +72,11 @@ public class LODNif extends Group
 						{
 							NiTriStrips niTriStrips = (NiTriStrips) child;
 							ntbg = new J3dNiTriStrips(niTriStrips, niToJ3dData, textureSource);
+						}
+						else if (child instanceof BSTriShape)
+						{
+							BSTriShape bsTriShape = (BSTriShape) child;
+							ntbg = new J3dBSTriShape(bsTriShape, niToJ3dData, textureSource);
 						}
 						else
 						{
