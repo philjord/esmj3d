@@ -77,6 +77,10 @@ public class LAND extends InstRECO
 			{
 				VCLR = bs;
 			}
+			else if (sr.getType().equals("MPCD"))
+			{
+				// new in FO4
+			}
 			else if (tes3 && sr.getType().equals("INTV"))
 			{
 				//landX = ESMByteConvert.extractInt(bs, 0);
