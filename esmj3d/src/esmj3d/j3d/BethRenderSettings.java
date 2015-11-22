@@ -39,7 +39,9 @@ public class BethRenderSettings
 
 	private static boolean enablePlacedLights = true;
 
-	private static boolean showPhysics = true;
+	private static boolean showPhysics = false;
+
+	private static boolean flipParentEnableDefault = false;
 
 	private static boolean showEditorMarkers = false;
 
@@ -295,6 +297,16 @@ public class BethRenderSettings
 	public static void setGlobalDirLightLevel(float globalDirLightLevel)
 	{
 		BethRenderSettings.globalDirLightLevel = globalDirLightLevel;
+	}
+
+	public static boolean isFlipParentEnableDefault()
+	{
+		return flipParentEnableDefault;
+	}
+
+	public static void setFlipParentEnableDefault(boolean flipParentEnableDefault)
+	{
+		BethRenderSettings.flipParentEnableDefault = flipParentEnableDefault;
 	}
 
 }

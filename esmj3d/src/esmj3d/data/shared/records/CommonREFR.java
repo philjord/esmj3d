@@ -2,7 +2,6 @@ package esmj3d.data.shared.records;
 
 import java.util.ArrayList;
 
-import tools.io.ESMByteConvert;
 import esmj3d.data.shared.subrecords.FNAM;
 import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.data.shared.subrecords.LString;
@@ -18,6 +17,7 @@ import esmj3d.data.shared.subrecords.XTEL;
 import esmj3d.data.shared.subrecords.ZString;
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
+import tools.io.ESMByteConvert;
 
 public class CommonREFR extends InstRECO
 {
@@ -49,7 +49,6 @@ public class CommonREFR extends InstRECO
 
 	public TNAM TNAM;
 
-	public XESP XESP;
 
 	public XLCM XLCM;
 
@@ -84,9 +83,9 @@ public class CommonREFR extends InstRECO
 				{
 					EDID = new ZString(bs);
 				}
-				else if (sr.getType().equals("XTEL") )
+				else if (sr.getType().equals("XTEL"))
 				{
-					XTEL = new XTEL(bs);				
+					XTEL = new XTEL(bs);
 				}
 				else if (sr.getType().equals("ONAM"))
 				{
@@ -142,7 +141,7 @@ public class CommonREFR extends InstRECO
 				}
 				else if (sr.getType().equals("XESP"))
 				{
-					XESP = new XESP(bs);
+					xesp = new XESP(bs);
 				}
 				else if (sr.getType().equals("XLCM"))
 				{
@@ -159,6 +158,9 @@ public class CommonREFR extends InstRECO
 			}
 		}
 	}
+
+ 
+	
 
 	@Override
 	public String toString()
