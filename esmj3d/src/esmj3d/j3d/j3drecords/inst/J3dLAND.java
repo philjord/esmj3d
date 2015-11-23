@@ -1,5 +1,6 @@
 package esmj3d.j3d.j3drecords.inst;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.media.j3d.Appearance;
@@ -22,8 +23,10 @@ import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
+import nif.BgsmSource;
 import nif.j3d.J3dNiGeometry;
 import nif.j3d.J3dNiTriBasedGeom;
+import nif.niobject.bgsm.BgsmFile;
 
 import org.j3d.geom.GeometryData;
 
@@ -149,14 +152,12 @@ public class J3dLAND extends J3dRECOStatInst
 
 			//now translate the heights into a nice mesh, 82 has been confirmed empirically			
 			//Note that 33 by 33 sets of point equals 32 by 32 sets of triangles between them
-			TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights,
-					null, null, null);
+			TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights, null, null, null);
 			GeometryData terrainData = new GeometryData();
 			gridGenerator.generateIndexedTriangleStrips(terrainData);
 
 			Shape3D shape = new Shape3D();
-			IndexedTriangleStripArray physicsTriStripArray = new IndexedTriangleStripArray(terrainData.vertexCount,
-					GeometryArray.COORDINATES, terrainData.indexesCount, terrainData.stripCounts);
+			IndexedTriangleStripArray physicsTriStripArray = new IndexedTriangleStripArray(terrainData.vertexCount, GeometryArray.COORDINATES, terrainData.indexesCount, terrainData.stripCounts);
 			physicsTriStripArray.setCoordinates(0, terrainData.coordinates);
 			physicsTriStripArray.setCoordinateIndices(0, terrainData.indexes);
 
@@ -256,7 +257,7 @@ public class J3dLAND extends J3dRECOStatInst
 				// make up some base land texture, pre sorted to btxt by quadrant
 				for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 				{
-					Appearance app = createAppearance();					
+					Appearance app = createAppearance();
 					app.setTextureAttributes(textureAttributesBase);
 
 					//oddly btxt are optional
@@ -293,7 +294,7 @@ public class J3dLAND extends J3dRECOStatInst
 					{
 						int texFormId = land.VTEXshorts[quadrant];
 
-						Appearance app = createAppearance();						
+						Appearance app = createAppearance();
 						app.setTextureAttributes(textureAttributesBase);
 
 						app.setTexture(getTextureTes3(texFormId, master, textureSource));
@@ -420,8 +421,7 @@ public class J3dLAND extends J3dRECOStatInst
 		return new Vector3f(x, 0, -y);
 	}
 
-	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
-			int quadrantsPerSide, int quadrant)
+	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrantsPerSide, int quadrant)
 	{
 		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
@@ -429,12 +429,11 @@ public class J3dLAND extends J3dRECOStatInst
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
 		TexCoord2f[][] quadrantTexCoords = new TexCoord2f[quadrantSquareCount][quadrantSquareCount];
 
-		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors,
-				quadrantTexCoords);
+		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		//Note that 33 by 33 sets of point equals 32 by 32 set of triangles between them
-		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount,
-				quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
+		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount, quadrantSquareCount, quadrantHeights, quadrantNormals,
+				quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
 		if (STRIPIFY)
@@ -455,8 +454,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 	}
 
-	private static GeometryArray makeQuadrantLayerSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
-			int quadrantsPerSide, int quadrant, VTXT vtxt)
+	private static GeometryArray makeQuadrantLayerSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrantsPerSide, int quadrant, VTXT vtxt)
 	{
 		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
@@ -464,8 +462,7 @@ public class J3dLAND extends J3dRECOStatInst
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
 		TexCoord2f[][] quadrantTexCoords = new TexCoord2f[quadrantSquareCount][quadrantSquareCount];
 
-		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors,
-				quadrantTexCoords);
+		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		if (vtxt != null)
 		{
@@ -487,8 +484,8 @@ public class J3dLAND extends J3dRECOStatInst
 			}
 		}
 
-		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount,
-				quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
+		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount, quadrantSquareCount, quadrantHeights, quadrantNormals,
+				quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
 		if (STRIPIFY)
@@ -520,9 +517,8 @@ public class J3dLAND extends J3dRECOStatInst
 	 * @param quadrantNormals 17x17 array to be filled
 	 * @param quadrantColors  17x17 array to be filled
 	 */
-	private static void makeQuadrantData(int quadrantsPerSide, int quadrant, float[][] baseHeights, Vector3f[][] baseNormals,
-			Color4f[][] baseColors, float[][] quadrantHeights, Vector3f[][] quadrantNormals, Color4f[][] quadrantColors,
-			TexCoord2f[][] quadrantTexCoords)
+	private static void makeQuadrantData(int quadrantsPerSide, int quadrant, float[][] baseHeights, Vector3f[][] baseNormals, Color4f[][] baseColors, float[][] quadrantHeights,
+			Vector3f[][] quadrantNormals, Color4f[][] quadrantColors, TexCoord2f[][] quadrantTexCoords)
 	{
 		//trust me on this madness
 		int qx = quadrant % quadrantsPerSide;
@@ -582,15 +578,36 @@ public class J3dLAND extends J3dRECOStatInst
 			{
 				LTEX ltex = new LTEX(ltexRec);
 				int texSetId = ltex.textureSetId;
-				//obliv uses simpler system
+				
 				if (texSetId != -1)
 				{
 					Record texSetRec = master.getRecord(texSetId);
 					TXST textureSet = new TXST(texSetRec);
-					return textureSource.getTexture(textureSet.TX00.str);
+					if (textureSet.TX00 != null)
+					{
+						return textureSource.getTexture(textureSet.TX00.str);
+					}
+					else if (textureSet.MNAM != null)
+					{
+						// new fallout 4 texture system
+						try
+						{
+
+							BgsmFile bgsm = BgsmSource.getBgsmFile("Materials\\" + textureSet.MNAM.str);
+							if (bgsm != null)
+							{
+								return textureSource.getTexture(bgsm.textures[0]);
+							}
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+					}
 				}
 				else if (ltex.ICON != null)
 				{
+					//obliv uses simpler system
 					return textureSource.getTexture("Landscape\\" + ltex.ICON.str);
 				}
 			}
@@ -736,20 +753,21 @@ public class J3dLAND extends J3dRECOStatInst
 		{
 			if (STRIPIFY)
 			{
-				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat// 
-						| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE | GeometryArray.INTERLEAVED,//
+				iga = new IndexedTriangleStripArray(terrainData.vertexCount,
+						basicFormat// 
+								| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE | GeometryArray.INTERLEAVED, //
 						terrainData.indexesCount, terrainData.stripCounts);
 			}
 			else
 			{
-				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat// 
-						| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE | GeometryArray.INTERLEAVED,//
+				iga = new IndexedTriangleArray(terrainData.vertexCount,
+						basicFormat// 
+								| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE | GeometryArray.INTERLEAVED, //
 						terrainData.indexesCount);
 			}
 			iga.setCoordIndicesRef(terrainData.indexes);
 
-			float[] vertexData = J3dNiTriBasedGeom.interleave(1, 2, new float[][]
-			{ terrainData.textureCoordinates }, null, terrainData.colors, terrainData.normals, terrainData.coordinates);
+			float[] vertexData = J3dNiTriBasedGeom.interleave(1, 2, new float[][] { terrainData.textureCoordinates }, null, terrainData.colors, terrainData.normals, terrainData.coordinates);
 
 			if (!BUFFERS)
 			{
@@ -765,12 +783,12 @@ public class J3dLAND extends J3dRECOStatInst
 		{
 			if (STRIPIFY)
 			{
-				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat,//
+				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat, //
 						terrainData.indexesCount, terrainData.stripCounts);
 			}
 			else
 			{
-				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat,//
+				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat, //
 						terrainData.indexesCount);
 			}
 
@@ -895,17 +913,13 @@ public class J3dLAND extends J3dRECOStatInst
 
 		rightVTXT = new VTXT();
 		rightVTXT.count = 5;
-		rightVTXT.position = new int[]
-		{ 4, 9, 14, 19, 24 };// one strip down the right
-		rightVTXT.opacity = new float[]
-		{ 0.5f, 1f, 1f, 1f, 0.5f };
+		rightVTXT.position = new int[] { 4, 9, 14, 19, 24 };// one strip down the right
+		rightVTXT.opacity = new float[] { 0.5f, 1f, 1f, 1f, 0.5f };
 
 		downVTXT = new VTXT();
 		downVTXT.count = 5;
-		downVTXT.position = new int[]
-		{ 20, 21, 22, 23, 24 };// one strip along the bottom
-		downVTXT.opacity = new float[]
-		{ 0.5f, 1f, 1f, 1f, 0.5f };
+		downVTXT.position = new int[] { 20, 21, 22, 23, 24 };// one strip along the bottom
+		downVTXT.opacity = new float[] { 0.5f, 1f, 1f, 1f, 0.5f };
 
 	}
 

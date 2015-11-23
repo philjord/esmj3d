@@ -31,6 +31,8 @@ public class TXST extends RECO
 
 	public ZString TX07;
 
+	public ZString MNAM;
+
 	public TXST(Record recordData)
 	{
 		super(recordData);
@@ -89,6 +91,11 @@ public class TXST extends RECO
 			else if (sr.getType().equals("DNAM"))
 			{
 
+			}
+			else if (sr.getType().equals("MNAM"))
+			{
+				//new in FO4
+				MNAM = new ZString(bs);
 			}
 			else
 			{
