@@ -78,8 +78,7 @@ public class J3dLIGH extends J3dRECOType
 			}
 			else
 			{
-				light = new SpotLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent), new Vector3f(0, 0, -1),
-						ligh.fieldOfView, 0);
+				light = new SpotLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent), new Vector3f(0, 0, -1), ligh.fieldOfView, 0);
 			}
 			light.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
 			bl.setRegion(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), ligh.radius * ESConfig.ES_TO_METERS_SCALE));
@@ -101,8 +100,8 @@ public class J3dLIGH extends J3dRECOType
 		//TODO: this should be the classic multiply up the chain gear
 		if (niAVObject.name.equals("AttachLight"))
 		{
-			return new Vector3f(niAVObject.translation.x * ESConfig.ES_TO_METERS_SCALE, niAVObject.translation.z
-					* ESConfig.ES_TO_METERS_SCALE, -niAVObject.translation.y * ESConfig.ES_TO_METERS_SCALE);
+			return new Vector3f(niAVObject.translation.x * ESConfig.ES_TO_METERS_SCALE, niAVObject.translation.z * ESConfig.ES_TO_METERS_SCALE,
+					-niAVObject.translation.y * ESConfig.ES_TO_METERS_SCALE);
 		}
 
 		if (niAVObject instanceof NiNode)
@@ -128,13 +127,16 @@ public class J3dLIGH extends J3dRECOType
 	public void renderSettingsUpdated()
 	{
 		super.renderSettingsUpdated();
-		if (BethRenderSettings.isEnablePlacedLights())
+		if (light != null)
 		{
-			light.setInfluencingBoundingLeaf(bl);
-		}
-		else
-		{
-			light.setInfluencingBoundingLeaf(null);
+			if (BethRenderSettings.isEnablePlacedLights())
+			{
+				light.setInfluencingBoundingLeaf(bl);
+			}
+			else
+			{
+				light.setInfluencingBoundingLeaf(null);
+			}
 		}
 	}
 }

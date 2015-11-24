@@ -36,10 +36,13 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 	protected Vector3f cellLocation;
 
-	public J3dCELLGeneral(IRecordStore master, List<Record> children, boolean makePhys, MediaSources mediaSources)
+	protected int worldId;
+
+	public J3dCELLGeneral(IRecordStore master, int worldId, List<Record> children, boolean makePhys, MediaSources mediaSources)
 	{
 		this.setName(this.getClass().getSimpleName());
 		this.master = master;
+		this.worldId = worldId;
 		this.children = children;
 		this.makePhys = makePhys;
 		this.mediaSources = mediaSources;
@@ -56,8 +59,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		this.instCell = instCell;
 		float landSize = J3dLAND.LAND_SIZE;
 		//we don't use instCell.getTrans().z even if set
-		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0, -(instCell.getTrans().y * landSize)
-				- (landSize / 2f));
+		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0, -(instCell.getTrans().y * landSize) - (landSize / 2f));
 	}
 
 	public InstRECO getInstCell()
