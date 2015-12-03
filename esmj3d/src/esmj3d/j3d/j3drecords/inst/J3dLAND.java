@@ -152,12 +152,14 @@ public class J3dLAND extends J3dRECOStatInst
 
 			//now translate the heights into a nice mesh, 82 has been confirmed empirically			
 			//Note that 33 by 33 sets of point equals 32 by 32 sets of triangles between them
-			TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights, null, null, null);
+			TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights,
+					null, null, null);
 			GeometryData terrainData = new GeometryData();
 			gridGenerator.generateIndexedTriangleStrips(terrainData);
 
 			Shape3D shape = new Shape3D();
-			IndexedTriangleStripArray physicsTriStripArray = new IndexedTriangleStripArray(terrainData.vertexCount, GeometryArray.COORDINATES, terrainData.indexesCount, terrainData.stripCounts);
+			IndexedTriangleStripArray physicsTriStripArray = new IndexedTriangleStripArray(terrainData.vertexCount,
+					GeometryArray.COORDINATES, terrainData.indexesCount, terrainData.stripCounts);
 			physicsTriStripArray.setCoordinates(0, terrainData.coordinates);
 			physicsTriStripArray.setCoordinateIndices(0, terrainData.indexes);
 
@@ -421,7 +423,8 @@ public class J3dLAND extends J3dRECOStatInst
 		return new Vector3f(x, 0, -y);
 	}
 
-	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrantsPerSide, int quadrant)
+	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
+			int quadrantsPerSide, int quadrant)
 	{
 		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
@@ -429,11 +432,12 @@ public class J3dLAND extends J3dRECOStatInst
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
 		TexCoord2f[][] quadrantTexCoords = new TexCoord2f[quadrantSquareCount][quadrantSquareCount];
 
-		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
+		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors,
+				quadrantTexCoords);
 
 		//Note that 33 by 33 sets of point equals 32 by 32 set of triangles between them
-		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount, quadrantSquareCount, quadrantHeights, quadrantNormals,
-				quadrantColors, quadrantTexCoords);
+		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount,
+				quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
 		if (STRIPIFY)
@@ -454,7 +458,8 @@ public class J3dLAND extends J3dRECOStatInst
 
 	}
 
-	private static GeometryArray makeQuadrantLayerSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrantsPerSide, int quadrant, VTXT vtxt)
+	private static GeometryArray makeQuadrantLayerSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors, int quadrantsPerSide,
+			int quadrant, VTXT vtxt)
 	{
 		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
 		float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
@@ -462,7 +467,8 @@ public class J3dLAND extends J3dRECOStatInst
 		Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
 		TexCoord2f[][] quadrantTexCoords = new TexCoord2f[quadrantSquareCount][quadrantSquareCount];
 
-		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
+		makeQuadrantData(quadrantsPerSide, quadrant, heights, normals, colors, quadrantHeights, quadrantNormals, quadrantColors,
+				quadrantTexCoords);
 
 		if (vtxt != null)
 		{
@@ -484,8 +490,8 @@ public class J3dLAND extends J3dRECOStatInst
 			}
 		}
 
-		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount, quadrantSquareCount, quadrantHeights, quadrantNormals,
-				quadrantColors, quadrantTexCoords);
+		TESLANDGen gridGenerator = new TESLANDGen(LAND_SIZE / quadrantsPerSide, LAND_SIZE / quadrantsPerSide, quadrantSquareCount,
+				quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
 		if (STRIPIFY)
@@ -517,8 +523,9 @@ public class J3dLAND extends J3dRECOStatInst
 	 * @param quadrantNormals 17x17 array to be filled
 	 * @param quadrantColors  17x17 array to be filled
 	 */
-	private static void makeQuadrantData(int quadrantsPerSide, int quadrant, float[][] baseHeights, Vector3f[][] baseNormals, Color4f[][] baseColors, float[][] quadrantHeights,
-			Vector3f[][] quadrantNormals, Color4f[][] quadrantColors, TexCoord2f[][] quadrantTexCoords)
+	private static void makeQuadrantData(int quadrantsPerSide, int quadrant, float[][] baseHeights, Vector3f[][] baseNormals,
+			Color4f[][] baseColors, float[][] quadrantHeights, Vector3f[][] quadrantNormals, Color4f[][] quadrantColors,
+			TexCoord2f[][] quadrantTexCoords)
 	{
 		//trust me on this madness
 		int qx = quadrant % quadrantsPerSide;
@@ -578,7 +585,7 @@ public class J3dLAND extends J3dRECOStatInst
 			{
 				LTEX ltex = new LTEX(ltexRec);
 				int texSetId = ltex.textureSetId;
-				
+
 				if (texSetId != -1)
 				{
 					Record texSetRec = master.getRecord(texSetId);
@@ -767,7 +774,8 @@ public class J3dLAND extends J3dRECOStatInst
 			}
 			iga.setCoordIndicesRef(terrainData.indexes);
 
-			float[] vertexData = J3dNiTriBasedGeom.interleave(1, 2, new float[][] { terrainData.textureCoordinates }, null, terrainData.colors, terrainData.normals, terrainData.coordinates);
+			float[] vertexData = J3dNiTriBasedGeom.interleave(2, new float[][] { terrainData.textureCoordinates }, null, terrainData.colors,
+					terrainData.normals, terrainData.coordinates);
 
 			if (!BUFFERS)
 			{
