@@ -23,17 +23,7 @@ import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
-import nif.BgsmSource;
-import nif.j3d.J3dNiGeometry;
-import nif.j3d.J3dNiTriBasedGeom;
-import nif.niobject.bgsm.BgsmFile;
-
 import org.j3d.geom.GeometryData;
-
-import tools.io.ESMByteConvert;
-import tools3d.utils.Utils3D;
-import utils.PhysAppearance;
-import utils.source.TextureSource;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
 
@@ -46,6 +36,14 @@ import esmj3d.data.shared.records.TXST;
 import esmj3d.j3d.TESLANDGen;
 import esmmanager.common.data.record.IRecordStore;
 import esmmanager.common.data.record.Record;
+import nif.BgsmSource;
+import nif.j3d.J3dNiGeometry;
+import nif.j3d.J3dNiTriBasedGeom;
+import nif.niobject.bgsm.BSMaterial;
+import tools.io.ESMByteConvert;
+import tools3d.utils.Utils3D;
+import utils.PhysAppearance;
+import utils.source.TextureSource;
 
 public class J3dLAND extends J3dRECOStatInst
 {
@@ -599,12 +597,12 @@ public class J3dLAND extends J3dRECOStatInst
 						// new fallout 4 texture system
 						try
 						{
-
-							BgsmFile bgsm = BgsmSource.getBgsmFile("Materials\\" + textureSet.MNAM.str);
-							if (bgsm != null)
+							BSMaterial material = BgsmSource.getMaterial("Materials\\" + textureSet.MNAM.str);
+							if (material != null)
 							{
-								return textureSource.getTexture(bgsm.textures[0]);
+								return textureSource.getTexture(material.textureList.get(0));
 							}
+
 						}
 						catch (IOException e)
 						{
