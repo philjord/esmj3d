@@ -9,7 +9,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/ESMManager"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core-and"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/java3d-utils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java3d-utils-and"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/vecmath"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
