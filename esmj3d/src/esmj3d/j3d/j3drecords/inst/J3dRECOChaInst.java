@@ -9,15 +9,13 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3f;
 
-import tools3d.utils.Utils3D;
-import tools3d.utils.scenegraph.BetterDistanceLOD;
-import utils.ESConfig;
-
-import com.sun.j3d.utils.geometry.ColorCube;
-
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOTypeCha;
+import tools3d.utils.Utils3D;
+import tools3d.utils.leafnode.Cube;
+import tools3d.utils.scenegraph.BetterDistanceLOD;
+import utils.ESConfig;
 
 public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst
 {
@@ -84,14 +82,13 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		this.j3dRECOType = j3dRECOType;
 
 		BranchGroup far = new BranchGroup();// empty group for no rendering
-		far.addChild(SHOW_FADE_OUT_MARKER ? new ColorCube(0.1) : new BranchGroup());
+		far.addChild(SHOW_FADE_OUT_MARKER ? new Cube(0.1) : new BranchGroup());
 
 		myNodes.add(j3dRECOType);
 		myNodes.add(far);
 		Group parent = new Group();
 		transformGroup.addChild(parent);
-		dl = new BetterDistanceLOD(parent, myNodes, new float[]
-		{ BethRenderSettings.getActorFade() });
+		dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getActorFade() });
 		transformGroup.addChild(dl);
 		dl.setSchedulingBounds(Utils3D.defaultBounds);
 		dl.setEnable(true);
@@ -129,8 +126,8 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 		transform.set(xrotT);
 
-		transform.setTranslation(new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y
-				* ESConfig.ES_TO_METERS_SCALE));
+		transform.setTranslation(
+				new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y * ESConfig.ES_TO_METERS_SCALE));
 
 		transform.setScale(scale);
 

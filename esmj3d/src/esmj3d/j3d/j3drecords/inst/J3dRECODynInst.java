@@ -9,15 +9,13 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3f;
 
-import tools3d.utils.Utils3D;
-import tools3d.utils.scenegraph.BetterDistanceLOD;
-import utils.ESConfig;
-
-import com.sun.j3d.utils.geometry.ColorCube;
-
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOType;
+import tools3d.utils.Utils3D;
+import tools3d.utils.leafnode.Cube;
+import tools3d.utils.scenegraph.BetterDistanceLOD;
+import utils.ESConfig;
 
 public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst
 {
@@ -99,7 +97,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	public void setJ3dRECOType(J3dRECOType j3dRECOType)
 	{
 		BranchGroup bg = new BranchGroup();// empty group for no rendering
-		bg.addChild(SHOW_FADE_OUT_MARKER ? new ColorCube(0.1) : new BranchGroup());
+		bg.addChild(SHOW_FADE_OUT_MARKER ? new Cube(0.1) : new BranchGroup());
 		setJ3dRECOType(j3dRECOType, bg);
 	}
 
