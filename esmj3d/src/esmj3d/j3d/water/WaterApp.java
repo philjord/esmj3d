@@ -1,6 +1,12 @@
 package esmj3d.j3d.water;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.Enumeration;
 
 import javax.media.j3d.Appearance;
@@ -47,8 +53,7 @@ public class WaterApp extends BranchGroup
 
 	public WaterApp(String defaultTexture, TextureSource textureSource)
 	{
-		this(new String[]
-		{ defaultTexture }, textureSource);
+		this(new String[] { defaultTexture }, textureSource);
 	}
 
 	public WaterApp(String[] textureStrings, TextureSource textureSource)
@@ -101,8 +106,7 @@ public class WaterApp extends BranchGroup
 
 		if (USE_SHADERS)
 		{
-			PerFrameUpdateBehavior pfub = new PerFrameUpdateBehavior(new PerFrameUpdateBehavior.CallBack()
-			{
+			PerFrameUpdateBehavior pfub = new PerFrameUpdateBehavior(new PerFrameUpdateBehavior.CallBack() {
 				@Override
 				public void update()
 				{
@@ -157,26 +161,22 @@ public class WaterApp extends BranchGroup
 				}
 
 				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram)
-				{
+				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
 					public String toString()
 					{
 						return "vertexProgram";
 					}
 				};
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram)
-				{
+				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
 					public String toString()
 					{
 						return "fragmentProgram";
 					}
 				};
 
-				final String[] shaderAttrNames =
-				{ "envMap", "numWaves", "amplitude", "wavelength", "speed", "direction", "time" };
+				final String[] shaderAttrNames = { "envMap", "numWaves", "amplitude", "wavelength", "speed", "direction", "time" };
 
-				shaderProgram = new GLSLShaderProgram()
-				{
+				shaderProgram = new GLSLShaderProgram() {
 					public String toString()
 					{
 						return "Water Shader Program";
@@ -235,10 +235,9 @@ public class WaterApp extends BranchGroup
 		app.setTextureUnitState(tus);
 
 		app.setMaterial(getLandMaterial());
-		
-		
+
 		app.setRenderingAttributes(new RenderingAttributes());
-		
+
 		return app;
 	}
 
@@ -283,8 +282,7 @@ public class WaterApp extends BranchGroup
 			wakeupOn(wakeUp);
 		}
 
-		@SuppressWarnings(
-		{ "unchecked", "rawtypes" })
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void processStimulus(Enumeration critiria)
 		{
 			idx++;

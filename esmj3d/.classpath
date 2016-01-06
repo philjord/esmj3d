@@ -8,9 +8,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/BSAManager"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ESMManager"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/j3d/j3d-org-java3d-all.jar" sourcepath="E:/Java/3rd party jars/j3d/src"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/java3d/1.6.0-pre12/j3dcore.jar"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/java3d/1.6.0-pre12/j3dutils.jar"/>
-	<classpathentry kind="lib" path="/external_jars/external jars/java3d/1.6.0-pre12/vecmath.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core-and"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java3d-utils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/vecmath"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
