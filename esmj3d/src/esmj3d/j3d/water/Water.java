@@ -2,11 +2,15 @@ package esmj3d.j3d.water;
 
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
+import javax.media.j3d.IndexedQuadArray;
+import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.Shape3D;
 
 import org.j3d.geom.GeometryData;
 import org.j3d.geom.terrain.ElevationGridGenerator;
+
+import tools3d.utils.Utils3D;
 
 public class Water extends Group
 {
@@ -27,7 +31,7 @@ public class Water extends Group
 	{
 		/*	QuadArray quads = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.TEXTURE_COORDINATE_2
 					| GeometryArray.COLOR_4);
-
+		
 			quads.setCoordinate(0, new Point3f(-size / 2f, 0, -size / 2f));
 			quads.setCoordinate(1, new Point3f(-size / 2f, 0, size / 2f));
 			quads.setCoordinate(2, new Point3f(size / 2f, 0, size / 2f));
@@ -53,16 +57,23 @@ public class Water extends Group
 		elevationGridGenerator.setTerrainDetail(flatHeights, 0);
 		elevationGridGenerator.generate(gd);
 		QuadArray quads = new QuadArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
-				| GeometryArray.TEXTURE_COORDINATE_2);
-		quads.setCoordinates(0, gd.coordinates);
-		quads.setNormals(0, gd.normals);
+				| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
+				//quads.setCoordinatesBuffer(0, gd.coordinates);
+				//quads.setNormals(0, gd.normals);
 
 		// repeat image every say 10 of size?
 		for (int i = 0; i < gd.textureCoordinates.length; i++)
 		{
 			gd.textureCoordinates[i] *= size / 10f;
 		}
-		quads.setTextureCoordinates(0, 0, gd.textureCoordinates);
+		//quads.setTextureCoordinates(0, 0, gd.textureCoordinates);
+
+		quads.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.coordinates)));
+
+		quads.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.normals)));
+
+		quads.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(gd.textureCoordinates)));
+		
 
 		return quads;
 	}

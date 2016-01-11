@@ -58,9 +58,9 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static float LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE; //= (32*2.56) = 81.92
 
-	public static boolean BY_REF = false;
+	public static boolean BY_REF = true;
 
-	public static boolean BUFFERS = false;
+	public static boolean BUFFERS = true;
 
 	public static boolean INTERLEAVE = false;
 
@@ -130,8 +130,8 @@ public class J3dLAND extends J3dRECOStatInst
 		TEX_REPEAT = 0.25f;
 		INTERLEAVE = false;
 		STRIPIFY = false;
-		BY_REF = false;
-		BUFFERS = false;
+		BY_REF = true;
+		BUFFERS = true;
 	}
 
 	private GeometryInfo gi;//for Bullet later
