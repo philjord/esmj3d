@@ -4,6 +4,7 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
+import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Link;
 import javax.media.j3d.Material;
 import javax.media.j3d.Node;
@@ -19,6 +20,7 @@ import javax.vecmath.Vector3f;
 
 import nif.j3d.J3dNiAVObject;
 import tools.WeakValueHashMap;
+import tools3d.utils.Utils3D;
 import utils.ESConfig;
 import utils.source.MediaSources;
 import utils.source.TextureSource;
@@ -41,8 +43,8 @@ public class TreeMaker
 			if (treeName.endsWith(".spt"))
 			{
 				// give it the InstREco to prebake
-				Node node = createShapeX(treeName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE, billBoardHeight
-						* ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource(), inst);
+				Node node = createShapeX(treeName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE,
+						billBoardHeight * ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource(), inst);
 				return node;
 			}
 			else
@@ -70,7 +72,7 @@ public class TreeMaker
 	{
 		String nifTreeFileName = null;
 		//firstly deal with spt file (speed tree) for oblic and fallouts
-		if (treeName.endsWith(".spt"))
+		if (treeName != null && treeName.endsWith(".spt"))
 		{
 			// see if we have a map of a skyrim tree
 			String sptFileName = treeName;
@@ -90,8 +92,8 @@ public class TreeMaker
 				if (!makePhys)
 				{
 					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, false, makePhys);
-					Node node = makeLODTreeX(sptFileName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE, billBoardHeight
-							* ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource());
+					Node node = makeLODTreeX(sptFileName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE,
+							billBoardHeight * ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource());
 					j3dinst.addNodeChild(node);
 					return j3dinst;
 				}
@@ -121,7 +123,7 @@ public class TreeMaker
 				{
 					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, true, makePhys);
 					j3dinst.setJ3dRECOType(//
-							new J3dRECOTypeStatic(inst, nifTreeFileName, makePhys, mediaSources),//							
+							new J3dRECOTypeStatic(inst, nifTreeFileName, makePhys, mediaSources), //							
 							makeFlatLodTree(treeLodFlat, mediaSources));
 					return j3dinst;
 				}
@@ -292,26 +294,23 @@ public class TreeMaker
 
 		float zPosition = 0f;
 
-		float[] verts1 =
-		{ x + (rectWidth / 2), y + 0f, z + zPosition,//
-				x + (rectWidth / 2), y + rectHeight, z + zPosition,//
-				x + (-rectWidth / 2), y + rectHeight, z + zPosition,//
+		float[] verts1 = { x + (rectWidth / 2), y + 0f, z + zPosition, //
+				x + (rectWidth / 2), y + rectHeight, z + zPosition, //
+				x + (-rectWidth / 2), y + rectHeight, z + zPosition, //
 				x + (-rectWidth / 2), y + 0f, z + zPosition//
 				, //
-				x + zPosition, y + 0f, z + (rectWidth / 2),//
-				x + zPosition, y + rectHeight, z + (rectWidth / 2),//
-				x + zPosition, y + rectHeight, z + (-rectWidth / 2),//
+				x + zPosition, y + 0f, z + (rectWidth / 2), //
+				x + zPosition, y + rectHeight, z + (rectWidth / 2), //
+				x + zPosition, y + rectHeight, z + (-rectWidth / 2), //
 				x + zPosition, y + 0f, z + (-rectWidth / 2) };
 
-		float[] texCoords =
-		{ 0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f//
-				,//
+		float[] texCoords = { 0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f//
+				, //
 				0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f //
 		};
 
 		//probably should add normals too for speed?otherwise auto generated or something
-		float[] normals =
-		{ 0f, 0f, 1f, //
+		float[] normals = { 0f, 0f, 1f, //
 				0f, 0f, 1f, //
 				0f, 0f, 1f, //
 				0f, 0f, 1f, //
@@ -322,10 +321,15 @@ public class TreeMaker
 		};
 
 		//TODO: should try filling in with interleaving etc
-		QuadArray rect = new QuadArray(8, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.NORMALS);
-		rect.setCoordinates(0, verts1);
-		rect.setTextureCoordinates(0, 0, texCoords);
-		rect.setNormals(0, normals);
+		QuadArray rect = new QuadArray(8, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.NORMALS
+				| GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
+		//rect.setCoordinates(0, verts1);
+		//rect.setTextureCoordinates(0, 0, texCoords);
+		//rect.setNormals(0, normals);
+
+		rect.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(verts1)));
+		rect.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(normals)));
+		rect.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(texCoords)));
 		return rect;
 	}
 

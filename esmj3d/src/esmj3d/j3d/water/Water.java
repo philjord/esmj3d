@@ -2,7 +2,6 @@ package esmj3d.j3d.water;
 
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
-import javax.media.j3d.IndexedQuadArray;
 import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.Shape3D;

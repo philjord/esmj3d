@@ -10,6 +10,7 @@ import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.IndexedGeometryArray;
+import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Material;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.QuadArray;
@@ -21,6 +22,7 @@ import javax.media.j3d.TransparencyAttributes;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
+import tools3d.utils.Utils3D;
 
 /**
  * Used by Oblivion only, the morph land system
@@ -80,8 +82,7 @@ public class MorphingLandscape extends BranchGroup
 				{
 					final Rectangle bounds = new Rectangle(lowX, lowY, absBounds.width + 1, absBounds.height + 1);
 
-					baseItsa.updateData(new GeometryUpdater()
-					{
+					baseItsa.updateData(new GeometryUpdater() {
 						public void updateData(Geometry geometry)
 						{
 							float[] coordRefFloat = baseItsa.getCoordRefFloat();
@@ -134,9 +135,9 @@ public class MorphingLandscape extends BranchGroup
 		mat.setDiffuseColor(0.5f, 0.6f, 0.5f);
 		mat.setSpecularColor(0.0f, 0.0f, 0.0f);
 		app.setMaterial(mat);
-		
+
 		app.setRenderingAttributes(new RenderingAttributes());
-		
+
 		return app;
 	}
 
@@ -172,23 +173,24 @@ public class MorphingLandscape extends BranchGroup
 
 		float yPosition = 0f;
 
-		float[] verts1 =
-		{ x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2),//
-				x + (rectWidth / 2), y + yPosition, z + (rectHeight / 2),//
-				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2),//
+		float[] verts1 = { x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2), //
+				x + (rectWidth / 2), y + yPosition, z + (rectHeight / 2), //
+				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2), //
 				x + (-rectWidth / 2), y + yPosition, z + (-rectHeight / 2) //
 		};
 
-		float[] normals =
-		{ 0f, 0f, 1f, //
+		float[] normals = { 0f, 0f, 1f, //
 				0f, 0f, 1f, //
 				0f, 0f, 1f, //
 				0f, 0f, 1f, //
 		};
 
-		QuadArray rect = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.NORMALS);
-		rect.setCoordinates(0, verts1);
-		rect.setNormals(0, normals);
+		QuadArray rect = new QuadArray(4,
+				GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
+		//rect.setCoordinates(0, verts1);
+		//rect.setNormals(0, normals);
+		rect.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(verts1)));
+		rect.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(normals)));
 
 		Shape3D shape = new Shape3D(rect, createBasicWaterApp());
 		return shape;

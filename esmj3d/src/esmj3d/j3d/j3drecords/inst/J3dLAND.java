@@ -157,9 +157,11 @@ public class J3dLAND extends J3dRECOStatInst
 
 			Shape3D shape = new Shape3D();
 			IndexedTriangleStripArray physicsTriStripArray = new IndexedTriangleStripArray(terrainData.vertexCount,
-					GeometryArray.COORDINATES, terrainData.indexesCount, terrainData.stripCounts);
-			physicsTriStripArray.setCoordinates(0, terrainData.coordinates);
-			physicsTriStripArray.setCoordinateIndices(0, terrainData.indexes);
+					GeometryArray.COORDINATES | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE
+							| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.USE_COORD_INDEX_ONLY,
+					terrainData.indexesCount, terrainData.stripCounts);
+			physicsTriStripArray.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.coordinates)));
+			physicsTriStripArray.setCoordIndicesRef(terrainData.indexes);
 
 			gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
 			gi.setStripCounts(terrainData.stripCounts);
