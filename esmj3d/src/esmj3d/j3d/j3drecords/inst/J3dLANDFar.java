@@ -1,41 +1,47 @@
 package esmj3d.j3d.j3drecords.inst;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.Geometry;
+import java.io.IOException;
+
+import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.Material;
 import javax.media.j3d.RenderingAttributes;
+import javax.media.j3d.Shader;
+import javax.media.j3d.ShaderAppearance;
+import javax.media.j3d.ShaderAttributeSet;
+import javax.media.j3d.ShaderAttributeValue;
+import javax.media.j3d.ShaderProgram;
 import javax.media.j3d.Shape3D;
-import javax.media.j3d.TextureAttributes;
+import javax.media.j3d.SourceCodeShader;
+import javax.media.j3d.TextureUnitState;
 import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
 
-import tools.io.ESMByteConvert;
-import utils.source.TextureSource;
+import com.sun.j3d.utils.shader.StringIO;
+
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.BTXT;
 import esmj3d.j3d.TESLANDGen;
 import esmmanager.common.data.record.IRecordStore;
+import tools.io.ESMByteConvert;
+import utils.source.TextureSource;
 
 public class J3dLANDFar extends J3dRECOStatInst
 {
 
 	private int reduceFactor = 2; // 2 or 4 only (2 for non tes3) 2 for far 4 for lod 
 
-	//Notice none of the below are static, I don't want too much sharing of appearance parts
-	private Material landMaterial = null;
-
-	private RenderingAttributes landRA = null;
-
-	private TextureAttributes textureAttributesBase = null;
-
-	private Geometry[] quadrantBaseSubGeoms;
-
 	private float lowestHeight = Float.MAX_VALUE;
+
+	private static ShaderProgram shaderProgram = null;
+
+	private static String vertexProgram = null;
+
+	private static String fragmentProgram = null;
 
 	/**
 	 * makes the visual version of land for farness (1/4 detail no layers)
@@ -55,14 +61,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 		int quadrantsPerSide = land.tes3 ? 16 : 2;
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 
-		quadrantBaseSubGeoms = new Geometry[totalQuadrants];
-		//tes3 doesn't use these as a very dfferent format, gets a big perf improve from just one
-		Group[] quadrantBaseGroups = new Group[totalQuadrants];
-
-		// not in fact ordered for fars
-		Group orderedGroup = new Group();
-		if (land.tes3)
-			addNodeChild(orderedGroup);
+		Group baseGroup = new Group();
+		addNodeChild(baseGroup);
 
 		if (land.VHGT != null)
 		{
@@ -78,113 +78,101 @@ public class J3dLANDFar extends J3dRECOStatInst
 			byte[] colorBytes = land.VCLR;
 			Color4f[][] colors = J3dLAND.extractColors(colorBytes);
 
-			if (textureAttributesBase == null)
-			{
-				textureAttributesBase = new TextureAttributes();
-				textureAttributesBase.setTextureMode(TextureAttributes.MODULATE);
-			}
-
-			// make up some base quadrants, keep seperate to allow frustrum culling
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
+
+				ShaderAppearance app = new ShaderAppearance();
+				Material mat = new Material();
+				mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+				mat.setShininess(1.0f);
+				mat.setDiffuseColor(1f, 1f, 1f);
+				mat.setSpecularColor(1f, 1f, 1f);
+				app.setMaterial(mat);
+
+				app.setRenderingAttributes(new RenderingAttributes());
+
+				if (shaderProgram == null)
+				{
+					try
+					{
+						vertexProgram = StringIO.readFully("./shaders/landfar.vert");
+						fragmentProgram = StringIO.readFully("./shaders/landfar.frag");
+					}
+					catch (IOException e)
+					{
+						System.err.println(e);
+					}
+
+					Shader[] shaders = new Shader[2];
+					shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+						public String toString()
+						{
+							return "vertexProgram";
+						}
+					};
+					shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+						public String toString()
+						{
+							return "fragmentProgram";
+						}
+					};
+
+					shaderProgram = new GLSLShaderProgram() {
+						public String toString()
+						{
+							return "Land Shader Program";
+						}
+					};
+					shaderProgram.setShaders(shaders);
+
+					String[] shaderAttrNames = new String[1];
+					shaderAttrNames[0] = "baseMap";
+					shaderProgram.setShaderAttrNames(shaderAttrNames);
+				}
+
+				TextureUnitState tus = null;
+
 				if (!land.tes3)
 				{
-					Group decalGroup = new Group();
-					quadrantBaseGroups[quadrant] = decalGroup;
-					addNodeChild(decalGroup);
-				}
-
-				quadrantBaseSubGeoms[quadrant] = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, reduceFactor);
-			}
-
-			if (!land.tes3)
-			{
-				//VTEXs a bad def that in fact should be only in the older tes3 system, I wager
-				if (land.VTEXids != null)
-				{
-					System.out.println("***********************VTEXs in LAND");
-				}
-
-				// make up some base land texture, pre sorted to btxt by quadrant
-				for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
-				{
-					Appearance app = createAppearance();
-					app.setTextureAttributes(textureAttributesBase);
-
 					//oddly btxt are optional
 					BTXT btxt = land.BTXTs[quadrant];
+
 					if (btxt != null)
 					{
-						app.setTexture(J3dLAND.getTexture(btxt.textureFormID, master, textureSource));
+						tus = J3dLAND.getTexture(btxt.textureFormID, master, textureSource);
 					}
 					else
 					{
-						app.setTexture(J3dLAND.getDefaultTexture(textureSource));
+						tus = J3dLAND.getDefaultTexture(textureSource);
 					}
-
-					Shape3D baseQuadShape = new Shape3D();
-					baseQuadShape.setAppearance(app);
-
-					baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-
-					quadrantBaseGroups[quadrant].addChild(baseQuadShape);
-
 				}
-			}
-			else
-			{
-				if (land.VTEXshorts != null)
+				else
 				{
-					for (int quadrant = 0; quadrant < land.VTEXshorts.length; quadrant++)
+					if (land.VTEXshorts != null)
 					{
 						int texFormId = land.VTEXshorts[quadrant];
-
-						Appearance app = createAppearance();
-						app.setTextureAttributes(textureAttributesBase);
-
-						app.setTexture(J3dLAND.getTextureTes3(texFormId, master, textureSource));
-
-						Shape3D baseQuadShape = new Shape3D();
-						baseQuadShape.setAppearance(app);
-
-						baseQuadShape.setGeometry(quadrantBaseSubGeoms[quadrant]);
-
-						addNodeChild(baseQuadShape);
+						tus = J3dLAND.getTextureTes3(texFormId, master, textureSource);
 					}
 				}
+
+				Shape3D baseQuadShape = new Shape3D();
+				baseQuadShape.setAppearance(app);
+				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, reduceFactor);
+				baseQuadShape.setGeometry(ga);
+
+				app.setTextureUnitState(new TextureUnitState[] { tus });
+
+				app.setShaderProgram(shaderProgram);
+
+				ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
+				shaderAttributeSet.put(new ShaderAttributeValue("baseMap", new Integer(0)));
+
+				app.setShaderAttributeSet(shaderAttributeSet);
+
+				baseGroup.addChild(baseQuadShape);
+
 			}
 		}
-	}
-
-	private Appearance createAppearance()
-	{
-		Appearance app = new Appearance();
-		app.setRenderingAttributes(getLandRA());
-		app.setMaterial(getLandMaterial());
-		return app;
-	}
-
-	private RenderingAttributes getLandRA()
-	{
-		if (landRA == null)
-		{
-			landRA = new RenderingAttributes();
-		}
-		return landRA;
-	}
-
-	private Material getLandMaterial()
-	{
-		if (landMaterial == null)
-		{
-			landMaterial = new Material();
-
-			landMaterial.setShininess(1.0f); // land is not very shiny, generally
-			landMaterial.setDiffuseColor(0.5f, 0.5f, 0.5f);
-			landMaterial.setSpecularColor(0.0f, 0.0f, 0.0f);// is the shiny value above not working?
-			landMaterial.setColorTarget(Material.AMBIENT_AND_DIFFUSE);//new
-		}
-		return landMaterial;
 	}
 
 	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
@@ -218,7 +206,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 			terrainData.coordinates[i + 2] += offset.z;
 		}
 
-		return J3dLAND.createGA(terrainData);
+		return J3dLAND.createGA(terrainData, 1, 0, null);
 
 	}
 

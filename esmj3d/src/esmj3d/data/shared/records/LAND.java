@@ -88,7 +88,7 @@ public class LAND extends InstRECO
 			}
 			else if (tes3 && sr.getType().equals("VTEX"))
 			{
-				// these occur in oblivion on rare occasion
+				// A 16x16 array of short texture ids
 				for (int f = 0; f < bs.length; f += 2)
 				{
 					VTEXshortsv.add(ESMByteConvert.extractShort(bs, f));
@@ -121,6 +121,7 @@ public class LAND extends InstRECO
 			}
 			else if (!tes3 && sr.getType().equals("VTEX"))
 			{
+				//TODO: I think using parent world has made this redundant entriely
 				//VTEX (Optional): Texture FormIDs: A sequence of LTEX FormIDs. 
 				//Many may be NULL values. (Variable length, but always multiples of 4 bytes).
 
@@ -131,15 +132,7 @@ public class LAND extends InstRECO
 					VTEXidsv.add(new FormID(fbs));
 				}
 
-				//it's 64 ints long, is that 8 layers by 4 quadrants but last 32 are 0?
-				//there is one in anvil world and I note that this land has a shape that doesn't fit it's neighbours	
-				//land id 96329 it only has subs of DATA VNML, VHGT, VCLR no texture data	so therefore no VTXT for transparency
-
-				//TODO: MegaTonWordl in fallout3 shows signs of being corrupted for some reason
-				// LTEX wrong ids data is mis placing the quadrants in height
-				// but mega ton does not seem to have one? and it has some quandrants
-
-				//I notice my height data is out in the case of bad land record, but the cell location is correct
+				// Notice for bad world land data the parent world data is accurate 
 
 			}
 			else
@@ -187,6 +180,17 @@ public class LAND extends InstRECO
 				ATXTs[j] = ATXTsv.get(j);
 			}
 
+			
+
+			Arrays.sort(ATXTs, new Comparator<ATXT>()
+			{
+				public int compare(ATXT a1, ATXT a2)
+				{
+					return a1.layer < a2.layer ? -1 :  a1.layer == a2.layer ? 0 : 1;
+				}
+			});
+			
+			//possibly remove entirely?
 			if (VTEXidsv.size() > 0)
 			{
 				VTEXids = new FormID[VTEXidsv.size()];
@@ -195,14 +199,6 @@ public class LAND extends InstRECO
 					VTEXids[j] = VTEXidsv.get(j);
 				}
 			}
-
-			Arrays.sort(ATXTs, new Comparator<ATXT>()
-			{
-				public int compare(ATXT a1, ATXT a2)
-				{
-					return a1.layer < a2.layer ? -1 : a1.layer == a2.layer ? 0 : 1;
-				}
-			});
 		}
 	}
 
@@ -276,9 +272,9 @@ public class LAND extends InstRECO
 
 		public int[] position;
 
-		public byte[] unknownByte1;
-
-		public byte[] unknownByte2;
+		public byte[] unknownByte1;//Unknown 	1 byte 	Unknown.
+		
+		public byte[] unknownByte2;//Unknown 	1 byte 	Unknown. Frequently (but not always) the same value as the previous byte. They look to be independent scalars in any case.
 
 		public float[] opacity;
 

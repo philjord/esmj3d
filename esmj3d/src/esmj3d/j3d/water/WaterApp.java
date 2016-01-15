@@ -1,12 +1,6 @@
 package esmj3d.j3d.water;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 import java.util.Enumeration;
 
 import javax.media.j3d.Appearance;
@@ -31,13 +25,13 @@ import javax.media.j3d.TransparencyAttributes;
 import javax.media.j3d.WakeupOnElapsedTime;
 import javax.vecmath.Point2f;
 
+import com.sun.j3d.utils.shader.StringIO;
+
 import nif.NifToJ3d;
 import nif.j3d.J3dNiGeometry;
 import tools3d.utils.Utils3D;
 import utils.PerFrameUpdateBehavior;
 import utils.source.TextureSource;
-
-import com.sun.j3d.utils.shader.StringIO;
 
 public class WaterApp extends BranchGroup
 {
