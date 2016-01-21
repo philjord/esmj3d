@@ -22,6 +22,7 @@ import javax.media.j3d.TransparencyAttributes;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
+import tools3d.utils.SimpleShaderAppearance;
 import tools3d.utils.Utils3D;
 
 /**
@@ -121,7 +122,7 @@ public class MorphingLandscape extends BranchGroup
 
 	protected static Appearance createAppearance(Texture tex)
 	{
-		Appearance app = new Appearance();
+		Appearance app = new SimpleShaderAppearance(true);
 
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
@@ -143,7 +144,7 @@ public class MorphingLandscape extends BranchGroup
 
 	protected static Appearance createBasicWaterApp()
 	{
-		Appearance app = new Appearance();
+		Appearance app = new SimpleShaderAppearance();
 
 		PolygonAttributes pa = new PolygonAttributes();
 		pa.setCullFace(PolygonAttributes.CULL_NONE);

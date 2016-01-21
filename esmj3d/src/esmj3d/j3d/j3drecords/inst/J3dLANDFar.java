@@ -120,7 +120,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 					shaderProgram = new GLSLShaderProgram() {
 						public String toString()
 						{
-							return "Land Shader Program";
+							return "Land (far) Shader Program";
 						}
 					};
 					shaderProgram.setShaders(shaders);

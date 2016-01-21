@@ -20,6 +20,7 @@ import javax.vecmath.Vector3f;
 
 import nif.j3d.J3dNiAVObject;
 import tools.WeakValueHashMap;
+import tools3d.utils.SimpleShaderAppearance;
 import tools3d.utils.Utils3D;
 import utils.ESConfig;
 import utils.source.MediaSources;
@@ -335,7 +336,7 @@ public class TreeMaker
 
 	private static Appearance createAppearance(Texture tex)
 	{
-		Appearance app = new Appearance();
+		Appearance app = new SimpleShaderAppearance(true);
 
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
