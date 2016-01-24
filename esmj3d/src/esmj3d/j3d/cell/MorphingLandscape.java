@@ -2,10 +2,12 @@ package esmj3d.j3d.cell;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
@@ -15,10 +17,16 @@ import javax.media.j3d.Material;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.RenderingAttributes;
+import javax.media.j3d.Shader;
+import javax.media.j3d.ShaderAppearance;
+import javax.media.j3d.ShaderProgram;
 import javax.media.j3d.Shape3D;
+import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
+
+import com.sun.j3d.utils.shader.StringIO;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
@@ -32,6 +40,7 @@ import tools3d.utils.Utils3D;
  */
 public class MorphingLandscape extends BranchGroup
 {
+	private static ShaderProgram shaderProgram = null;
 
 	private int lodX = 0;
 
@@ -122,24 +131,71 @@ public class MorphingLandscape extends BranchGroup
 
 	protected static Appearance createAppearance(Texture tex)
 	{
-		Appearance app = new SimpleShaderAppearance(true);
+		ShaderAppearance app = new ShaderAppearance();
+		Material mat = new Material();
+		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+		mat.setShininess(1.0f);
+		mat.setDiffuseColor(1f, 1f, 1f);
+		mat.setSpecularColor(1f, 1f, 1f);
+		app.setMaterial(mat);
 
+		app.setRenderingAttributes(new RenderingAttributes());
+
+		if (shaderProgram == null)
+		{
+			loadShaderProgram();
+		}
+		app.setShaderProgram(shaderProgram);
+		
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
 		tus0.setTexture(tex);
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);
-
-		Material mat = new Material();
-		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
-		mat.setShininess(1.0f);
-		mat.setDiffuseColor(0.5f, 0.6f, 0.5f);
-		mat.setSpecularColor(0.0f, 0.0f, 0.0f);
-		app.setMaterial(mat);
-
-		app.setRenderingAttributes(new RenderingAttributes());
+		
+		
 
 		return app;
+	}
+
+	private static void loadShaderProgram()
+	{
+		if (shaderProgram == null)
+		{
+			try
+			{
+				String vertexProgram = StringIO.readFully("./shaders/landfar.vert");
+				String fragmentProgram = StringIO.readFully("./shaders/landfar.frag");
+
+				Shader[] shaders = new Shader[2];
+				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+					public String toString()
+					{
+						return "vertexProgram";
+					}
+				};
+				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+					public String toString()
+					{
+						return "fragmentProgram";
+					}
+				};
+
+				shaderProgram = new GLSLShaderProgram() {
+					public String toString()
+					{
+						return "Land (lod) Shader Program";
+					}
+				};
+				shaderProgram.setShaders(shaders);
+				shaderProgram.setShaderAttrNames(new String[] { "baseMap" });
+			}
+			catch (IOException e)
+			{
+				System.err.println(e);
+				return;
+			}
+		}
 	}
 
 	protected static Appearance createBasicWaterApp()
