@@ -25,6 +25,7 @@ import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
+import javax.vecmath.Color3f;
 
 import com.sun.j3d.utils.shader.StringIO;
 
@@ -200,13 +201,13 @@ public class MorphingLandscape extends BranchGroup
 
 	protected static Appearance createBasicWaterApp()
 	{
-		Appearance app = new SimpleShaderAppearance();
+		Appearance app = new SimpleShaderAppearance(new Color3f(0.5f, 0.5f, 0.6f));
 
 		PolygonAttributes pa = new PolygonAttributes();
 		pa.setCullFace(PolygonAttributes.CULL_NONE);
 		app.setPolygonAttributes(pa);
 		RenderingAttributes ra = new RenderingAttributes();
-		ra.setIgnoreVertexColors(true);//TODO: this is not working so fonv water is still white
+		ra.setIgnoreVertexColors(true);
 		app.setRenderingAttributes(ra);
 
 		TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.1f);
@@ -220,7 +221,7 @@ public class MorphingLandscape extends BranchGroup
 		app.setMaterial(mat);
 		return app;
 	}
-
+	
 	protected static Shape3D createBasicWater(float rectWidth, float rectHeight)
 	{
 		// ready for prebaking coords if required
