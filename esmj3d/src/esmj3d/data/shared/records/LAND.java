@@ -3,11 +3,12 @@ package esmj3d.data.shared.records;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 
-import tools.io.ESMByteConvert;
 import esmj3d.data.shared.subrecords.FormID;
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
+import tools.io.ESMByteConvert;
 
 /**
  * Note no location data for these ones
@@ -38,6 +39,10 @@ public class LAND extends InstRECO
 	public ATXT[] ATXTs;
 
 	public FormID[] VTEXids;
+
+	public int landX;
+
+	public int landY;
 
 	public LAND(Record recordData)
 	{
@@ -83,12 +88,13 @@ public class LAND extends InstRECO
 			}
 			else if (tes3 && sr.getType().equals("INTV"))
 			{
-				//landX = ESMByteConvert.extractInt(bs, 0);
-				//landY = ESMByteConvert.extractInt(bs, 4);
+				//Note this is not used except for debug output
+				landX = ESMByteConvert.extractInt(bs, 0);
+				landY = ESMByteConvert.extractInt(bs, 4);
 			}
 			else if (tes3 && sr.getType().equals("VTEX"))
 			{
-				// A 16x16 array of short texture ids
+				// An array made up of 4x4 sets of 4x4 short texture ids
 				for (int f = 0; f < bs.length; f += 2)
 				{
 					VTEXshortsv.add(ESMByteConvert.extractShort(bs, f));
@@ -96,7 +102,8 @@ public class LAND extends InstRECO
 			}
 			else if (tes3 && sr.getType().equals("WNAM"))
 			{
-
+				// low-LOD heightmap (used for rendering the global map)
+				//signed char mWnam[81];
 			}
 			else if (!tes3 && sr.getType().equals("BTXT"))
 			{
@@ -166,7 +173,6 @@ public class LAND extends InstRECO
 		}
 		if (!tes3)
 		{
-
 			//now make the BTXT and ATXT ordered
 			for (int j = 0; j < BTXTsv.size(); j++)
 			{
@@ -180,16 +186,13 @@ public class LAND extends InstRECO
 				ATXTs[j] = ATXTsv.get(j);
 			}
 
-			
-
-			Arrays.sort(ATXTs, new Comparator<ATXT>()
-			{
+			Arrays.sort(ATXTs, new Comparator<ATXT>() {
 				public int compare(ATXT a1, ATXT a2)
 				{
-					return a1.layer < a2.layer ? -1 :  a1.layer == a2.layer ? 0 : 1;
+					return a1.layer < a2.layer ? -1 : a1.layer == a2.layer ? 0 : 1;
 				}
 			});
-			
+
 			//possibly remove entirely?
 			if (VTEXidsv.size() > 0)
 			{
@@ -200,6 +203,32 @@ public class LAND extends InstRECO
 				}
 			}
 		}
+
+		HashSet<Integer> allTexIds = new HashSet<Integer>();
+		/*for (int j = 0; j < BTXTsv.size(); j++)
+		{
+			allTexIds.add(BTXTsv.get(j).textureFormID);
+		}
+		for (int j = 0; j < ATXTsv.size(); j++)
+		{
+			allTexIds.add(ATXTsv.get(j).textureFormID);
+		}*/
+		
+		//ok no more unrolling the outer 4x4 of tes3
+		// I need to just do the inner 4x4 
+		
+
+		/*for (int a = 0; a < 16; a++)
+		{
+			allTexIds.clear();
+			for (int b = 0; b < 16; b++)
+			{
+				allTexIds.add(VTEXshortsv.get((a * 16) + b));
+			}
+
+			System.out.println("Total count of texture Ids for " + this + " " + a + " " + allTexIds.size());
+		}*/
+
 	}
 
 	public String showDetails()
@@ -273,7 +302,7 @@ public class LAND extends InstRECO
 		public int[] position;
 
 		public byte[] unknownByte1;//Unknown 	1 byte 	Unknown.
-		
+
 		public byte[] unknownByte2;//Unknown 	1 byte 	Unknown. Frequently (but not always) the same value as the previous byte. They look to be independent scalars in any case.
 
 		public float[] opacity;

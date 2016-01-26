@@ -15,7 +15,6 @@ import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Material;
 import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.QuadArray;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shader;
 import javax.media.j3d.ShaderAppearance;
@@ -25,6 +24,7 @@ import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
+import javax.media.j3d.TriangleArray;
 import javax.vecmath.Color3f;
 
 import com.sun.j3d.utils.shader.StringIO;
@@ -147,14 +147,12 @@ public class MorphingLandscape extends BranchGroup
 			loadShaderProgram();
 		}
 		app.setShaderProgram(shaderProgram);
-		
+
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
 		tus0.setTexture(tex);
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);
-		
-		
 
 		return app;
 	}
@@ -221,7 +219,7 @@ public class MorphingLandscape extends BranchGroup
 		app.setMaterial(mat);
 		return app;
 	}
-	
+
 	protected static Shape3D createBasicWater(float rectWidth, float rectHeight)
 	{
 		// ready for prebaking coords if required
@@ -231,19 +229,23 @@ public class MorphingLandscape extends BranchGroup
 
 		float yPosition = 0f;
 
-		float[] verts1 = { x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2), //
-				x + (rectWidth / 2), y + yPosition, z + (rectHeight / 2), //
-				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2), //
-				x + (-rectWidth / 2), y + yPosition, z + (-rectHeight / 2) //
+		float[] verts1 = { x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2), //1
+				x + (rectWidth / 2), y + yPosition, z + (rectHeight / 2), //2
+				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2), //3
+				x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2), //1
+				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2), //3
+				x + (-rectWidth / 2), y + yPosition, z + (-rectHeight / 2) //4
 		};
 
-		float[] normals = { 0f, 0f, 1f, //
-				0f, 0f, 1f, //
-				0f, 0f, 1f, //
-				0f, 0f, 1f, //
+		float[] normals = { 0f, 0f, 1f, //1
+				0f, 0f, 1f, //2
+				0f, 0f, 1f, //3
+				0f, 0f, 1f, //1
+				0f, 0f, 1f, //3
+				0f, 0f, 1f, //4
 		};
 
-		QuadArray rect = new QuadArray(4,
+		TriangleArray rect = new TriangleArray(6,
 				GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
 		//rect.setCoordinates(0, verts1);
 		//rect.setNormals(0, normals);

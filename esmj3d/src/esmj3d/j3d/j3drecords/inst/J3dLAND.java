@@ -69,7 +69,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static boolean INTERLEAVE = false;
 
-	public static boolean STRIPIFY = false;
+	public static boolean STRIPIFY = true;
 
 	//LOD tristrip in 5.12 increments (2.56?)
 	//public static float HEIGHT_TO_J3D_SCALE = 0.057f;
@@ -211,6 +211,9 @@ public class J3dLAND extends J3dRECOStatInst
 		Group baseGroup = new Group();
 		addNodeChild(baseGroup);
 
+		//ensure shader ready
+		createShaderProgram();
+		
 		if (land.VHGT != null)
 		{
 			// extract the heights
@@ -249,54 +252,6 @@ public class J3dLAND extends J3dRECOStatInst
 
 				app.setRenderingAttributes(new RenderingAttributes());
 
-				if (shaderProgram == null)
-				{
-					try
-					{
-						vertexProgram = StringIO.readFully("./shaders/land.vert");
-						fragmentProgram = StringIO.readFully("./shaders/land.frag");
-					}
-					catch (IOException e)
-					{
-						System.err.println(e);
-					}
-
-					Shader[] shaders = new Shader[2];
-					shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
-						public String toString()
-						{
-							return "vertexProgram";
-						}
-					};
-					shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
-						public String toString()
-						{
-							return "fragmentProgram";
-						}
-					};
-
-					shaderProgram = new GLSLShaderProgram() {
-						public String toString()
-						{
-							return "Land Shader Program";
-						}
-					};
-					shaderProgram.setShaders(shaders);
-
-					String[] shaderAttrNames = new String[10];
-
-					shaderAttrNames[0] = "baseMap";
-					for (int i = 1; i < 9; i++)
-					{
-						shaderAttrNames[i] = "layerMap" + i;
-						if (OUTPUT_BINDINGS)
-							System.out.println("shaderAttrNames " + shaderAttrNames[i]);
-					}
-					shaderAttrNames[9] = "layerCount";
-
-					shaderProgram.setShaderAttrNames(shaderAttrNames);
-				}
-
 				//TODO: LAND vertex attributes proper
 				// ok so the texcoord stuff is bullshit, must use 2 vertex attributes with  4-floats of data
 				// but it's gonna require a lot of stuffing around!
@@ -318,11 +273,11 @@ public class J3dLAND extends J3dRECOStatInst
 				for (int a = 0; a < atxts.length; a++)
 				{
 					ATXT atxt = atxts[a];
-					//TODO: I've seen layer ==8 which is too many
+					//TODO: I've seen layer == 8 which is too many
 					if (atxt.quadrant == quadrant && atxt.layer < 8 && atxt.vtxt != null)
 					{
 						texCoordCount++;
-					}
+					}					
 				}
 				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(texCoordCount)));
 
@@ -356,6 +311,8 @@ public class J3dLAND extends J3dRECOStatInst
 				Shape3D baseQuadShape = new Shape3D();
 				baseQuadShape.setAppearance(app);
 				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, texCoordCount, 0, null);
+				ga.setName(land.toString() + ":LAND " + quadrant + " " + land.landX + " " + land.landY);
+				//System.out.println(""+ quadrant + " "  + land.landX + " " + land.landY);
 				baseQuadShape.setGeometry(ga);
 
 				//These are per sorted by layer in LAND RECO
@@ -409,7 +366,6 @@ public class J3dLAND extends J3dRECOStatInst
 							}
 
 							ga.setTexCoordRefBuffer(atxt.layer + 1, new J3DBuffer(Utils3D.makeFloatBuffer(opacities)));
-
 						}
 					}
 				}
@@ -532,7 +488,7 @@ public class J3dLAND extends J3dRECOStatInst
 		//0 means default?
 		if (textureID > 0)
 		{
-			//not sure why -1 has correct texture but it sure does
+			//not sure why -1 has correct texture but it sure does see openMW
 			Record ltexRec = master.getRecord("LTEX_" + (textureID - 1));
 			if (ltexRec != null)
 			{
@@ -916,6 +872,57 @@ public class J3dLAND extends J3dRECOStatInst
 
 		ATXT[] ret = atxts.toArray(new ATXT[0]);
 		return ret;
+	}
+
+	private static void createShaderProgram()
+	{
+		if (shaderProgram == null)
+		{
+			try
+			{
+				vertexProgram = StringIO.readFully("./shaders/land.vert");
+				fragmentProgram = StringIO.readFully("./shaders/land.frag");
+			}
+			catch (IOException e)
+			{
+				System.err.println(e);
+			}
+
+			Shader[] shaders = new Shader[2];
+			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+				public String toString()
+				{
+					return "vertexProgram";
+				}
+			};
+			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+				public String toString()
+				{
+					return "fragmentProgram";
+				}
+			};
+
+			shaderProgram = new GLSLShaderProgram() {
+				public String toString()
+				{
+					return "Land Shader Program";
+				}
+			};
+			shaderProgram.setShaders(shaders);
+
+			String[] shaderAttrNames = new String[10];
+
+			shaderAttrNames[0] = "baseMap";
+			for (int i = 1; i < 9; i++)
+			{
+				shaderAttrNames[i] = "layerMap" + i;
+				if (OUTPUT_BINDINGS)
+					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+			}
+			shaderAttrNames[9] = "layerCount";
+
+			shaderProgram.setShaderAttrNames(shaderAttrNames);
+		}
 	}
 
 	private static VTXT rightVTXT;

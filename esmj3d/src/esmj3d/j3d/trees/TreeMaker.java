@@ -9,15 +9,19 @@ import javax.media.j3d.Link;
 import javax.media.j3d.Material;
 import javax.media.j3d.Node;
 import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.QuadArray;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.SharedGroup;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
+import javax.media.j3d.TriangleArray;
 import javax.vecmath.Vector3f;
 
+import esmj3d.data.shared.records.InstRECO;
+import esmj3d.j3d.LODNif;
+import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
+import esmj3d.j3d.j3drecords.type.J3dRECOTypeStatic;
 import nif.j3d.J3dNiAVObject;
 import tools.WeakValueHashMap;
 import tools3d.utils.SimpleShaderAppearance;
@@ -25,10 +29,6 @@ import tools3d.utils.Utils3D;
 import utils.ESConfig;
 import utils.source.MediaSources;
 import utils.source.TextureSource;
-import esmj3d.data.shared.records.InstRECO;
-import esmj3d.j3d.LODNif;
-import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
-import esmj3d.j3d.j3drecords.type.J3dRECOTypeStatic;
 
 public class TreeMaker
 {
@@ -232,7 +232,7 @@ public class TreeMaker
 
 		String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
 		Appearance app = loadedApps.get(keyString);
-		QuadArray geom = createGeometryX(billWidth, billHeight, ir);
+		GeometryArray geom = createGeometryX(billWidth, billHeight, ir);
 		if (app == null)
 		{
 			Texture tex = textureSource.getTexture("textures\\trees\\billboards\\" + treeLODTextureName);
@@ -276,7 +276,7 @@ public class TreeMaker
 	 * @param ir
 	 * @return
 	 */
-	private static QuadArray createGeometryX(float rectWidth, float rectHeight, InstRECO ir)
+	private static GeometryArray createGeometryX(float rectWidth, float rectHeight, InstRECO ir)
 	{
 
 		float x = 0;
@@ -295,34 +295,52 @@ public class TreeMaker
 
 		float zPosition = 0f;
 
-		float[] verts1 = { x + (rectWidth / 2), y + 0f, z + zPosition, //
-				x + (rectWidth / 2), y + rectHeight, z + zPosition, //
-				x + (-rectWidth / 2), y + rectHeight, z + zPosition, //
-				x + (-rectWidth / 2), y + 0f, z + zPosition//
+		float[] verts1 = { x + (rectWidth / 2), y + 0f, z + zPosition, //1
+				x + (rectWidth / 2), y + rectHeight, z + zPosition, //2
+				x + (-rectWidth / 2), y + rectHeight, z + zPosition, //3
+				x + (rectWidth / 2), y + 0f, z + zPosition, //1
+				x + (-rectWidth / 2), y + rectHeight, z + zPosition, //3
+				x + (-rectWidth / 2), y + 0f, z + zPosition//4
 				, //
-				x + zPosition, y + 0f, z + (rectWidth / 2), //
-				x + zPosition, y + rectHeight, z + (rectWidth / 2), //
-				x + zPosition, y + rectHeight, z + (-rectWidth / 2), //
-				x + zPosition, y + 0f, z + (-rectWidth / 2) };
+				x + zPosition, y + 0f, z + (rectWidth / 2), //1
+				x + zPosition, y + rectHeight, z + (rectWidth / 2), //2
+				x + zPosition, y + rectHeight, z + (-rectWidth / 2), //3
+				x + zPosition, y + 0f, z + (rectWidth / 2), //1
+				x + zPosition, y + rectHeight, z + (-rectWidth / 2), //3
+				x + zPosition, y + 0f, z + (-rectWidth / 2) };//4
 
-		float[] texCoords = { 0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f//
+		float[] texCoords = { 0f, 1f, //1
+				0f, 0f, //2
+				(1f), 0f, //3
+				0f, 1f, //1
+				(1f), 0f, //3
+				(1f), 1f//4
 				, //
-				0f, 1f, 0f, 0f, (1f), 0f, (1f), 1f //
+				0f, 1f, //1
+				0f, 0f, //2
+				(1f), 0f, //3
+				0f, 1f, //1
+				(1f), 0f, //3
+				(1f), 1f //4
 		};
 
 		//probably should add normals too for speed?otherwise auto generated or something
-		float[] normals = { 0f, 0f, 1f, //
-				0f, 0f, 1f, //
-				0f, 0f, 1f, //
-				0f, 0f, 1f, //
-				1f, 0f, 0f, //
-				1f, 0f, 0f, //
-				1f, 0f, 0f, //
-				1f, 0f, 0f, //
+		float[] normals = { 0f, 0f, 1f, //1
+				0f, 0f, 1f, //2
+				0f, 0f, 1f, //3
+				0f, 0f, 1f, //1
+				0f, 0f, 1f, //3
+				0f, 0f, 1f, //4
+				1f, 0f, 0f, //1
+				1f, 0f, 0f, //2
+				1f, 0f, 0f, //3
+				1f, 0f, 0f, //1
+				1f, 0f, 0f, //3
+				1f, 0f, 0f, //4
 		};
 
 		//TODO: should try filling in with interleaving etc
-		QuadArray rect = new QuadArray(8, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.NORMALS
+		TriangleArray rect = new TriangleArray(12, GeometryArray.COORDINATES | GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.NORMALS
 				| GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
 		//rect.setCoordinates(0, verts1);
 		//rect.setTextureCoordinates(0, 0, texCoords);
