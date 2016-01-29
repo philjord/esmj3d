@@ -204,7 +204,7 @@ public class LAND extends InstRECO
 			}
 		}
 
-		HashSet<Integer> allTexIds = new HashSet<Integer>();
+		//HashSet<Integer> allTexIds = new HashSet<Integer>();
 		/*for (int j = 0; j < BTXTsv.size(); j++)
 		{
 			allTexIds.add(BTXTsv.get(j).textureFormID);
