@@ -5,8 +5,6 @@ import java.io.IOException;
 import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
-import javax.media.j3d.Material;
-import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shader;
 import javax.media.j3d.ShaderAppearance;
 import javax.media.j3d.ShaderAttributeSet;
@@ -38,6 +36,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 	private float lowestHeight = Float.MAX_VALUE;
 
 	private static ShaderProgram shaderProgram = null;
+	private static ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
 
 	/**
 	 * makes the visual version of land for farness (1/4 detail no layers)
@@ -56,7 +55,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 		this.reduceFactor = reduceFactor2;
 		int quadrantsPerSide = land.tes3 ? 16 : 2;
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
-
+		
+		loadShaderProgram();
+		
 		Group baseGroup = new Group();
 		addNodeChild(baseGroup);
 
@@ -78,22 +79,12 @@ public class J3dLANDFar extends J3dRECOStatInst
 			{
 
 				ShaderAppearance app = new ShaderAppearance();
-				Material mat = new Material();
-				mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
-				mat.setShininess(1.0f);
-				mat.setDiffuseColor(1f, 1f, 1f);
-				mat.setSpecularColor(1f, 1f, 1f);
-				app.setMaterial(mat);
-
-				app.setRenderingAttributes(new RenderingAttributes());
-
-				if (shaderProgram == null)
-				{
-					loadShaderProgram();
-				}
+				app.setMaterial(J3dLAND.createMat());
+				app.setRenderingAttributes(J3dLAND.createRA());
 
 				app.setShaderProgram(shaderProgram);
-
+				app.setShaderAttributeSet(shaderAttributeSet);
+				
 				TextureUnitState tus = null;
 
 				if (!land.tes3)
@@ -124,12 +115,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, reduceFactor);
 				baseQuadShape.setGeometry(ga);
 
-				app.setTextureUnitState(new TextureUnitState[] { tus });
-
-				ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
-				shaderAttributeSet.put(new ShaderAttributeValue("baseMap", new Integer(0)));
-
-				app.setShaderAttributeSet(shaderAttributeSet);
+				app.setTextureUnitState(new TextureUnitState[] { tus });			
+				
 
 				baseGroup.addChild(baseQuadShape);
 
@@ -168,6 +155,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 				};
 				shaderProgram.setShaders(shaders);
 				shaderProgram.setShaderAttrNames(new String[] { "baseMap" });
+				
+				shaderAttributeSet.put(new ShaderAttributeValue("baseMap", new Integer(0)));
+
 			}
 			catch (IOException e)
 			{

@@ -197,10 +197,6 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private static ShaderProgram shaderProgram = null;
 
-	private static String vertexProgram = null;
-
-	private static String fragmentProgram = null;
-
 	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		super(land, false, false);
@@ -213,7 +209,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 		//ensure shader ready
 		createShaderProgram();
-		
+
 		if (land.VHGT != null)
 		{
 			// extract the heights
@@ -243,14 +239,9 @@ public class J3dLAND extends J3dRECOStatInst
 			{
 
 				ShaderAppearance app = new ShaderAppearance();
-				Material mat = new Material();
-				mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
-				mat.setShininess(1.0f);
-				mat.setDiffuseColor(1f, 1f, 1f);
-				mat.setSpecularColor(1f, 1f, 1f);
-				app.setMaterial(mat);
 
-				app.setRenderingAttributes(new RenderingAttributes());
+				app.setMaterial(createMat());
+				app.setRenderingAttributes(createRA());
 
 				//TODO: LAND vertex attributes proper
 				// ok so the texcoord stuff is bullshit, must use 2 vertex attributes with  4-floats of data
@@ -277,7 +268,7 @@ public class J3dLAND extends J3dRECOStatInst
 					if (atxt.quadrant == quadrant && atxt.layer < 8 && atxt.vtxt != null)
 					{
 						texCoordCount++;
-					}					
+					}
 				}
 				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(texCoordCount)));
 
@@ -398,6 +389,32 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 	}
 
+	private static Material mat;
+
+	public static Material createMat()
+	{
+		if (mat == null)
+		{
+			mat = new Material();
+			mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+			mat.setShininess(1.0f);
+			mat.setDiffuseColor(1f, 1f, 1f);
+			mat.setSpecularColor(1f, 1f, 1f);
+		}
+		return mat;
+	}
+	
+	private static RenderingAttributes ra;
+
+	public static RenderingAttributes createRA()
+	{
+		if (ra == null)
+		{
+			ra = new RenderingAttributes();			
+		}
+		return ra;
+	}
+
 	protected static Vector3f quadOffSet(int quadrantsPerSide, int quadrant)
 	{
 		//Yes it's mad, but get a pen and paper and this is where a quadrant is
@@ -484,7 +501,7 @@ public class J3dLAND extends J3dRECOStatInst
 	}
 
 	public static TextureUnitState getTextureTes3(int textureID, IRecordStore master, TextureSource textureSource)
-	{
+	{ 
 		//0 means default?
 		if (textureID > 0)
 		{
@@ -880,48 +897,48 @@ public class J3dLAND extends J3dRECOStatInst
 		{
 			try
 			{
-				vertexProgram = StringIO.readFully("./shaders/land.vert");
-				fragmentProgram = StringIO.readFully("./shaders/land.frag");
+				String vertexProgram = StringIO.readFully("./shaders/land.vert");
+				String fragmentProgram = StringIO.readFully("./shaders/land.frag");
+
+				Shader[] shaders = new Shader[2];
+				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+					public String toString()
+					{
+						return "vertexProgram";
+					}
+				};
+				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+					public String toString()
+					{
+						return "fragmentProgram";
+					}
+				};
+
+				shaderProgram = new GLSLShaderProgram() {
+					public String toString()
+					{
+						return "Land Shader Program";
+					}
+				};
+				shaderProgram.setShaders(shaders);
+
+				String[] shaderAttrNames = new String[10];
+
+				shaderAttrNames[0] = "baseMap";
+				for (int i = 1; i < 9; i++)
+				{
+					shaderAttrNames[i] = "layerMap" + i;
+					if (OUTPUT_BINDINGS)
+						System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+				}
+				shaderAttrNames[9] = "layerCount";
+
+				shaderProgram.setShaderAttrNames(shaderAttrNames);
 			}
 			catch (IOException e)
 			{
 				System.err.println(e);
 			}
-
-			Shader[] shaders = new Shader[2];
-			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
-				public String toString()
-				{
-					return "vertexProgram";
-				}
-			};
-			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
-				public String toString()
-				{
-					return "fragmentProgram";
-				}
-			};
-
-			shaderProgram = new GLSLShaderProgram() {
-				public String toString()
-				{
-					return "Land Shader Program";
-				}
-			};
-			shaderProgram.setShaders(shaders);
-
-			String[] shaderAttrNames = new String[10];
-
-			shaderAttrNames[0] = "baseMap";
-			for (int i = 1; i < 9; i++)
-			{
-				shaderAttrNames[i] = "layerMap" + i;
-				if (OUTPUT_BINDINGS)
-					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
-			}
-			shaderAttrNames[9] = "layerCount";
-
-			shaderProgram.setShaderAttrNames(shaderAttrNames);
 		}
 	}
 
