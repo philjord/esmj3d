@@ -270,7 +270,8 @@ public class J3dLAND extends J3dRECOStatInst
 						texCoordCount++;
 					}
 				}
-				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(texCoordCount)));
+				// Notice -1 as the tex coords includes the baseMap coord (the real coords)
+				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(texCoordCount-1)));
 
 				TextureUnitState tus = null;
 
@@ -329,7 +330,7 @@ public class J3dLAND extends J3dRECOStatInst
 							allTextureUnitStates.add(tus);
 							//Notice +2 as space for base and size is one more than final index, these are in order so there should be no spaces
 							if (allTextureUnitStates.size() != atxt.layer + 2)
-								System.err.println("allTextureUnitStates.size()!= atxt.layer + 2 " + allTextureUnitStates.size() + " "
+								System.err.println("allTextureUnitStates.size()!= atxt.layer + 2 " + allTextureUnitStates.size() + " != "
 										+ (atxt.layer + 2));
 
 							allShaderAttributeValues
@@ -381,7 +382,7 @@ public class J3dLAND extends J3dRECOStatInst
 					shaderAttributeSet.put(sav);
 				}
 				app.setShaderAttributeSet(shaderAttributeSet);
-
+			
 				baseGroup.addChild(baseQuadShape);
 
 			}
