@@ -5,9 +5,6 @@
 
 package bsa;
 
-import gui.StatusDialog;
-
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -15,18 +12,18 @@ import java.util.List;
 import javax.media.j3d.Texture;
 import javax.swing.SwingUtilities;
 
+import archive.ArchiveEntry;
+import archive.Main;
+import bsa.source.BsaMeshSource;
+import bsa.source.BsaTextureSource;
+import gui.StatusDialog;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
 import tools.ddstexture.DDSTextureLoader;
 import tools.ddstexture.utils.DDSTextureLoaderTester;
-import tools.image.SimpleImageLoader;
 import utils.source.DummyTextureSource;
-import archive.ArchiveEntry;
-import archive.Main;
-import bsa.source.BsaMeshSource;
-import bsa.source.BsaTextureSource;
 
 // Referenced classes of package FO3Archive:
 //            ArchiveEntry, ArchiveFile, StatusDialog, Main
@@ -139,7 +136,8 @@ public class DisplayTask extends Thread
 						}
 						NifToJ3d.clearCache();
 					}
-					else if (ext.equals(".png"))
+					//FIXME: no generic image loading systems anymore
+					/*else if (ext.equals(".png"))
 					{
 						if (verifyOnly)
 						{
@@ -164,7 +162,7 @@ public class DisplayTask extends Thread
 							}
 						}
 
-					}
+					}*/
 					else if (ext.equals(".wav"))
 					{
 

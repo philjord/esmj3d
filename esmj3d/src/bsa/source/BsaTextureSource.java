@@ -1,25 +1,19 @@
 package bsa.source;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.media.j3d.Texture;
 
-import tools.ddstexture.DDSImage;
-import tools.ddstexture.DDSTextureLoader;
-import tools.ddstexture.utils.DDSDecompressor;
-import tools.image.ImageFlip;
-import utils.source.TextureSource;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
+import tools.ddstexture.DDSTextureLoader;
+import utils.source.TextureSource;
 
-import com.sun.j3d.utils.image.TextureLoader;
+ 
 
 public class BsaTextureSource implements TextureSource
 {
@@ -130,8 +124,9 @@ public class BsaTextureSource implements TextureSource
 						}
 						else
 						{
-							TextureLoader tl = new TextureLoader(ImageIO.read(in));
-							tex = tl.getTexture();
+							//FIXME: generic texture loading system
+							/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
+							tex = tl.getTexture();*/
 						}
 
 						if (tex != null)
@@ -152,57 +147,7 @@ public class BsaTextureSource implements TextureSource
 		return null;
 	}
 
-	@Override
-	public Image getImage(String imageName)
-	{
-		if (imageName != null && imageName.length() > 0)
-		{
-
-			// remove incorrect file path prefix, if it exists
-			if (imageName.startsWith("data\\"))
-			{
-				imageName = imageName.substring(5);
-			}
-
-			// add the textures path part
-			if (!imageName.startsWith("textures"))
-			{
-				imageName = "textures\\" + imageName;
-			}
-
-			for (ArchiveFile archiveFile : bsas)
-			{
-				ArchiveEntry archiveEntry = archiveFile.getEntry(imageName);
-				if (archiveEntry != null)
-				{
-					DDSImage ddsImage = null;
-					try
-					{
-						InputStream in = archiveFile.getInputStream(archiveEntry);
-
-						ddsImage = DDSImage.read(DDSTextureLoader.toByteBuffer(in));
-						BufferedImage image = new DDSDecompressor(ddsImage, 0, imageName).convertImage();
-
-						if (image != null)
-						{
-							return ImageFlip.verticalflip(image);
-						}
-
-					}
-					catch (IOException e)
-					{
-						System.out.println("BsaTextureSource  " + imageName + " " + e + " " + e.getStackTrace()[0]);
-					}
-					if (ddsImage != null)
-						ddsImage.close();
-				}
-			}
-		}
-		System.out.println("BsaTextureSource texture not found in archive bsas: " + imageName);
-		new Throwable().printStackTrace();
-		return null;
-
-	}
+	 
 
 	@Override
 	public List<String> getFilesInFolder(String folderName)
