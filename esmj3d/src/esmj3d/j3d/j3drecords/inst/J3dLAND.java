@@ -174,6 +174,7 @@ public class J3dLAND extends J3dRECOStatInst
 			gi.setCoordinateIndices(terrainData.indexes);
 
 			//apply them
+			physicsTriStripArray.setName("LAND phys geo");
 			shape.setGeometry(physicsTriStripArray);
 			shape.setAppearance(PhysAppearance.makeAppearance());
 			addNodeChild(shape);

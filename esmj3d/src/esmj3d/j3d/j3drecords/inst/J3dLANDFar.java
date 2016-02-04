@@ -113,6 +113,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 				Shape3D baseQuadShape = new Shape3D();
 				baseQuadShape.setAppearance(app);
 				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, reduceFactor);
+				ga.setName("LANDfar geo");
 				baseQuadShape.setGeometry(ga);
 
 				app.setTextureUnitState(new TextureUnitState[] { tus });			
