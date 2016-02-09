@@ -1,6 +1,6 @@
 package esmj3d.j3d.cell;
 
-import java.awt.Rectangle;
+import javaawt.Rectangle;
 
 import javax.media.j3d.LinearFog;
 import javax.vecmath.Color3f;

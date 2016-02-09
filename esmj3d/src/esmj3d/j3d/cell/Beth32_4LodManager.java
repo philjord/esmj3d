@@ -1,7 +1,7 @@
 package esmj3d.j3d.cell;
 
-import java.awt.Point;
-import java.awt.Rectangle;
+import javaawt.Point;
+import javaawt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

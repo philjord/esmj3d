@@ -1,6 +1,6 @@
 package esmj3d.j3d.cell;
 
-import java.awt.Point;
+import javaawt.Point;
 import java.util.HashMap;
 
 import javax.media.j3d.BranchGroup;

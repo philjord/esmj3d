@@ -1,7 +1,6 @@
 package esmj3d.j3d.cell;
 
-import java.awt.Point;
-import java.awt.Rectangle;
+
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -11,6 +10,8 @@ import javax.vecmath.Color3f;
 
 import tools3d.utils.Utils3D;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
+import javaawt.Point;
+import javaawt.Rectangle;
 
 public class Beth32LodManager extends BethLodManager
 {
