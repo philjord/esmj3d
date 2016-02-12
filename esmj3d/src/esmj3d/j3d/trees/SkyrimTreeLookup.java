@@ -121,7 +121,7 @@ public class SkyrimTreeLookup
 			{ "treeironwoodwi", "trees\\treeaspen02" }, //
 			{ "treejapanesemaple", "trees\\treeaspen05" }, //
 			{ "treejuniper01", "trees\\treeaspen02" }, //
-			{ "treekvatchburnt", "trees\\wrtempletree01" }, //
+			{ "treekvatchburnt", "trees\\reachclifftree01" }, //
 			//{ "treems14canvasfree", "trees\\treepineforest05" }, //
 			//{ "treems14canvasfreesu", "trees\\treepineforest05" }, //
 			//{ "treems14willowoakforest01su", "trees\\treepineforest05" }, //
@@ -156,9 +156,9 @@ public class SkyrimTreeLookup
 			{ "treesugarmaplesaplingsu", "trees\\treeaspen04" }, //
 			{ "treesugarmapleyoungfa", "trees\\treeaspen05" }, //
 			{ "treesugarmapleyoungsu", "trees\\treeaspen05" }, //
-			{ "treeswampcypress", "trees\\reachtree01" }, //
-			{ "treeswampcypressforest", "trees\\reachtree02" }, //
-			{ "treeswampcypressforestfg08", "trees\\reachtree02" }, //
+			{ "treeswampcypress", "trees\\treepineforest01" }, //
+			{ "treeswampcypressforest", "trees\\treepineforest02" }, //
+			{ "treeswampcypressforestfg08", "trees\\treepineforest03" }, //
 			{ "treetupelo", "trees\\treeaspen01" }, //
 			{ "treeweepingwillowsu", "trees\\treeaspen01" }, //
 			{ "treewhitepineforest", "trees\\treepineforest01" }, //
@@ -173,14 +173,12 @@ public class SkyrimTreeLookup
 			{ "treewillowoakforestsu", "trees\\treeaspen02" }, //
 			{ "treewillowoakfreesu", "trees\\treeaspen01" }, //
 			{ "treewillowoakyoungsu", "trees\\treeaspen04" }, //
-			{ "treeyewforest", "trees\\wrtempletree02" }, //
+			{ "treeyewforest", "trees\\treeaspen04" }, //
 			//////////////////////////////
 			
 			
 			//Oblivion styles
 			//tree whitepine free/forest [01] [young] su/fa/snow
-			
-			
 			
 			
 			//Skyrim styles 

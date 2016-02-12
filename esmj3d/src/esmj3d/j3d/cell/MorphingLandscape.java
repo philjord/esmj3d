@@ -1,7 +1,5 @@
 package esmj3d.j3d.cell;
 
-import javaawt.Point;
-import javaawt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -11,28 +9,25 @@ import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
-import javax.media.j3d.IndexedGeometryArray;
-import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Material;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shader;
 import javax.media.j3d.ShaderAppearance;
 import javax.media.j3d.ShaderProgram;
-import javax.media.j3d.Shape3D;
 import javax.media.j3d.SourceCodeShader;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
-import javax.media.j3d.TriangleArray;
 import javax.vecmath.Color3f;
 
 import com.sun.j3d.utils.shader.StringIO;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
+import javaawt.Point;
+import javaawt.Rectangle;
 import tools3d.utils.SimpleShaderAppearance;
-import tools3d.utils.Utils3D;
 
 /**
  * Used by Oblivion only, the morph land system
@@ -53,7 +48,7 @@ public class MorphingLandscape extends BranchGroup
 
 	private Rectangle prevBounds = new Rectangle();
 
-	private ArrayList<IndexedGeometryArray> baseItsas = new ArrayList<IndexedGeometryArray>();
+	private ArrayList<GeometryArray> baseItsas = new ArrayList<GeometryArray>();
 
 	public MorphingLandscape(int lodX, int lodY, int scale)
 	{
@@ -64,7 +59,7 @@ public class MorphingLandscape extends BranchGroup
 		this.scale = scale;
 	}
 
-	protected void addGeometryArray(IndexedGeometryArray baseItsa)
+	protected void addGeometryArray(GeometryArray baseItsa)
 	{
 		baseItsas.add(baseItsa);
 	}
@@ -76,7 +71,7 @@ public class MorphingLandscape extends BranchGroup
 	 */
 	public void updateVisibility(float charX, float charY)
 	{
-		for (final IndexedGeometryArray baseItsa : baseItsas)
+		for (final GeometryArray baseItsa : baseItsas)
 		{
 			Rectangle absBounds = Beth32LodManager.getBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
 
@@ -220,40 +215,6 @@ public class MorphingLandscape extends BranchGroup
 		return app;
 	}
 
-	protected static Shape3D createBasicWater(float rectWidth, float rectHeight)
-	{
-		// ready for prebaking coords if required
-		float x = 0;
-		float y = 0;
-		float z = 0;
-
-		float yPosition = 0f;
-
-		float[] verts1 = { x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2), //1
-				x + (rectWidth / 2), y + yPosition, z + (rectHeight / 2), //2
-				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2), //3
-				x + (rectWidth / 2), y + yPosition, z + (-rectHeight / 2), //1
-				x + (-rectWidth / 2), y + yPosition, z + (rectHeight / 2), //3
-				x + (-rectWidth / 2), y + yPosition, z + (-rectHeight / 2) //4
-		};
-
-		float[] normals = { 0f, 0f, 1f, //1
-				0f, 0f, 1f, //2
-				0f, 0f, 1f, //3
-				0f, 0f, 1f, //1
-				0f, 0f, 1f, //3
-				0f, 0f, 1f, //4
-		};
-
-		TriangleArray rect = new TriangleArray(6,
-				GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
-		//rect.setCoordinates(0, verts1);
-		//rect.setNormals(0, normals);
-		rect.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(verts1)));
-		rect.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(normals)));
-
-		Shape3D shape = new Shape3D(rect, createBasicWaterApp());
-		return shape;
-	}
+	
 
 }
