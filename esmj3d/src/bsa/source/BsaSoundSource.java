@@ -11,7 +11,7 @@ import javax.media.j3d.SoundException;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
-import utils.source.SoundKeyToName;
+import tools.SoundKeyToName;
 import utils.source.SoundSource;
 
 public class BsaSoundSource implements SoundSource
