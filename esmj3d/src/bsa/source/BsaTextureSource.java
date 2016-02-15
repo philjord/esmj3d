@@ -10,7 +10,7 @@ import javax.media.j3d.Texture;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
-import tools.ddstexture.DDSTextureLoader;
+import tools.compressedtexture.dds.DDSTextureLoader;
 import utils.source.TextureSource;
 
  
