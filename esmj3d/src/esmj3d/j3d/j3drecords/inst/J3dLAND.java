@@ -28,7 +28,6 @@ import javax.vecmath.Vector3f;
 import org.j3d.geom.GeometryData;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
-import com.sun.j3d.utils.shader.StringIO;
 
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.ATXT;
@@ -45,6 +44,7 @@ import nif.j3d.J3dNiTriBasedGeom;
 import nif.niobject.bgsm.BSMaterial;
 import tools.io.ESMByteConvert;
 import tools3d.utils.PhysAppearance;
+import tools3d.utils.TextIO;
 import tools3d.utils.Utils3D;
 import utils.source.TextureSource;
 
@@ -272,7 +272,7 @@ public class J3dLAND extends J3dRECOStatInst
 					}
 				}
 				// Notice -1 as the tex coords includes the baseMap coord (the real coords)
-				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(texCoordCount-1)));
+				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(texCoordCount - 1)));
 
 				TextureUnitState tus = null;
 
@@ -383,7 +383,7 @@ public class J3dLAND extends J3dRECOStatInst
 					shaderAttributeSet.put(sav);
 				}
 				app.setShaderAttributeSet(shaderAttributeSet);
-			
+
 				baseGroup.addChild(baseQuadShape);
 
 			}
@@ -405,14 +405,14 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 		return mat;
 	}
-	
+
 	private static RenderingAttributes ra;
 
 	public static RenderingAttributes createRA()
 	{
 		if (ra == null)
 		{
-			ra = new RenderingAttributes();			
+			ra = new RenderingAttributes();
 		}
 		return ra;
 	}
@@ -503,7 +503,7 @@ public class J3dLAND extends J3dRECOStatInst
 	}
 
 	public static TextureUnitState getTextureTes3(int textureID, IRecordStore master, TextureSource textureSource)
-	{ 
+	{
 		//0 means default?
 		if (textureID > 0)
 		{
@@ -897,50 +897,45 @@ public class J3dLAND extends J3dRECOStatInst
 	{
 		if (shaderProgram == null)
 		{
-			try
-			{
-				String vertexProgram = StringIO.readFully("./shaders/land.vert");
-				String fragmentProgram = StringIO.readFully("./shaders/land.frag");
 
-				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
-					public String toString()
-					{
-						return "vertexProgram";
-					}
-				};
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
-					public String toString()
-					{
-						return "fragmentProgram";
-					}
-				};
+			String vertexProgram = TextIO.getTextFileAsString("./shaders/land.vert");
+			String fragmentProgram = TextIO.getTextFileAsString("./shaders/land.frag");
 
-				shaderProgram = new GLSLShaderProgram() {
-					public String toString()
-					{
-						return "Land Shader Program";
-					}
-				};
-				shaderProgram.setShaders(shaders);
-
-				String[] shaderAttrNames = new String[10];
-
-				shaderAttrNames[0] = "baseMap";
-				for (int i = 1; i < 9; i++)
+			Shader[] shaders = new Shader[2];
+			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+				public String toString()
 				{
-					shaderAttrNames[i] = "layerMap" + i;
-					if (OUTPUT_BINDINGS)
-						System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+					return "vertexProgram";
 				}
-				shaderAttrNames[9] = "layerCount";
+			};
+			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+				public String toString()
+				{
+					return "fragmentProgram";
+				}
+			};
 
-				shaderProgram.setShaderAttrNames(shaderAttrNames);
-			}
-			catch (IOException e)
+			shaderProgram = new GLSLShaderProgram() {
+				public String toString()
+				{
+					return "Land Shader Program";
+				}
+			};
+			shaderProgram.setShaders(shaders);
+
+			String[] shaderAttrNames = new String[10];
+
+			shaderAttrNames[0] = "baseMap";
+			for (int i = 1; i < 9; i++)
 			{
-				System.err.println(e);
+				shaderAttrNames[i] = "layerMap" + i;
+				if (OUTPUT_BINDINGS)
+					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
 			}
+			shaderAttrNames[9] = "layerCount";
+
+			shaderProgram.setShaderAttrNames(shaderAttrNames);
+
 		}
 	}
 

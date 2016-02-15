@@ -1,7 +1,5 @@
 package esmj3d.j3d.j3drecords.inst;
 
-import java.io.IOException;
-
 import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
@@ -19,13 +17,12 @@ import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
 
-import com.sun.j3d.utils.shader.StringIO;
-
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.BTXT;
 import esmj3d.j3d.TESLANDGen;
 import esmmanager.common.data.record.IRecordStore;
 import tools.io.ESMByteConvert;
+import tools3d.utils.TextIO;
 import utils.source.TextureSource;
 
 public class J3dLANDFar extends J3dRECOStatInst
@@ -55,9 +52,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 		this.reduceFactor = reduceFactor2;
 		int quadrantsPerSide = land.tes3 ? 16 : 2;
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
-		
+
 		loadShaderProgram();
-		
+
 		Group baseGroup = new Group();
 		addNodeChild(baseGroup);
 
@@ -84,7 +81,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 				app.setShaderProgram(shaderProgram);
 				app.setShaderAttributeSet(shaderAttributeSet);
-				
+
 				TextureUnitState tus = null;
 
 				if (!land.tes3)
@@ -116,8 +113,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 				ga.setName("LANDfar geo");
 				baseQuadShape.setGeometry(ga);
 
-				app.setTextureUnitState(new TextureUnitState[] { tus });			
-				
+				app.setTextureUnitState(new TextureUnitState[] { tus });
 
 				baseGroup.addChild(baseQuadShape);
 
@@ -129,41 +125,35 @@ public class J3dLANDFar extends J3dRECOStatInst
 	{
 		if (shaderProgram == null)
 		{
-			try
-			{
-				String vertexProgram = StringIO.readFully("./shaders/landfar.vert");
-				String fragmentProgram = StringIO.readFully("./shaders/landfar.frag");
 
-				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
-					public String toString()
-					{
-						return "vertexProgram";
-					}
-				};
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
-					public String toString()
-					{
-						return "fragmentProgram";
-					}
-				};
+			String vertexProgram = TextIO.getTextFileAsString("shaders/landfar.vert");
+			String fragmentProgram = TextIO.getTextFileAsString("shaders/landfar.frag");
 
-				shaderProgram = new GLSLShaderProgram() {
-					public String toString()
-					{
-						return "Land (far) Shader Program";
-					}
-				};
-				shaderProgram.setShaders(shaders);
-				shaderProgram.setShaderAttrNames(new String[] { "baseMap" });
-				
-				shaderAttributeSet.put(new ShaderAttributeValue("baseMap", new Integer(0)));
+			Shader[] shaders = new Shader[2];
+			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+				public String toString()
+				{
+					return "vertexProgram";
+				}
+			};
+			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+				public String toString()
+				{
+					return "fragmentProgram";
+				}
+			};
 
-			}
-			catch (IOException e)
-			{
-				System.err.println(e);
-			}
+			shaderProgram = new GLSLShaderProgram() {
+				public String toString()
+				{
+					return "Land (far) Shader Program";
+				}
+			};
+			shaderProgram.setShaders(shaders);
+			shaderProgram.setShaderAttrNames(new String[] { "baseMap" });
+
+			shaderAttributeSet.put(new ShaderAttributeValue("baseMap", new Integer(0)));
+
 		}
 	}
 
