@@ -26,7 +26,7 @@ import javax.vecmath.Point2f;
 
 import nif.NifToJ3d;
 import nif.j3d.J3dNiGeometry;
-import tools3d.utils.TextIO;
+import tools3d.utils.ShaderSourceIO;
 import tools3d.utils.Utils3D;
 import utils.PerFrameUpdateBehavior;
 import utils.source.TextureSource;
@@ -139,8 +139,8 @@ public class WaterApp extends BranchGroup
 			if (shaderProgram == null)
 			{
 
-				String vertexProgram = TextIO.getTextFileAsString("./shaders/water.vert");
-				String fragmentProgram = TextIO.getTextFileAsString("./shaders/water.frag");
+				String vertexProgram = ShaderSourceIO.getTextFileAsString("./shaders/water.vert");
+				String fragmentProgram = ShaderSourceIO.getTextFileAsString("./shaders/water.frag");
 
 				Shader[] shaders = new Shader[2];
 				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {

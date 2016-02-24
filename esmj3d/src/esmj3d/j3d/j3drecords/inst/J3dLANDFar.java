@@ -22,7 +22,7 @@ import esmj3d.data.shared.records.LAND.BTXT;
 import esmj3d.j3d.TESLANDGen;
 import esmmanager.common.data.record.IRecordStore;
 import tools.io.ESMByteConvert;
-import tools3d.utils.TextIO;
+import tools3d.utils.ShaderSourceIO;
 import utils.source.TextureSource;
 
 public class J3dLANDFar extends J3dRECOStatInst
@@ -126,8 +126,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 		if (shaderProgram == null)
 		{
 
-			String vertexProgram = TextIO.getTextFileAsString("shaders/landfar.vert");
-			String fragmentProgram = TextIO.getTextFileAsString("shaders/landfar.frag");
+			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landfar.vert");
+			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landfar.frag");
 
 			Shader[] shaders = new Shader[2];
 			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
