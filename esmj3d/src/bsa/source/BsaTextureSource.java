@@ -10,10 +10,10 @@ import javax.media.j3d.Texture;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
+import tools.compressedtexture.astc.ASTCTextureLoader;
 import tools.compressedtexture.dds.DDSTextureLoader;
+import tools.compressedtexture.ktx.KTXTextureLoader;
 import utils.source.TextureSource;
-
- 
 
 public class BsaTextureSource implements TextureSource
 {
@@ -22,16 +22,16 @@ public class BsaTextureSource implements TextureSource
 	public BsaTextureSource(List<ArchiveFile> allBsas)
 	{
 		this.bsas = new ArrayList<ArchiveFile>();
-		for (ArchiveFile archiveFile : allBsas )
+		for (ArchiveFile archiveFile : allBsas)
 		{
-			if (archiveFile.hasDDS())
+			if (archiveFile.hasDDS() || archiveFile.hasKTX())
 			{
 				bsas.add(archiveFile);
 			}
 		}
 		if (bsas.size() == 0)
 		{
-			System.out.println("No hasDDS archive files found in:");
+			System.out.println("No hasDDS nor hasKTX archive files found in:");
 			for (ArchiveFile archiveFile : allBsas)
 			{
 				System.out.println("ArchiveFiFSle:" + archiveFile.getName());
@@ -68,6 +68,15 @@ public class BsaTextureSource implements TextureSource
 
 			for (ArchiveFile archiveFile : bsas)
 			{
+				if (archiveFile.hasKTX())
+				{
+					texName = texName.replace(".dds", ".ktx");
+				}
+				else if (archiveFile.hasASTC())
+				{
+					texName = texName.replace(".dds", ".tga.astc");
+				}
+
 				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
 				if (archiveEntry != null)
 				{
@@ -109,18 +118,34 @@ public class BsaTextureSource implements TextureSource
 
 			for (ArchiveFile archiveFile : bsas)
 			{
+				if (archiveFile.hasKTX())
+				{
+					texName = texName.replace(".dds", ".ktx");
+				}
+				else if (archiveFile.hasASTC())
+				{
+					texName = texName.replace(".dds", ".tga.astc");
+				}
 
 				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
 				if (archiveEntry != null)
-				{ 
+				{
 					try
-					{ 
+					{
 						//note that we want all disk activity now, (mappedbytebuffers can delay it until the j3d thread)
 						InputStream in = archiveFile.getInputStream(archiveEntry);
 
 						if (texName.endsWith(".dds"))
 						{
 							tex = DDSTextureLoader.getTexture(texName, in);
+						}
+						else if (texName.endsWith(".astc") || texName.endsWith(".atc"))
+						{
+							tex = ASTCTextureLoader.getTexture(texName, in);
+						}
+						else if (texName.endsWith(".ktx"))
+						{
+							tex = KTXTextureLoader.getTexture(texName, in);
 						}
 						else
 						{
@@ -146,8 +171,6 @@ public class BsaTextureSource implements TextureSource
 		//new Throwable().printStackTrace();
 		return null;
 	}
-
-	 
 
 	@Override
 	public List<String> getFilesInFolder(String folderName)
