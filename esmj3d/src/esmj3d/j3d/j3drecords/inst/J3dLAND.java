@@ -898,8 +898,8 @@ public class J3dLAND extends J3dRECOStatInst
 		if (shaderProgram == null)
 		{
 
-			String vertexProgram = ShaderSourceIO.getTextFileAsString("./shaders/land.vert");
-			String fragmentProgram = ShaderSourceIO.getTextFileAsString("./shaders/land.frag");
+			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/land.vert");
+			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/land.frag");
 
 			Shader[] shaders = new Shader[2];
 			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
