@@ -1,6 +1,6 @@
 package esmj3d.j3d.cell;
 
-import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import javax.media.j3d.Appearance;
@@ -21,12 +21,11 @@ import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
 import javax.vecmath.Color3f;
 
-import com.sun.j3d.utils.shader.StringIO;
-
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import javaawt.Point;
 import javaawt.Rectangle;
+import tools3d.utils.ShaderSourceIO;
 import tools3d.utils.SimpleShaderAppearance;
 
 /**
@@ -91,14 +90,14 @@ public class MorphingLandscape extends BranchGroup
 					baseItsa.updateData(new GeometryUpdater() {
 						public void updateData(Geometry geometry)
 						{
-							float[] coordRefFloat = baseItsa.getCoordRefFloat();
+							FloatBuffer coordRefFloat = (FloatBuffer) baseItsa.getCoordRefBuffer().getBuffer();
 
 							Point p = new Point();
-							for (int i = 0; i < coordRefFloat.length / 3; i++)
+							for (int i = 0; i < coordRefFloat.limit() / 3; i++)
 							{
-								float x = coordRefFloat[(i * 3) + 0];
+								float x = coordRefFloat.get((i * 3) + 0);
 								//float y = coordRefFloat[(i * 3) + 1];
-								float z = coordRefFloat[(i * 3) + 2];
+								float z = coordRefFloat.get((i * 3) + 2);
 
 								int xSpaceIdx = (int) (x / J3dLAND.LAND_SIZE);
 								int zSpaceIdx = -(int) (z / J3dLAND.LAND_SIZE);
@@ -107,14 +106,14 @@ public class MorphingLandscape extends BranchGroup
 
 								if (bounds.contains(p) && !prevBounds.contains(p))
 								{
-									coordRefFloat[(i * 3) + 1] -= 20;
+									coordRefFloat.put((i * 3) + 1, coordRefFloat.get((i * 3) + 1) - 40);
 								}
 								else if (!bounds.contains(p) && prevBounds.contains(p))
 								{
-									coordRefFloat[(i * 3) + 1] += 20;
+									coordRefFloat.put((i * 3) + 1, coordRefFloat.get((i * 3) + 1) + 40);
 								}
-
 							}
+
 						}
 					});
 					prevBounds = bounds;
@@ -156,39 +155,33 @@ public class MorphingLandscape extends BranchGroup
 	{
 		if (shaderProgram == null)
 		{
-			try
-			{
-				String vertexProgram = StringIO.readFully("./shaders/landfar.vert");
-				String fragmentProgram = StringIO.readFully("./shaders/landfar.frag");
 
-				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
-					public String toString()
-					{
-						return "vertexProgram";
-					}
-				};
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
-					public String toString()
-					{
-						return "fragmentProgram";
-					}
-				};
+			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landfar.vert");
+			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landfar.frag");
 
-				shaderProgram = new GLSLShaderProgram() {
-					public String toString()
-					{
-						return "Land (lod) Shader Program";
-					}
-				};
-				shaderProgram.setShaders(shaders);
-				shaderProgram.setShaderAttrNames(new String[] { "baseMap" });
-			}
-			catch (IOException e)
-			{
-				System.err.println(e);
-				return;
-			}
+			Shader[] shaders = new Shader[2];
+			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+				public String toString()
+				{
+					return "vertexProgram";
+				}
+			};
+			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+				public String toString()
+				{
+					return "fragmentProgram";
+				}
+			};
+
+			shaderProgram = new GLSLShaderProgram() {
+				public String toString()
+				{
+					return "Land (lod) Shader Program";
+				}
+			};
+			shaderProgram.setShaders(shaders);
+			shaderProgram.setShaderAttrNames(new String[] { "baseMap" });
+
 		}
 	}
 
@@ -214,7 +207,5 @@ public class MorphingLandscape extends BranchGroup
 		app.setMaterial(mat);
 		return app;
 	}
-
-	
 
 }
