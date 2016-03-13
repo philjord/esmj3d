@@ -141,12 +141,15 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private GeometryInfo gi;//for Bullet later
 
+	private LAND land;
+
 	/**
 	 * Makes the physics version of land
 	 */
 	public J3dLAND(LAND land)
 	{
 		super(land, false, false);
+		this.land = land;
 		if (land.VHGT != null)
 		{
 			// extract the heights
@@ -183,6 +186,28 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public GeometryInfo getGeometryInfo()
 	{
+		//Weird new build physics off visuals system
+		if (gi == null)
+		{
+			if (land.VHGT != null)
+			{
+				// extract the heights
+				byte[] heightBytes = land.VHGT;
+				float[][] heights = extractHeights(heightBytes);
+
+				//now translate the heights into a nice mesh, 82 has been confirmed empirically			
+				//Note that 33 by 33 sets of point equals 32 by 32 sets of triangles between them
+				TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights,
+						null, null, null);
+				GeometryData terrainData = new GeometryData();
+				gridGenerator.generateIndexedTriangleStrips(terrainData);
+
+				gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
+				gi.setStripCounts(terrainData.stripCounts);
+				gi.setCoordinates(terrainData.coordinates);
+				gi.setCoordinateIndices(terrainData.indexes);
+			}
+		}
 		return gi;
 	}
 
@@ -201,6 +226,7 @@ public class J3dLAND extends J3dRECOStatInst
 	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		super(land, false, false);
+		this.land = land;
 		int quadrantsPerSide = land.tes3 ? 16 : 2;
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
