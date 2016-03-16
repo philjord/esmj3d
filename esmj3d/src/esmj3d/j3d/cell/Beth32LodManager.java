@@ -1,6 +1,5 @@
 package esmj3d.j3d.cell;
 
-
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -9,6 +8,7 @@ import javax.media.j3d.LinearFog;
 import javax.vecmath.Color3f;
 
 import tools3d.utils.Utils3D;
+import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import javaawt.Point;
 import javaawt.Rectangle;
@@ -61,7 +61,7 @@ public class Beth32LodManager extends BethLodManager
 					MorphingLandscape bg = (MorphingLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, lodWorldFormId);
 					loadedGrosses.put(key, bg);
 					bg.compile();// better to be done not on the j3d thread?
-					addChild(bg);
+					//addChild(bg);// don't add yet, updateGross will do so shortly
 				}
 			}
 			if ((System.currentTimeMillis() - start) > 50)
@@ -78,10 +78,22 @@ public class Beth32LodManager extends BethLodManager
 		while (keys.hasNext())
 		{
 			Point key = keys.next();
-			if (key.distance(charPoint) <= 64)
+			MorphingLandscape oblivLODLandscape = loadedGrosses.get(key);			
+			if (Math.abs(key.x - charPoint.x) <= BethRenderSettings.getLOD_LOAD_DIST_MAX()
+					&& Math.abs(key.y - charPoint.y) <= BethRenderSettings.getLOD_LOAD_DIST_MAX())
 			{
-				MorphingLandscape oblivLODLandscape = loadedGrosses.get(key);
-				oblivLODLandscape.updateVisibility(charX, charY);
+				if (oblivLODLandscape.getParent() == null)
+					addChild(oblivLODLandscape);
+
+				if (key.distance(charPoint) <= 64)
+				{
+					oblivLODLandscape.updateVisibility(charX, charY);
+				}
+			}
+			else
+			{
+				if (oblivLODLandscape.getParent() != null)
+					removeChild(oblivLODLandscape);
 			}
 		}
 
