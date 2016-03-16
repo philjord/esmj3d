@@ -2,6 +2,7 @@ package bsa.source;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +75,7 @@ public class BsaMeshSource implements MeshSource
 					try
 					{
 						NifFile nifFile = null;
-						InputStream inputStream = archiveFile.getInputStream(archiveEntry);
+						ByteBuffer inputStream = archiveFile.getByteBuffer(archiveEntry);
 						// String fileName = archiveEntry.getName();
 
 						try
@@ -85,7 +86,7 @@ public class BsaMeshSource implements MeshSource
 						{
 							System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
 						}
-						finally
+					/*	finally
 						{
 							try
 							{
@@ -96,7 +97,7 @@ public class BsaMeshSource implements MeshSource
 							{
 								e.printStackTrace();
 							}
-						}
+						}*/
 
 						if (nifFile != null)
 						{
@@ -154,6 +155,38 @@ public class BsaMeshSource implements MeshSource
 					try
 					{
 						return archiveFile.getInputStream(archiveEntry);
+					}
+					catch (IOException e)
+					{
+						System.out.println("BsaMeshSource  " + fileName + " " + e + " " + e.getStackTrace()[0]);
+					}
+
+				}
+			}
+
+			System.out.print("nif " + fileName + " not found in archive bsas");
+			for (ArchiveFile archiveFile : bsas)
+			{
+				System.out.print(" checked: " + archiveFile.getName() + ", ");
+			}
+			System.out.println("");
+		}
+		return null;
+	}
+
+	@Override
+	public ByteBuffer getByteBuffer(String fileName)
+	{
+		if (fileName != null && fileName.length() > 0)
+		{
+			for (ArchiveFile archiveFile : bsas)
+			{
+				ArchiveEntry archiveEntry = archiveFile.getEntry(fileName);
+				if (archiveEntry != null)
+				{
+					try
+					{
+						return archiveFile.getByteBuffer(archiveEntry);
 					}
 					catch (IOException e)
 					{
