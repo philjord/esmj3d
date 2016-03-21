@@ -3,7 +3,6 @@ package esmj3d.data.shared.records;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 
 import esmj3d.data.shared.subrecords.FormID;
 import esmmanager.common.data.record.Record;

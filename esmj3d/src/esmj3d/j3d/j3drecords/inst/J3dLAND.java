@@ -1,6 +1,9 @@
 package esmj3d.j3d.j3drecords.inst;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import javax.media.j3d.GLSLShaderProgram;
@@ -134,7 +137,7 @@ public class J3dLAND extends J3dRECOStatInst
 		LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE;//refresh
 		TEX_REPEAT = 0.25f;
 		INTERLEAVE = false;
-		STRIPIFY = false;
+		STRIPIFY = true;
 		BY_REF = true;
 		BUFFERS = true;
 	}
@@ -217,8 +220,6 @@ public class J3dLAND extends J3dRECOStatInst
 	 * @param master
 	 */
 
-	//Notice none of the below are static, I don't want too much sharing of appearance parts
-
 	private float lowestHeight = Float.MAX_VALUE;
 
 	private static ShaderProgram shaderProgram = null;
@@ -264,41 +265,34 @@ public class J3dLAND extends J3dRECOStatInst
 
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
-
 				ShaderAppearance app = new ShaderAppearance();
 
 				app.setMaterial(createMat());
 				app.setRenderingAttributes(createRA());
 
 				//TODO: LAND vertex attributes proper
+				// tex coords setting along with multiple TUS causes huge problems
+				// Java3D make decisions and calls activeTextureUnit and bindTexture2D out of order
+
 				// ok so the texcoord stuff is bullshit, must use 2 vertex attributes with  4-floats of data
 				// but it's gonna require a lot of stuffing around!
-
-				/*String[] attribNames = new String[8];
-				for (int i = 0; i < 8; i++)
-				{
-					attribNames[i] = "attribLayer" + i;
-					if (OUTPUT_BINDINGS)
-						System.out.println("set attribute name " + i + " to " + attribNames[i]);
-				}
-				shaderProgram.setVertexAttrNames(attribNames);*/
 
 				ArrayList<ShaderAttributeValue> allShaderAttributeValues = new ArrayList<ShaderAttributeValue>();
 				ArrayList<TextureUnitState> allTextureUnitStates = new ArrayList<TextureUnitState>();
 
 				// need texcoord count up front for constructor
-				int texCoordCount = 1;
+				int layerCount = 1;
 				for (int a = 0; a < atxts.length; a++)
 				{
 					ATXT atxt = atxts[a];
 					//TODO: I've seen layer == 8 which is too many
 					if (atxt.quadrant == quadrant && atxt.layer < 8 && atxt.vtxt != null)
 					{
-						texCoordCount++;
+						layerCount++;
 					}
 				}
-				// Notice -1 as the tex coords includes the baseMap coord (the real coords)
-				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(texCoordCount - 1)));
+
+				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(layerCount)));
 
 				TextureUnitState tus = null;
 
@@ -323,24 +317,45 @@ public class J3dLAND extends J3dRECOStatInst
 						int texFormId = land.VTEXshorts[quadrant];
 						tus = getTextureTes3(texFormId, master, textureSource);
 					}
+					else
+					{
+						System.out.println("this one a??");
+						tus = getDefaultTexture(textureSource);
+					}
+
 				}
+
+				if (tus == null)
+					System.err.println("tus == null, things are gonna break!");
+
 				allTextureUnitStates.add(tus);
 				allShaderAttributeValues.add(new ShaderAttributeValue("baseMap", new Integer(0)));
 
 				Shape3D baseQuadShape = new Shape3D();
 				baseQuadShape.setAppearance(app);
-				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, texCoordCount, 0, null);
+
+				int[] attributeSizes = new int[] { 4, 4, 4 };
+				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, 1, 3, attributeSizes);
 				ga.setName(land.toString() + ":LAND " + quadrant + " " + land.landX + " " + land.landY);
-				//System.out.println(""+ quadrant + " "  + land.landX + " " + land.landY);
+
 				baseQuadShape.setGeometry(ga);
+
+				ByteBuffer bb = ByteBuffer.allocateDirect((quadrantSquareCount * quadrantSquareCount) * 4 * 4);
+				bb.order(ByteOrder.nativeOrder());
+				FloatBuffer alphas04 = bb.asFloatBuffer();
+				bb = ByteBuffer.allocateDirect((quadrantSquareCount * quadrantSquareCount) * 4 * 4);
+				bb.order(ByteOrder.nativeOrder());
+				FloatBuffer alphas58 = bb.asFloatBuffer();
+				bb = ByteBuffer.allocateDirect((quadrantSquareCount * quadrantSquareCount) * 4 * 4);
+				bb.order(ByteOrder.nativeOrder());
+				FloatBuffer alphas912 = bb.asFloatBuffer();
 
 				//These are per sorted by layer in LAND RECO
 				for (int a = 0; a < atxts.length; a++)
 				{
 					ATXT atxt = atxts[a];
 
-					//TODO: I've seen layer ==8 which is too many
-					if (atxt.quadrant == quadrant && atxt.layer < 8)
+					if (atxt.quadrant == quadrant)
 					{
 						// now build up the vertex attribute float arrays to hand to the geometry	
 						VTXT vtxt = atxt.vtxt;
@@ -354,45 +369,46 @@ public class J3dLAND extends J3dRECOStatInst
 							{
 								tus = getTexture(atxt.textureFormID, master, textureSource);
 							}
+
+							if (tus == null)
+								System.err.println("tus == null, things are gonna break!");
+
 							allTextureUnitStates.add(tus);
 							//Notice +2 as space for base and size is one more than final index, these are in order so there should be no spaces
 							if (allTextureUnitStates.size() != atxt.layer + 2)
 								System.err.println("allTextureUnitStates.size()!= atxt.layer + 2 " + allTextureUnitStates.size() + " != "
 										+ (atxt.layer + 2));
 
-							allShaderAttributeValues
-									.add(new ShaderAttributeValue("layerMap" + (atxt.layer + 1), new Integer(atxt.layer + 1)));
-
-							float[][] quadrantColors = new float[quadrantSquareCount][quadrantSquareCount];
+							allShaderAttributeValues.add(new ShaderAttributeValue("layerMap" + atxt.layer, new Integer(atxt.layer + 1)));
 
 							for (int v = 0; v < vtxt.count; v++)
 							{
 								int rowno = (GRID_COUNT / quadrantsPerSide) - (vtxt.position[v] / quadrantSquareCount);
 								int colno = (vtxt.position[v] % quadrantSquareCount);
 
-								quadrantColors[rowno][colno] = vtxt.opacity[v];
+								int idx = ((rowno * quadrantSquareCount + colno) * 4) + (atxt.layer % 4);
+								if (atxt.layer < 4)
+									alphas04.put(idx, vtxt.opacity[v]);
+								else if (atxt.layer < 8)
+									alphas58.put(idx, vtxt.opacity[v]);
+								else if (atxt.layer < 12)
+									alphas912.put(idx, vtxt.opacity[v]);
+								else
+									System.out.println("atxt.layer== " + atxt.layer);
 							}
-
-							float[] opacities = new float[(quadrantSquareCount * quadrantSquareCount) * 2];
-							int i = 0;
-							for (int row = 0; row < quadrantSquareCount; row++)
-							{
-								for (int col = 0; col < quadrantSquareCount; col++)
-								{
-									opacities[i++] = quadrantColors[row][col];
-									opacities[i++] = 0;// texcoord v unused
-								}
-							}
-
-							ga.setTexCoordRefBuffer(atxt.layer + 1, new J3DBuffer(Utils3D.makeFloatBuffer(opacities)));
 						}
 					}
 				}
+
+				ga.setVertexAttrRefBuffer(0, new J3DBuffer(alphas04));
+				ga.setVertexAttrRefBuffer(1, new J3DBuffer(alphas58));
+				ga.setVertexAttrRefBuffer(2, new J3DBuffer(alphas912));
 
 				TextureUnitState[] tusa = new TextureUnitState[allTextureUnitStates.size()];
 				for (int i = 0; i < allTextureUnitStates.size(); i++)
 				{
 					tusa[i] = allTextureUnitStates.get(i);
+					//TODO: I notice the same texture repeats in the layers a lot sometimes
 					if (OUTPUT_BINDINGS)
 						System.out.println("LAND Tus " + i + " " + tusa[i]);
 				}
@@ -558,7 +574,6 @@ public class J3dLAND extends J3dRECOStatInst
 				}
 			}
 		}
-
 		return getDefaultTexture(textureSource);
 	}
 
@@ -751,8 +766,10 @@ public class J3dLAND extends J3dRECOStatInst
 				| GeometryArray.TEXTURE_COORDINATE_2 //
 				| GeometryArray.USE_COORD_INDEX_ONLY //
 				| (BY_REF || STRIPIFY ? (GeometryArray.BY_REFERENCE_INDICES | GeometryArray.BY_REFERENCE) : 0)//
-				| (BUFFERS ? GeometryArray.USE_NIO_BUFFER : 0);
+				| (BUFFERS ? GeometryArray.USE_NIO_BUFFER : 0) //
+				| (vertexAttrCount > 0 ? GeometryArray.VERTEX_ATTRIBUTES : 0);
 
+		texCoordCount = 1;
 		int[] texMap = new int[texCoordCount];
 		for (int i = 0; i < texCoordCount; i++)
 			texMap[i] = i;
@@ -763,14 +780,12 @@ public class J3dLAND extends J3dRECOStatInst
 			if (STRIPIFY)
 			{
 				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat | GeometryArray.INTERLEAVED, //
-						texCoordCount, texMap, // vertexAttrCount, vertexAttrSizes, //
-						terrainData.indexesCount, terrainData.stripCounts);
+						texCoordCount, texMap, vertexAttrCount, vertexAttrSizes, terrainData.indexesCount, terrainData.stripCounts);
 			}
 			else
 			{
 				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat | GeometryArray.INTERLEAVED, //
-						texCoordCount, texMap, // vertexAttrCount, vertexAttrSizes, //
-						terrainData.indexesCount);
+						texCoordCount, texMap, vertexAttrCount, vertexAttrSizes, terrainData.indexesCount);
 			}
 			iga.setCoordIndicesRef(terrainData.indexes);
 
@@ -791,13 +806,14 @@ public class J3dLAND extends J3dRECOStatInst
 		{
 			if (STRIPIFY)
 			{
-				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat, texCoordCount, texMap, // vertexAttrCount,
-						//vertexAttrSizes, //
+				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat, texCoordCount, texMap, vertexAttrCount,
+						vertexAttrSizes, //
 						terrainData.indexesCount, terrainData.stripCounts);
 			}
 			else
 			{
-				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat, texCoordCount, texMap, // vertexAttrCount, vertexAttrSizes, //
+				iga = new IndexedTriangleArray(terrainData.vertexCount, basicFormat, texCoordCount, texMap, vertexAttrCount,
+						vertexAttrSizes, //
 						terrainData.indexesCount);
 			}
 
@@ -923,7 +939,6 @@ public class J3dLAND extends J3dRECOStatInst
 	{
 		if (shaderProgram == null)
 		{
-
 			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/land.vert");
 			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/land.frag");
 
@@ -949,18 +964,21 @@ public class J3dLAND extends J3dRECOStatInst
 			};
 			shaderProgram.setShaders(shaders);
 
-			String[] shaderAttrNames = new String[10];
+			String[] shaderAttrNames = new String[11];
 
 			shaderAttrNames[0] = "baseMap";
-			for (int i = 1; i < 9; i++)
+			for (int i = 0; i < 9; i++)
 			{
-				shaderAttrNames[i] = "layerMap" + i;
+				shaderAttrNames[i + 1] = "layerMap" + i;
 				if (OUTPUT_BINDINGS)
 					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
 			}
-			shaderAttrNames[9] = "layerCount";
+			shaderAttrNames[10] = "layerCount";
 
 			shaderProgram.setShaderAttrNames(shaderAttrNames);
+
+			String[] vertexAttrNames = new String[] { "alphas04", "alphas58", "alphas912" };
+			shaderProgram.setVertexAttrNames(vertexAttrNames);
 
 		}
 	}
