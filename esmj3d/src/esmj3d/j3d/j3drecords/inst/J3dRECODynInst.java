@@ -38,6 +38,8 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
 
 		this.setCapability(BranchGroup.ALLOW_DETACH);
+		transformGroup.clearCapabilities();
+		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		super.addChild(transformGroup);//Note must use super here
 
@@ -97,6 +99,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	public void setJ3dRECOType(J3dRECOType j3dRECOType)
 	{
 		BranchGroup bg = new BranchGroup();// empty group for no rendering
+		bg.clearCapabilities();
 		bg.addChild(SHOW_FADE_OUT_MARKER ? new Cube(0.1) : new BranchGroup());
 		setJ3dRECOType(j3dRECOType, bg);
 	}
@@ -109,9 +112,9 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 			myNodes.add(j3dRECOType);
 			myNodes.add(j3dRECOTypeFar);
 			Group parent = new Group();
+			parent.clearCapabilities();
 			transformGroup.addChild(parent);
-			dl = new BetterDistanceLOD(parent, myNodes, new float[]
-			{ BethRenderSettings.getItemFade() });
+			dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getItemFade() });
 			transformGroup.addChild(dl);//Note must use super here
 			dl.setSchedulingBounds(Utils3D.defaultBounds);
 			dl.setEnable(true);
@@ -153,8 +156,8 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 
 		transform.set(xrotT);
 
-		transform.setTranslation(new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y
-				* ESConfig.ES_TO_METERS_SCALE));
+		transform.setTranslation(
+				new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y * ESConfig.ES_TO_METERS_SCALE));
 
 		transform.setScale(scale);
 

@@ -181,7 +181,7 @@ public class Beth32_4LodManager extends BethLodManager
 				if (!pointsToAttach.contains(key))
 				{
 					BranchGroup lod = store.get(key);
-					if (lod != null && lod.getParent() != null)
+					if (lod != null && !lod.isLive())
 					{
 						//System.out.println("Removed lod level" + scale + " at " + key);
 						lod.detach();
@@ -199,7 +199,7 @@ public class Beth32_4LodManager extends BethLodManager
 				}
 
 				//attach if not yet attached
-				if (lod.getParent() == null)
+				if (!lod.isLive())
 				{
 					//System.out.println("Added lod level" + scale + " at " + key);
 					lod.compile();// better to be done not on the j3d thread?
@@ -210,7 +210,7 @@ public class Beth32_4LodManager extends BethLodManager
 
 	}
 
-	private int doAxisDown(int startValue, int scale, int nextScale, ArrayList<Integer> toAttach)
+	private static int doAxisDown(int startValue, int scale, int nextScale, ArrayList<Integer> toAttach)
 	{
 		//sub1 (scale)
 		//add it
@@ -228,7 +228,7 @@ public class Beth32_4LodManager extends BethLodManager
 		}
 	}
 
-	private int doAxisUp(int startValue, int scale, int nextScale, ArrayList<Integer> toAttach)
+	private static int doAxisUp(int startValue, int scale, int nextScale, ArrayList<Integer> toAttach)
 	{
 		//add1 (scale)
 		//add it

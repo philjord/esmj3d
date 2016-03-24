@@ -1,5 +1,7 @@
 package esmj3d.j3d.water;
 
+import java.util.HashMap;
+
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.J3DBuffer;
@@ -17,7 +19,9 @@ public class Water extends Group
 	{
 		if (waterApp != null)
 		{
-			addChild(new Shape3D(createQuad(size), waterApp.getApp()));
+			Shape3D s = new Shape3D(createQuad(size), waterApp.getApp());
+			s.clearCapabilities();
+			addChild(s);
 		}
 		else
 		{
@@ -25,8 +29,11 @@ public class Water extends Group
 		}
 	}
 
+	private static HashMap<Float, TriangleStripArray> preLoadedQuads = new HashMap<Float, TriangleStripArray>();
+
 	private static GeometryArray createQuad(float size)
 	{
+
 		/*	QuadArray quads = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.TEXTURE_COORDINATE_2
 					| GeometryArray.COLOR_4);
 		
@@ -47,26 +54,32 @@ public class Water extends Group
 			quads.setColor(2, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
 			quads.setColor(3, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));*/
 
-		ElevationGridGenerator elevationGridGenerator = new ElevationGridGenerator(size, size, 30, 30);
-		GeometryData gd = new GeometryData();
-		gd.geometryType = GeometryData.TRIANGLE_STRIPS;
-		gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
-		float[] flatHeights = new float[900];
-		elevationGridGenerator.setTerrainDetail(flatHeights, 0);
-		elevationGridGenerator.generate(gd);
-		TriangleStripArray quads = new TriangleStripArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
-				| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE, gd.stripCounts);
+		TriangleStripArray quads = preLoadedQuads.get(size);
 
-		// repeat image every say 10 of size?
-		for (int i = 0; i < gd.textureCoordinates.length; i++)
+		if (quads == null)
 		{
-			gd.textureCoordinates[i] *= size / 10f;
-		}
+			ElevationGridGenerator elevationGridGenerator = new ElevationGridGenerator(size, size, 30, 30);
+			GeometryData gd = new GeometryData();
+			gd.geometryType = GeometryData.TRIANGLE_STRIPS;
+			gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
+			float[] flatHeights = new float[900];
+			elevationGridGenerator.setTerrainDetail(flatHeights, 0);
+			elevationGridGenerator.generate(gd);
+			quads = new TriangleStripArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
+					| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE, gd.stripCounts);
 
-		quads.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.coordinates)));
-		quads.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.normals)));
-		quads.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(gd.textureCoordinates)));
-		quads.setName("Water");
+			// repeat image every say 10 of size?
+			for (int i = 0; i < gd.textureCoordinates.length; i++)
+			{
+				gd.textureCoordinates[i] *= size / 10f;
+			}
+
+			quads.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.coordinates)));
+			quads.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.normals)));
+			quads.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(gd.textureCoordinates)));
+			quads.setName("Water");
+			preLoadedQuads.put(size, quads);
+		}
 		return quads;
 	}
 }

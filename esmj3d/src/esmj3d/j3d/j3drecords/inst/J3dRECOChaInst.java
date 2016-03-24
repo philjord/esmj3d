@@ -35,6 +35,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	public J3dRECOChaInst(InstRECO instRECO)
 	{
 		this.setCapability(BranchGroup.ALLOW_DETACH);
+		transformGroup.clearCapabilities(); 
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		super.addChild(transformGroup);//Note must use super here
 
@@ -82,11 +83,13 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		this.j3dRECOType = j3dRECOType;
 
 		BranchGroup far = new BranchGroup();// empty group for no rendering
+		far.clearCapabilities(); 
 		far.addChild(SHOW_FADE_OUT_MARKER ? new Cube(0.1) : new BranchGroup());
 
 		myNodes.add(j3dRECOType);
 		myNodes.add(far);
 		Group parent = new Group();
+		parent.clearCapabilities(); 
 		transformGroup.addChild(parent);
 		dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getActorFade() });
 		transformGroup.addChild(dl);

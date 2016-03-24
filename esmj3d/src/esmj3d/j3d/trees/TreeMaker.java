@@ -46,6 +46,7 @@ public class TreeMaker
 				// give it the InstREco to prebake
 				Node node = createShapeX(treeName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE,
 						billBoardHeight * ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource(), inst);
+				
 				return node;
 			}
 			else
@@ -95,6 +96,7 @@ public class TreeMaker
 					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, false, makePhys);
 					Node node = makeLODTreeX(sptFileName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE,
 							billBoardHeight * ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource());
+					node.clearCapabilities();
 					j3dinst.addNodeChild(node);
 					return j3dinst;
 				}
@@ -166,6 +168,7 @@ public class TreeMaker
 			if (sg == null && nifFileName.indexOf(".nif") != -1)
 			{
 				sg = new SharedGroup();
+				sg.clearCapabilities();
 
 				J3dNiAVObject nif = J3dRECOTypeStatic.loadNif(nifFileName, false, mediaSources);
 				sg.addChild(nif);
@@ -174,7 +177,7 @@ public class TreeMaker
 			}
 
 			BranchGroup bg = new BranchGroup();
-
+			bg.clearCapabilities();
 			if (sg != null)
 			{
 				bg.addChild(new Link(sg));
@@ -201,7 +204,7 @@ public class TreeMaker
 			if (sg == null && sptFileName.indexOf(".spt") != -1)
 			{
 				sg = new SharedGroup();
-
+				sg.clearCapabilities();
 				sg.addChild(createShapeX(sptFileName, billWidth, billHeight, textureSource, null));
 				sg.compile();
 				loadedLodXSharedGroups.put(keyString, sg);
@@ -209,7 +212,7 @@ public class TreeMaker
 			}
 
 			Group g = new Group();
-
+			g.clearCapabilities();
 			if (sg != null)
 			{
 				g.addChild(new Link(sg));
@@ -263,6 +266,7 @@ public class TreeMaker
 		}
 
 		Shape3D treeShape = new Shape3D();
+		treeShape.clearCapabilities();
 		treeShape.setGeometry(geom);
 		treeShape.setAppearance(app);
 
@@ -367,16 +371,18 @@ public class TreeMaker
 		return app;
 	}
 
+	private static Material m = null;
+
 	public static Material getMaterial()
 	{
-
-		Material m = new Material();
-
-		m.setShininess(1.0f); // trees is  very shiny, generally
-		m.setDiffuseColor(0.5f, 0.6f, 0.5f);
-		m.setSpecularColor(0.0f, 0.0f, 0.0f);
-		m.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
-
+		if (m == null)
+		{
+			m = new Material();
+			m.setShininess(1.0f); // trees is not very shiny, generally
+			m.setDiffuseColor(0.5f, 0.6f, 0.5f);
+			m.setSpecularColor(0.0f, 0.0f, 0.0f);
+			m.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+		}
 		return m;
 	}
 }

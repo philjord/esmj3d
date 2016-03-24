@@ -31,7 +31,8 @@ public class LODNif extends Group
 {
 	public LODNif(String nifFileName, MediaSources mediaSources)
 	{
-		// TODO: bake in the coords now too
+		clearCapabilities();
+ 
 
 		// TODO: can I optomise this like the X form ones
 		// need to make a generic lod nif loading system, fallout uses this for all lod things

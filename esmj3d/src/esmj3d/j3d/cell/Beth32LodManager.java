@@ -30,7 +30,6 @@ public class Beth32LodManager extends BethLodManager
 	public Beth32LodManager(J3dICellFactory j3dCellFactory)
 	{
 		this.j3dCellFactory = j3dCellFactory;
-
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 
@@ -78,11 +77,11 @@ public class Beth32LodManager extends BethLodManager
 		while (keys.hasNext())
 		{
 			Point key = keys.next();
-			MorphingLandscape oblivLODLandscape = loadedGrosses.get(key);			
+			MorphingLandscape oblivLODLandscape = loadedGrosses.get(key);
 			if (Math.abs(key.x - charPoint.x) <= BethRenderSettings.getLOD_LOAD_DIST_MAX()
 					&& Math.abs(key.y - charPoint.y) <= BethRenderSettings.getLOD_LOAD_DIST_MAX())
 			{
-				if (oblivLODLandscape.getParent() == null)
+				if (!oblivLODLandscape.isLive())
 					addChild(oblivLODLandscape);
 
 				if (key.distance(charPoint) <= 64)
@@ -92,7 +91,7 @@ public class Beth32LodManager extends BethLodManager
 			}
 			else
 			{
-				if (oblivLODLandscape.getParent() != null)
+				if (oblivLODLandscape.isLive())
 					removeChild(oblivLODLandscape);
 			}
 		}

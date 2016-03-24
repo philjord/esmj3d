@@ -10,15 +10,16 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3f;
 
-import utils.ESConfig;
-import utils.source.MediaSources;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
+import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
 import esmj3d.j3d.water.Water;
 import esmj3d.j3d.water.WaterApp;
 import esmmanager.common.data.record.IRecordStore;
 import esmmanager.common.data.record.Record;
+import utils.ESConfig;
+import utils.source.MediaSources;
 
 public abstract class J3dCELLGeneral extends BranchGroup
 {
@@ -46,7 +47,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		this.children = children;
 		this.makePhys = makePhys;
 		this.mediaSources = mediaSources;
-
+		clearCapabilities();
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 	}
 
@@ -59,7 +60,8 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		this.instCell = instCell;
 		float landSize = J3dLAND.LAND_SIZE;
 		//we don't use instCell.getTrans().z even if set
-		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0, -(instCell.getTrans().y * landSize) - (landSize / 2f));
+		cellLocation = new Vector3f((instCell.getTrans().x * landSize) + (landSize / 2f), 0,
+				-(instCell.getTrans().y * landSize) - (landSize / 2f));
 	}
 
 	public InstRECO getInstCell()
@@ -103,6 +105,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 			Water water = new Water(J3dLAND.LAND_SIZE, waterApp);
 
 			TransformGroup transformGroup = new TransformGroup();
+			transformGroup.clearCapabilities();
 			Transform3D transform = new Transform3D();
 
 			Vector3f loc = new Vector3f(cellLocation);
@@ -116,4 +119,5 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		}
 		return null;
 	}
+
 }

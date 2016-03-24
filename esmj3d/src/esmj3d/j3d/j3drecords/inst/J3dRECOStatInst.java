@@ -27,7 +27,9 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	private ArrayList<BranchGroup> myNodes = new ArrayList<BranchGroup>();
 
-	protected TransformGroup transformGroup = new TransformGroup();
+	private TransformGroup transformGroup = new TransformGroup();
+
+	private Transform3D transform = new Transform3D();
 
 	protected J3dRECOType j3dRECOType;
 
@@ -36,6 +38,8 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	public J3dRECOStatInst(InstRECO instRECO, boolean enableSimpleFade, boolean makePhys)
 	{
 		this(instRECO, null, enableSimpleFade, makePhys);
+		transformGroup.clearCapabilities();
+		clearCapabilities();
 	}
 
 	/**
@@ -47,6 +51,8 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	 */
 	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean makePhys)
 	{
+		transformGroup.clearCapabilities();
+		clearCapabilities();
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
 
 		super.addChild(transformGroup);//Note must use super here
@@ -95,6 +101,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		if (fader && SHOW_FADE_OUT_MARKER)
 		{
 			BranchGroup bg = new BranchGroup();// empty group for no rendering
+			bg.clearCapabilities();
 			bg.addChild(new Cube(0.1));
 			setJ3dRECOType(j3dRECOType, bg);
 		}
@@ -113,9 +120,9 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 			myNodes.add(j3dRECOType);
 			myNodes.add(j3dRECOTypeFar);
 			Group parent = new Group();
+			parent.clearCapabilities();
 			transformGroup.addChild(parent);
-			dl = new BetterDistanceLOD(parent, myNodes, new float[]
-			{ BethRenderSettings.getObjectFade() });
+			dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getObjectFade() });
 			transformGroup.addChild(dl);//Note must use super here
 			dl.setSchedulingBounds(Utils3D.defaultBounds);
 			dl.setEnable(true);
@@ -163,8 +170,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	 */
 	private void setLocation(float x, float y, float z, float rx, float ry, float rz, float scale)
 	{
-		Transform3D transform = new Transform3D();
-
 		Transform3D xrotT = new Transform3D();
 		xrotT.rotX(-rx);
 		Transform3D zrotT = new Transform3D();
@@ -177,8 +182,8 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 		transform.set(xrotT);
 
-		transform.setTranslation(new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y
-				* ESConfig.ES_TO_METERS_SCALE));
+		transform.setTranslation(
+				new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y * ESConfig.ES_TO_METERS_SCALE));
 
 		transform.setScale(scale);
 
@@ -198,7 +203,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	 */
 	public void setLocation(Vector3f loc)
 	{
-		Transform3D transform = new Transform3D();
 		transform.setTranslation(loc);
 		transformGroup.setTransform(transform);
 	}
@@ -206,7 +210,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	@Override
 	public Transform3D getLocation(Transform3D out)
 	{
-		transformGroup.getTransform(out);
+		out.set(transform);
 		return out;
 	}
 

@@ -48,23 +48,23 @@ public class J3dLANDFar extends J3dRECOStatInst
 	 * @param master
 	 */
 
-	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource)
+	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource, Vector3f loc)
 	{
-		this(land, master, textureSource, 4);
+		this(land, master, textureSource, loc, 4);
 	}
 
-	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource, int reduceFactor2)
+	public J3dLANDFar(LAND land, IRecordStore master, TextureSource textureSource, Vector3f loc, int reduceFactor2)
 	{
 		super(land, false, false);
 		this.reduceFactor = reduceFactor2;
 
 		if (land.tes3)
-			tes3LAND(land, master, textureSource);
+			tes3LAND(land, master, textureSource, loc);
 		else
-			LAND(land, master, textureSource);
+			LAND(land, master, textureSource, loc);
 	}
 
-	private void LAND(LAND land, IRecordStore master, TextureSource textureSource)
+	private void LAND(LAND land, IRecordStore master, TextureSource textureSource, Vector3f loc)
 	{
 		int quadrantsPerSide = 2;
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
@@ -124,8 +124,10 @@ public class J3dLANDFar extends J3dRECOStatInst
 				}
 
 				Shape3D baseQuadShape = new Shape3D();
+				baseQuadShape.clearCapabilities();
 				baseQuadShape.setAppearance(app);
-				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, 0, null, reduceFactor);
+				GeometryArray ga = makeQuadrantBaseSubGeom(loc, heights, normals, colors, quadrantsPerSide, quadrant, 0, null,
+						reduceFactor);
 				ga.setName("LANDfar geo");
 				baseQuadShape.setGeometry(ga);
 
@@ -135,6 +137,11 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 			}
 		}
+	}
+
+	public void setLocation(Vector3f loc)
+	{
+		throw new UnsupportedOperationException("Location must be handed into the constructor");
 	}
 
 	private static void loadShaderProgram()
@@ -173,7 +180,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 		}
 	}
 
-	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
+	protected static GeometryArray makeQuadrantBaseSubGeom(Vector3f loc, float[][] heights, Vector3f[][] normals, Color4f[][] colors,
 			int quadrantsPerSide, int quadrant, int vertexAttrCount, int[] vertexAttrSizes, int reduceFactor)
 	{
 		int quadrantSquareCount = ((J3dLAND.GRID_COUNT / reduceFactor) / quadrantsPerSide) + 1;
@@ -199,9 +206,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 		Vector3f offset = J3dLAND.quadOffSet(quadrantsPerSide, quadrant);
 		for (int i = 0; i < terrainData.coordinates.length; i += 3)
 		{
-			terrainData.coordinates[i + 0] += offset.x;
-			terrainData.coordinates[i + 1] += offset.y;
-			terrainData.coordinates[i + 2] += offset.z;
+			terrainData.coordinates[i + 0] += offset.x + loc.x;
+			terrainData.coordinates[i + 1] += offset.y + loc.y;
+			terrainData.coordinates[i + 2] += offset.z + loc.z;
 		}
 
 		return J3dLAND.createGA(terrainData, 1, vertexAttrCount, vertexAttrSizes);
@@ -288,7 +295,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 		return lowestHeight;
 	}
 
-	public void tes3LAND(LAND land, IRecordStore master, TextureSource textureSource)
+	public void tes3LAND(LAND land, IRecordStore master, TextureSource textureSource, Vector3f loc)
 	{
 
 		int quadrantsPerSide = 16;
@@ -319,10 +326,11 @@ public class J3dLANDFar extends J3dRECOStatInst
 			app.setRenderingAttributes(J3dLAND.createRA());
 
 			Shape3D baseQuadShape = new Shape3D();
+			baseQuadShape.clearCapabilities();
 			baseQuadShape.setAppearance(app);
 
 			int[] attributeSizes = new int[] { 4, 4, 4, 4 };
-			GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, 1, 0, 4, attributeSizes, reduceFactor);
+			GeometryArray ga = makeQuadrantBaseSubGeom(loc, heights, normals, colors, 1, 0, 4, attributeSizes, reduceFactor);
 			ga.setName(land.toString() + ":LAND " + 0 + " " + land.landX + " " + land.landY);
 
 			baseQuadShape.setGeometry(ga);
@@ -384,7 +392,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 					//NOTICE 1s! as this is the base only
 					// 0.5 etc are for the layers in a moment
-					
+
 					//FIXME: not even close in fact
 
 					int idx = (vertexIdx * 4) + (samplerId % 4);
