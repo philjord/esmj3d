@@ -10,6 +10,7 @@ import java.util.Iterator;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.LinearFog;
+import javax.media.j3d.Node;
 import javax.vecmath.Color3f;
 
 import tools3d.utils.Utils3D;
@@ -181,7 +182,7 @@ public class Beth32_4LodManager extends BethLodManager
 				if (!pointsToAttach.contains(key))
 				{
 					BranchGroup lod = store.get(key);
-					if (lod != null && !lod.isLive())
+					if (lod != null && lod.getParent() != null)
 					{
 						//System.out.println("Removed lod level" + scale + " at " + key);
 						lod.detach();
@@ -195,11 +196,12 @@ public class Beth32_4LodManager extends BethLodManager
 				if (lod == null)
 				{
 					lod = j3dCellFactory.makeLODLandscape(key.x, key.y, scale, lodWorldName);
+					lod.setCapability(Node.ALLOW_PARENT_READ);
 					store.put(key, lod);
 				}
 
 				//attach if not yet attached
-				if (!lod.isLive())
+				if (lod.getParent() == null)
 				{
 					//System.out.println("Added lod level" + scale + " at " + key);
 					lod.compile();// better to be done not on the j3d thread?
