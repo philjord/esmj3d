@@ -3,6 +3,7 @@ package esmj3d.data.shared.records;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 
 import esmj3d.data.shared.subrecords.FormID;
 import esmmanager.common.data.record.Record;
@@ -203,7 +204,7 @@ public class LAND extends InstRECO
 			}
 		}
 
-		//HashSet<Integer> allTexIds = new HashSet<Integer>();
+	//	HashSet<Integer> allTexIds = new HashSet<Integer>();
 		/*for (int j = 0; j < BTXTsv.size(); j++)
 		{
 			allTexIds.add(BTXTsv.get(j).textureFormID);
@@ -212,22 +213,22 @@ public class LAND extends InstRECO
 		{
 			allTexIds.add(ATXTsv.get(j).textureFormID);
 		}*/
-		
+
 		//ok no more unrolling the outer 4x4 of tes3
 		// I need to just do the inner 4x4 
-		
 
-		/*for (int a = 0; a < 16; a++)
+	/*	for (int a = 0; a < 16; a++)
 		{
-			allTexIds.clear();
+			//allTexIds.clear();
 			for (int b = 0; b < 16; b++)
 			{
 				allTexIds.add(VTEXshortsv.get((a * 16) + b));
 			}
 
-			System.out.println("Total count of texture Ids for " + this + " " + a + " " + allTexIds.size());
+			//System.out.println("Total count of VTEXshortsv texture Ids for " + this + " " + a + " " + allTexIds.size());
 		}*/
-
+	//	System.out.println(
+	//			"Total count of VTEXshortsv texture Ids for " + this + " " + allTexIds.size() + " landX " + landX + " landY " + landY);
 	}
 
 	public String showDetails()

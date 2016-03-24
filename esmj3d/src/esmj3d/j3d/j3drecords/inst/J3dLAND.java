@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
@@ -57,7 +58,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static final float TERRIAN_SQUARE_SIZE = 2.56f;// confirmed empirically
 
-	private static final boolean OUTPUT_BINDINGS = false;
+	static final boolean OUTPUT_BINDINGS = false;
 
 	public static float TEX_REPEAT = 0.5f;// suggests how many times to repeat the texture over a grid square
 
@@ -70,7 +71,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static boolean BUFFERS = true;
 
-	public static boolean INTERLEAVE = false;
+	public static boolean INTERLEAVE = false;// DO NOT TURN ON until pipeline supports it
 
 	public static boolean STRIPIFY = true;
 
@@ -136,10 +137,6 @@ public class J3dLAND extends J3dRECOStatInst
 		GRID_COUNT = 64;//64 not 32
 		LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE;//refresh
 		TEX_REPEAT = 0.25f;
-		INTERLEAVE = false;
-		STRIPIFY = true;
-		BY_REF = true;
-		BUFFERS = true;
 	}
 
 	private GeometryInfo gi;//for Bullet later
@@ -227,8 +224,16 @@ public class J3dLAND extends J3dRECOStatInst
 	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		super(land, false, false);
+		if (land.tes3)
+			tes3LAND(land, master, textureSource);
+		else
+			LAND(land, master, textureSource);
+	}
+
+	private void LAND(LAND land, IRecordStore master, TextureSource textureSource)
+	{
 		this.land = land;
-		int quadrantsPerSide = land.tes3 ? 16 : 2;
+		int quadrantsPerSide = 2;
 		int totalQuadrants = quadrantsPerSide * quadrantsPerSide;
 		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
 
@@ -253,15 +258,7 @@ public class J3dLAND extends J3dRECOStatInst
 			Color4f[][] colors = extractColors(colorBytes);
 
 			// get the atxts
-			ATXT[] atxts;
-			if (land.tes3)
-			{
-				atxts = createTes3ATXT(land.VTEXshorts);
-			}
-			else
-			{
-				atxts = land.ATXTs;
-			}
+			ATXT[] atxts = land.ATXTs;
 
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
@@ -296,33 +293,16 @@ public class J3dLAND extends J3dRECOStatInst
 
 				TextureUnitState tus = null;
 
-				if (!land.tes3)
-				{
-					//oddly btxt are optional
-					BTXT btxt = land.BTXTs[quadrant];
+				//oddly btxt are optional
+				BTXT btxt = land.BTXTs[quadrant];
 
-					if (btxt != null)
-					{
-						tus = getTexture(btxt.textureFormID, master, textureSource);
-					}
-					else
-					{
-						tus = getDefaultTexture(textureSource);
-					}
+				if (btxt != null)
+				{
+					tus = getTexture(btxt.textureFormID, master, textureSource);
 				}
 				else
 				{
-					if (land.VTEXshorts != null)
-					{
-						int texFormId = land.VTEXshorts[quadrant];
-						tus = getTextureTes3(texFormId, master, textureSource);
-					}
-					else
-					{
-						System.out.println("this one a??");
-						tus = getDefaultTexture(textureSource);
-					}
-
+					tus = getDefaultTexture(textureSource);
 				}
 
 				if (tus == null)
@@ -361,14 +341,8 @@ public class J3dLAND extends J3dRECOStatInst
 						VTXT vtxt = atxt.vtxt;
 						if (vtxt != null)
 						{
-							if (land.tes3)
-							{
-								tus = getTextureTes3(atxt.textureFormID, master, textureSource);
-							}
-							else
-							{
-								tus = getTexture(atxt.textureFormID, master, textureSource);
-							}
+
+							tus = getTexture(atxt.textureFormID, master, textureSource);
 
 							if (tus == null)
 								System.err.println("tus == null, things are gonna break!");
@@ -469,8 +443,9 @@ public class J3dLAND extends J3dRECOStatInst
 		int qx = quadrant % quadrantsPerSide;
 		int qy = quadrant / quadrantsPerSide;
 
-		float x = ((qx - (quadrantsPerSide / 2)) * quadSize) + halfQuadSize;
-		float y = ((qy - (quadrantsPerSide / 2)) * quadSize) + halfQuadSize;
+		//-1 handles odd sizes
+		float x = ((qx - (quadrantsPerSide / 2f)) * quadSize) + halfQuadSize;
+		float y = ((qy - (quadrantsPerSide / 2f)) * quadSize) + halfQuadSize;
 		return new Vector3f(x, 0, -y);
 	}
 
@@ -760,6 +735,14 @@ public class J3dLAND extends J3dRECOStatInst
 		return colors;
 	}
 
+	/**
+	 * texCoordCount is overrriden to 1
+	 * @param terrainData
+	 * @param texCoordCount
+	 * @param vertexAttrCount
+	 * @param vertexAttrSizes
+	 * @return
+	 */
 	public static GeometryArray createGA(GeometryData terrainData, int texCoordCount, int vertexAttrCount, int[] vertexAttrSizes)
 	{
 		int basicFormat = GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.COLOR_4 //
@@ -857,84 +840,6 @@ public class J3dLAND extends J3dRECOStatInst
 		return this.getClass().getSimpleName();
 	}
 
-	/**
-	 * return ATXTs array that are just faked up side faders with the right textureid on them
-	 * It will be (2 per interior texture grid, plus 1 for edge grids) in size with a pointer to the original
-	 * Blurr only needs to go down and left not up and right as well
-	 * Each will have 1 ref to a static VTXT
-	 *  
-	 * @param VTEXs
-	 * @return
-	 */
-	private static ATXT[] createTes3ATXT(int[] VTEXs)
-	{
-		if (rightVTXT == null)
-			createTes3VTXT();
-
-		int quadrantsPerSide = 16;
-
-		ArrayList<ATXT> atxts = new ArrayList<ATXT>();
-		for (int q = 0; q < VTEXs.length; q++)
-		{
-			int texFormId = VTEXs[q];
-
-			int qx = q % quadrantsPerSide;
-			int qy = q / quadrantsPerSide;
-
-			// find each neighbour in 2 dirs (if still a valid quadrant)
-			// make a ATXT with my texture and the appropriate VTXT static
-
-			// but must put neighbour into me quadrant and keep track of layer count
-			int layer = 0;
-
-			//down
-			int downqy = qy + 1;
-			// did we not move off the grid?
-			if (downqy < quadrantsPerSide)
-			{
-				int downQuadrant = (downqy * 16) + qx;
-				// don't bother if it's the same texture, notice upQuandrant is  NOT is (4x4)x(4x4)
-				// squares it's regular 16x16 style
-				int downTexFormId = VTEXs[downQuadrant];
-				if (downTexFormId != texFormId)
-				{
-					ATXT atxt = new LAND.ATXT();
-					atxt.layer = layer;
-					atxt.textureFormID = downTexFormId;
-					atxt.quadrant = q;
-					atxt.vtxt = downVTXT;
-					atxts.add(atxt);
-
-					layer++;
-				}
-			}
-
-			//right
-			int rqx = qx + 1;
-
-			// did we not move off the grid?
-			if (rqx < quadrantsPerSide)
-			{
-				int rightQuadrant = (qy * 16) + rqx;
-				// don't bother if it's the same texture
-				int rightTexFormId = VTEXs[rightQuadrant];
-				if (rightTexFormId != texFormId)
-				{
-					ATXT atxt = new LAND.ATXT();
-					atxt.layer = layer;
-					atxt.textureFormID = rightTexFormId;
-					atxt.quadrant = q;
-					atxt.vtxt = rightVTXT;
-					atxts.add(atxt);
-				}
-			}
-
-		}
-
-		ATXT[] ret = atxts.toArray(new ATXT[0]);
-		return ret;
-	}
-
 	private static void createShaderProgram()
 	{
 		if (shaderProgram == null)
@@ -983,27 +888,198 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 	}
 
-	private static VTXT rightVTXT;
-
-	private static VTXT downVTXT;
-
-	private static void createTes3VTXT()
-	{
-
-		rightVTXT = new VTXT();
-		rightVTXT.count = 5;
-		rightVTXT.position = new int[] { 4, 9, 14, 19, 24 };// one strip down the right
-		rightVTXT.opacity = new float[] { 0.5f, 1f, 1f, 1f, 0.5f };
-
-		downVTXT = new VTXT();
-		downVTXT.count = 5;
-		downVTXT.position = new int[] { 20, 21, 22, 23, 24 };// one strip along the bottom
-		downVTXT.opacity = new float[] { 0.5f, 1f, 1f, 1f, 0.5f };
-
-	}
-
 	public float getLowestHeight()
 	{
 		return lowestHeight;
 	}
+
+	public void tes3LAND(LAND land, IRecordStore master, TextureSource textureSource)
+	{
+		this.land = land;
+		int quadrantsPerSide = 16;
+
+		Group baseGroup = new Group();
+		addNodeChild(baseGroup);
+
+		//ensure shader ready
+		createShaderProgramTes3();
+
+		if (land.VHGT != null)
+		{
+			// extract the heights
+			byte[] heightBytes = land.VHGT;
+			float[][] heights = extractHeights(heightBytes);
+
+			// extract the normals
+			byte[] normalBytes = land.VNML;
+			Vector3f[][] normals = extractNormals(normalBytes);
+
+			// extract the colors
+			byte[] colorBytes = land.VCLR;
+			Color4f[][] colors = extractColors(colorBytes);
+
+			ShaderAppearance app = new ShaderAppearance();
+
+			app.setMaterial(createMat());
+			app.setRenderingAttributes(createRA());
+
+			Shape3D baseQuadShape = new Shape3D();
+			baseQuadShape.setAppearance(app);
+
+			int[] attributeSizes = new int[] { 4, 4, 4, 4 };
+			GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, 1, 0, 1, 4, attributeSizes);
+			ga.setName(land.toString() + ":LAND " + 0 + " " + land.landX + " " + land.landY);
+
+			baseQuadShape.setGeometry(ga);
+
+			ArrayList<ShaderAttributeValue> allShaderAttributeValues = new ArrayList<ShaderAttributeValue>();
+			ArrayList<TextureUnitState> allTextureUnitStates = new ArrayList<TextureUnitState>();
+
+			HashMap<Integer, Integer> texIdToTUS = new HashMap<Integer, Integer>();
+			int tusCount = 0;
+			//16x16 texids each one is for a set of 4x4 squares (5x5 verts make up the square) 
+			//max seen 14
+			for (int t = 0; t < land.VTEXshorts.length; t++)
+			{
+				int texFormId = land.VTEXshorts[t];
+				//ensure the TUS exiosts and we have a map to it's sampler id
+				if (!texIdToTUS.containsKey(texFormId))
+				{
+					TextureUnitState tus = getTextureTes3(texFormId, master, textureSource);
+					allTextureUnitStates.add(tus);
+					allShaderAttributeValues.add(new ShaderAttributeValue("sampler" + tusCount, new Integer(tusCount)));
+					texIdToTUS.put(texFormId, tusCount);
+					//System.out.println("t " + t + " putting texid = " + texFormId + " against " + tusCount);
+					tusCount++;
+				}
+			}
+
+			int vertsPerSide = (GRID_COUNT + 1);
+			int vertexCount = vertsPerSide * vertsPerSide;
+			ByteBuffer bb = ByteBuffer.allocateDirect(vertexCount * 4 * 4);
+			bb.order(ByteOrder.nativeOrder());
+			FloatBuffer samplers0 = bb.asFloatBuffer();
+			bb = ByteBuffer.allocateDirect(vertexCount * 4 * 4);
+			bb.order(ByteOrder.nativeOrder());
+			FloatBuffer samplers1 = bb.asFloatBuffer();
+			bb = ByteBuffer.allocateDirect(vertexCount * 4 * 4);
+			bb.order(ByteOrder.nativeOrder());
+			FloatBuffer samplers2 = bb.asFloatBuffer();
+			bb = ByteBuffer.allocateDirect(vertexCount * 4 * 4);
+			bb.order(ByteOrder.nativeOrder());
+			FloatBuffer samplers3 = bb.asFloatBuffer();
+			for (int row = 0; row < vertsPerSide; row++)
+			{
+				for (int col = 0; col < vertsPerSide; col++)
+				{
+					int vertexIdx = (row * vertsPerSide) + col;
+
+					int quadRow = (row / 4);
+					int quadCol = (col / 4);
+					//put final verts into prev quadrant (each has 5 lines of verts reused by the next except for the final)
+					quadRow = quadRow >= quadrantsPerSide ? quadrantsPerSide - 1 : quadRow;
+					quadCol = quadCol >= quadrantsPerSide ? quadrantsPerSide - 1 : quadCol;
+
+					int quadrant = ((((quadrantsPerSide - 1) - quadRow) * quadrantsPerSide)) + quadCol;
+
+					// look up sampler id from texture id mapped earlier
+					int samplerId = texIdToTUS.get(land.VTEXshorts[quadrant]);
+					//	System.out.println("quadRow " + quadRow + "  " + quadCol + " quadrant = " + quadrant + " vertexIdx " + vertexIdx
+					//			+ " land.VTEXshorts[quadrant] " + land.VTEXshorts[quadrant] + " sampler id = " + samplerId);
+
+					//NOTICE 1s! as this is the base only
+					// 0.5 etc are for the layers in a moment
+
+					int idx = (vertexIdx * 4) + (samplerId % 4);
+					if (samplerId < 4)
+						samplers0.put(idx, 1);
+					else if (samplerId < 8)
+						samplers1.put(idx, 1);
+					else if (samplerId < 12)
+						samplers2.put(idx, 1);
+					else if (samplerId < 16)
+						samplers3.put(idx, 1);
+					else
+						new Throwable("SamplerId too big! " + samplerId).printStackTrace();
+				}
+			}
+
+			ga.setVertexAttrRefBuffer(0, new J3DBuffer(samplers0));
+			ga.setVertexAttrRefBuffer(1, new J3DBuffer(samplers1));
+			ga.setVertexAttrRefBuffer(2, new J3DBuffer(samplers2));
+			ga.setVertexAttrRefBuffer(3, new J3DBuffer(samplers3));
+
+			TextureUnitState[] tusa = new TextureUnitState[allTextureUnitStates.size()];
+			for (int i = 0; i < allTextureUnitStates.size(); i++)
+			{
+				tusa[i] = allTextureUnitStates.get(i);
+				//TODO: I notice the same texture repeats in the layers a lot sometimes
+				if (OUTPUT_BINDINGS)
+					System.out.println("LAND Tus " + i + " " + tusa[i]);
+			}
+			app.setTextureUnitState(tusa);
+
+			app.setShaderProgram(shaderProgram);
+
+			ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
+			for (ShaderAttributeValue sav : allShaderAttributeValues)
+			{
+				if (OUTPUT_BINDINGS)
+					System.out.println(sav.getAttributeName() + " " + sav.getValue());
+
+				shaderAttributeSet.put(sav);
+			}
+			app.setShaderAttributeSet(shaderAttributeSet);
+
+			baseGroup.addChild(baseQuadShape);
+
+		}
+
+	}
+
+	private static void createShaderProgramTes3()
+	{
+		if (shaderProgram == null)
+		{
+			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.vert");
+			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.frag");
+
+			Shader[] shaders = new Shader[2];
+			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+				public String toString()
+				{
+					return "Tes3 land vertex Program";
+				}
+			};
+			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+				public String toString()
+				{
+					return "Tes3 land fragment Program";
+				}
+			};
+
+			shaderProgram = new GLSLShaderProgram() {
+				public String toString()
+				{
+					return "Land Shader Program";
+				}
+			};
+			shaderProgram.setShaders(shaders);
+
+			String[] shaderAttrNames = new String[20];
+			for (int i = 0; i < 20; i++)
+			{
+				shaderAttrNames[i] = "sampler" + i;
+				if (OUTPUT_BINDINGS)
+					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+			}
+
+			shaderProgram.setShaderAttrNames(shaderAttrNames);
+
+			String[] vertexAttrNames = new String[] { "samplers0", "samplers1", "samplers2", "samplers3" };
+			shaderProgram.setVertexAttrNames(vertexAttrNames);
+
+		}
+	}
+
 }
