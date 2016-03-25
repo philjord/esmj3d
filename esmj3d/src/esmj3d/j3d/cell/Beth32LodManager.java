@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.LinearFog;
+import javax.media.j3d.Node;
 import javax.vecmath.Color3f;
 
 import tools3d.utils.Utils3D;
@@ -58,6 +59,7 @@ public class Beth32LodManager extends BethLodManager
 				{
 					Point key = new Point(x, y);
 					MorphingLandscape bg = (MorphingLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, lodWorldFormId);
+					bg.setCapability(Node.ALLOW_PARENT_READ);
 					loadedGrosses.put(key, bg);
 					bg.compile();// better to be done not on the j3d thread?
 					//addChild(bg);// don't add yet, updateGross will do so shortly
@@ -81,7 +83,7 @@ public class Beth32LodManager extends BethLodManager
 			if (Math.abs(key.x - charPoint.x) <= BethRenderSettings.getLOD_LOAD_DIST_MAX()
 					&& Math.abs(key.y - charPoint.y) <= BethRenderSettings.getLOD_LOAD_DIST_MAX())
 			{
-				if (!oblivLODLandscape.isLive())
+				if (oblivLODLandscape.getParent() == null)
 					addChild(oblivLODLandscape);
 
 				if (key.distance(charPoint) <= 64)
@@ -91,7 +93,7 @@ public class Beth32LodManager extends BethLodManager
 			}
 			else
 			{
-				if (oblivLODLandscape.isLive())
+				if (oblivLODLandscape.getParent() != null)
 					removeChild(oblivLODLandscape);
 			}
 		}
