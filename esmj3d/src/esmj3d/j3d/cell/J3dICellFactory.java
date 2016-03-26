@@ -30,11 +30,7 @@ public abstract class J3dICellFactory implements IRecordStore
 
 	public abstract J3dICELLPersistent makeBGWRLDPersistent(int formId, boolean makePhys);
 
-	public abstract J3dCELLGeneral makeBGWRLDTemporary(int cellId, int wrldFormId, boolean makePhys);
-
 	public abstract J3dCELLGeneral makeBGWRLDTemporary(int wrldFormId, int x, int y, boolean makePhys);
-
-	public abstract J3dCELLGeneral makeBGWRLDDistant(int cellId, int wrldFormId, boolean makePhys);
 
 	public abstract J3dCELLGeneral makeBGWRLDDistant(int wrldFormId, int x, int y, boolean makePhys);
 
@@ -43,7 +39,7 @@ public abstract class J3dICellFactory implements IRecordStore
 	public abstract J3dCELLGeneral makeBGInteriorCELLTemporary(int cellId, boolean makePhys);
 
 	public abstract J3dCELLGeneral makeBGInteriorCELLDistant(int cellId, boolean makePhys);
-	
+
 	public abstract Record getParentWRLDLAND(int wrldFormId, int x, int y);
 
 	public abstract String getLODWorldName(int worldFormId);
