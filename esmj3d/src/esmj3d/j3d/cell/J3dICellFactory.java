@@ -52,19 +52,23 @@ public abstract class J3dICellFactory implements IRecordStore
 	{
 		if (cellChildGroups != null && cellChildGroups.getRecordList() != null)
 		{
-			for (PluginRecord pgr : cellChildGroups.getRecordList())
+			//		for (PluginRecord pgr : cellChildGroups.getRecordList())
+			//		{
+			//			PluginGroup pg = (PluginGroup) pgr;
+			//			if (pg.getGroupType() == PluginGroup.CELL_PERSISTENT)
+			//			{
+			persistentChildrenGroupByFormId.put(parentId, cellChildGroups);
+			for (PluginRecord pr : cellChildGroups.getRecordList())
 			{
-				PluginGroup pg = (PluginGroup) pgr;
-				if (pg.getGroupType() == PluginGroup.CELL_PERSISTENT)
-				{
-					persistentChildrenGroupByFormId.put(parentId, pg);
-					for (PluginRecord pr : pg.getRecordList())
-					{
-						persistentChildrenByFormId.put(pr.getFormID(), new Record(pr));
-						persistentCellIdByFormId.put(pr.getFormID(), parentId);
-					}
-				}
+				persistentChildrenByFormId.put(pr.getFormID(), new Record(pr));
+
+				//In fact the parent id can be taken from the persisten record itself
+				// in the label field, but apparently this is not reliable?
+				//http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format
+				persistentCellIdByFormId.put(pr.getFormID(), parentId);
 			}
+			//			}
+			//		}
 		}
 	}
 
