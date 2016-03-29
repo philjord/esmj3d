@@ -98,12 +98,19 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	public void setJ3dRECOType(J3dRECOType j3dRECOType)
 	{
-		if (fader && SHOW_FADE_OUT_MARKER)
+		if (fader)
 		{
-			BranchGroup bg = new BranchGroup();// empty group for no rendering
-			bg.clearCapabilities();
-			bg.addChild(new Cube(0.1));
-			setJ3dRECOType(j3dRECOType, bg);
+			if (SHOW_FADE_OUT_MARKER)
+			{
+				BranchGroup bg = new BranchGroup();// empty group for no rendering
+				bg.clearCapabilities();
+				bg.addChild(new Cube(0.1));
+				setJ3dRECOType(j3dRECOType, bg);
+			}
+			else
+			{
+				setJ3dRECOType(j3dRECOType, null);
+			}
 		}
 		else
 		{
