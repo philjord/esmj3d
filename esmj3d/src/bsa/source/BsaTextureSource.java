@@ -10,7 +10,6 @@ import javax.media.j3d.Texture;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
-import archive.displayables.Displayable;
 import tools.compressedtexture.astc.ASTCTextureLoader;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.compressedtexture.ktx.KTXTextureLoader;
@@ -183,9 +182,10 @@ public class BsaTextureSource implements TextureSource
 			Folder folder = archiveFile.getFolder(folderName, true);
 			if (folder != null)
 			{
-				for (ArchiveEntry e : folder.fileToHashMap.values())
+				for (int i = 0; i < folder.fileToHashMap.size(); i++)
 				{
-					ret.add(folderName + "\\" + ((Displayable) e).getFileName());
+					ArchiveEntry e = folder.fileToHashMap.get(folder.fileToHashMap.keyAt(i));
+					ret.add(folderName + "\\" + e.getFileName());
 				}
 			}
 		}

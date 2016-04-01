@@ -132,8 +132,9 @@ public class BsaMeshSource implements MeshSource
 			Folder folder = archiveFile.getFolder(folderName, true);
 			if (folder != null)
 			{
-				for (ArchiveEntry e : folder.fileToHashMap.values())
+				for (int i = 0; i < folder.fileToHashMap.size(); i++)
 				{
+					ArchiveEntry e = folder.fileToHashMap.get(folder.fileToHashMap.keyAt(i));
 					ret.add(folderName + "\\" + e.getFileName());
 				}
 			}
