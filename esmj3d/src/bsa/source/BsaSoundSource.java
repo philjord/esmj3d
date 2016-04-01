@@ -11,6 +11,7 @@ import javax.media.j3d.SoundException;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
+import archive.displayables.Displayable;
 import tools.SoundKeyToName;
 import utils.source.SoundSource;
 
@@ -94,12 +95,12 @@ public class BsaSoundSource implements SoundSource
 
 		for (ArchiveFile archiveFile : bsas)
 		{
-			Folder folder = archiveFile.getFolder(folderName);
+			Folder folder = archiveFile.getFolder(folderName, true);
 			if (folder != null)
 			{
 				for (ArchiveEntry e : folder.fileToHashMap.values())
 				{
-					ret.add(folderName + "\\" + e.getFileName());
+					ret.add(folderName + "\\" + ((Displayable) e).getFileName());
 				}
 			}
 		}

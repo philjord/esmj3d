@@ -86,18 +86,18 @@ public class BsaMeshSource implements MeshSource
 						{
 							System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
 						}
-					/*	finally
-						{
-							try
+						/*	finally
 							{
-								if (inputStream != null)
-									inputStream.close();
-							}
-							catch (IOException e)
-							{
-								e.printStackTrace();
-							}
-						}*/
+								try
+								{
+									if (inputStream != null)
+										inputStream.close();
+								}
+								catch (IOException e)
+								{
+									e.printStackTrace();
+								}
+							}*/
 
 						if (nifFile != null)
 						{
@@ -129,7 +129,7 @@ public class BsaMeshSource implements MeshSource
 
 		for (ArchiveFile archiveFile : bsas)
 		{
-			Folder folder = archiveFile.getFolder(folderName);
+			Folder folder = archiveFile.getFolder(folderName, true);
 			if (folder != null)
 			{
 				for (ArchiveEntry e : folder.fileToHashMap.values())
