@@ -7,11 +7,9 @@ import java.util.zip.DataFormatException;
 
 import javax.media.j3d.BranchGroup;
 
-import utils.source.MediaSources;
 import esmmanager.common.PluginException;
 import esmmanager.common.data.plugin.PluginGroup;
 import esmmanager.common.data.plugin.PluginRecord;
-import esmmanager.common.data.record.IRecordStore;
 import esmmanager.common.data.record.Record;
 import esmmanager.loader.CELLDIALPointer;
 import esmmanager.loader.ESMManager;
@@ -19,8 +17,11 @@ import esmmanager.loader.IESMManager;
 import esmmanager.loader.InteriorCELLTopGroup;
 import esmmanager.loader.WRLDChildren;
 import esmmanager.loader.WRLDTopGroup;
+import esmmanager.tes3.IRecordStoreTes3;
+import utils.source.MediaSources;
 
-public abstract class J3dICellFactory implements IRecordStore
+//NOTE it will only be TEs3 style if the ESMMAnger given in is
+public abstract class J3dICellFactory implements IRecordStoreTes3
 {
 
 	protected IESMManager esmManager;
@@ -168,7 +169,7 @@ public abstract class J3dICellFactory implements IRecordStore
 	public Record getRecord(String edidId)
 	{
 		// note persistent are not loaded this way
-		return esmManager.getRecord(edidId);
+		return ((IRecordStoreTes3) esmManager).getRecord(edidId);
 	}
 
 }

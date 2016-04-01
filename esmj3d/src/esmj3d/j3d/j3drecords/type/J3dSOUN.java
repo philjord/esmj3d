@@ -55,7 +55,7 @@ public class J3dSOUN extends J3dRECOType
 		//System.out.println("playing sound " + file);
 
 		/*PointSound ps = new PointSound();
-
+		
 		ps.setSoundData(soundSource.getMediaContainer(soun.FNAM.str));
 		ps.setPosition(new Point3f(0, 0, 0));
 			if (soun.SNDX != null)
@@ -68,7 +68,7 @@ public class J3dSOUN extends J3dRECOType
 				{ maxGain, maxGain, 0 });
 				ps.setEnable(true);
 				ps.setPause(false);
-
+		
 				ps.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.POSITIVE_INFINITY));
 				ps.setLoop(soun.SNDX.isLoop() ? -1 : 1);
 				ps.setContinuousEnable(soun.SNDX.isLoop());
@@ -77,13 +77,13 @@ public class J3dSOUN extends J3dRECOType
 			else
 			{
 				PointSound ps = new PointSound();
-
+		
 		ps.setSoundData(soundSource.getMediaContainer(soun.FNAM.str));
 		ps.setPosition(new Point3f(0, 0, 0));
 		 
 		ps.setEnable(true);
 		ps.setPause(false);
-
+		
 		ps.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.POSITIVE_INFINITY));
 		ps.setLoop(1);
 		ps.setContinuousEnable(true);
@@ -139,10 +139,14 @@ public class J3dSOUN extends J3dRECOType
 						//NOTE the sound name is a reference to an ESM EditorID for a sound					 
 						//example farm fence open  = sound: DRSFarmFenceOpen
 						//System.out.println("getting " + soundName.substring(7));
-						Record sound = master.getRecord(soundName.substring(7));
-						if (sound != null)
+						//Record sound = master.getRecord(soundName.substring(7));
+						
+						//TODO: a proper sound system where sounds are indexed by name
+						
+						
+						//if (sound != null)
 						{
-							GenericSOUN soun = new GenericSOUN(sound);
+							//	GenericSOUN soun = new GenericSOUN(sound);
 							//	System.out.println("SOUN " + sound.getEditorID());
 						}
 					}
@@ -164,9 +168,9 @@ public class J3dSOUN extends J3dRECOType
 					try
 					{
 						PointSound ps = new PointSound();
-
+			
 						fis = new FileInputStream(file);
-
+			
 						ps.setSoundData(new MediaContainer(fis));
 						ps.setPosition(new Point3f(0, 0, 0));
 						float maxGain = soun.SNDX.staticAttenuation / 100f;
@@ -177,7 +181,7 @@ public class J3dSOUN extends J3dRECOType
 						{ maxGain, maxGain, 0 });
 						ps.setEnable(true);
 						ps.setPause(false);
-
+			
 						ps.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.POSITIVE_INFINITY));
 						ps.setLoop(soun.SNDX.isLoop() ? -1 : 1);
 						ps.setContinuousEnable(soun.SNDX.isLoop());
@@ -198,8 +202,7 @@ public class J3dSOUN extends J3dRECOType
 				wakeupOn(wakeupCriterion);
 			}
 
-			@SuppressWarnings(
-			{ "unchecked", "rawtypes" })
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public void processStimulus(Enumeration criteria)
 			{

@@ -42,6 +42,7 @@ import esmj3d.data.shared.records.TXST;
 import esmj3d.j3d.TESLANDGen;
 import esmmanager.common.data.record.IRecordStore;
 import esmmanager.common.data.record.Record;
+import esmmanager.tes3.IRecordStoreTes3;
 import nif.BgsmSource;
 import nif.j3d.J3dNiGeometry;
 import nif.j3d.J3dNiTriBasedGeom;
@@ -534,7 +535,7 @@ public class J3dLAND extends J3dRECOStatInst
 		if (textureID > 0)
 		{
 			//not sure why -1 has correct texture but it sure does see openMW
-			Record ltexRec = master.getRecord("LTEX_" + (textureID - 1));
+			Record ltexRec = ((IRecordStoreTes3) master).getRecord("LTEX_" + (textureID - 1));
 			if (ltexRec != null)
 			{
 				if (ltexRec.getRecordType().equals("LTEX"))
