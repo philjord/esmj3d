@@ -13,7 +13,7 @@ import esmmanager.common.data.plugin.PluginGroup;
 import esmmanager.common.data.plugin.PluginRecord;
 import esmmanager.common.data.record.IRecordStore;
 import esmmanager.common.data.record.Record;
-import esmmanager.loader.CELLPointer;
+import esmmanager.loader.CELLDIALPointer;
 import esmmanager.loader.ESMManager;
 import esmmanager.loader.IESMManager;
 import esmmanager.loader.InteriorCELLTopGroup;
@@ -99,7 +99,7 @@ public abstract class J3dICellFactory implements IRecordStore
 				List<InteriorCELLTopGroup> interiorCELLTopGroups = ((ESMManager) esmManager).getInteriorCELLTopGroups();
 				for (InteriorCELLTopGroup interiorCELLTopGroup : interiorCELLTopGroups)
 				{
-					for (CELLPointer cp : interiorCELLTopGroup.getAllInteriorCELLFormIds())
+					for (CELLDIALPointer cp : interiorCELLTopGroup.getAllInteriorCELLFormIds())
 					{
 						try
 						{
