@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.GeometryArray;
@@ -31,6 +30,7 @@ import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
 
+import com.frostwire.util.SparseArray;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 
 import esmj3d.data.shared.records.LAND;
@@ -946,20 +946,20 @@ public class J3dLAND extends J3dRECOStatInst
 			ArrayList<ShaderAttributeValue> allShaderAttributeValues = new ArrayList<ShaderAttributeValue>();
 			ArrayList<TextureUnitState> allTextureUnitStates = new ArrayList<TextureUnitState>();
 
-			HashMap<Integer, Integer> texIdToTUS = new HashMap<Integer, Integer>();
+			SparseArray<Integer> texIdToTUS = new SparseArray<Integer>();
 			int tusCount = 0;
 			//16x16 texids each one is for a set of 4x4 squares (5x5 verts make up the square) 
 			//max seen 14
 			for (int t = 0; t < land.VTEXshorts.length; t++)
 			{
 				int texFormId = land.VTEXshorts[t];
-				//ensure the TUS exiosts and we have a map to it's sampler id
-				if (!texIdToTUS.containsKey(texFormId))
+				//ensure the TUS exists and we have a map to it's sampler id
+				if ( texIdToTUS.get(texFormId) == null)
 				{
 					TextureUnitState tus = getTextureTes3(texFormId, master, textureSource);
 					allTextureUnitStates.add(tus);
 					allShaderAttributeValues.add(new ShaderAttributeValue("sampler" + tusCount, new Integer(tusCount)));
-					texIdToTUS.put(texFormId, tusCount);
+					texIdToTUS.put(texFormId, new Integer(tusCount));
 					//System.out.println("t " + t + " putting texid = " + texFormId + " against " + tusCount);
 					tusCount++;
 				}
