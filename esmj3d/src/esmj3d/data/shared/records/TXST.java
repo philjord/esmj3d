@@ -1,6 +1,6 @@
 package esmj3d.data.shared.records;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import esmj3d.data.shared.subrecords.ZString;
 import esmmanager.common.data.record.Record;
@@ -36,70 +36,70 @@ public class TXST extends RECO
 	public TXST(Record recordData)
 	{
 		super(recordData);
-		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
+		List<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getData();
+			byte[] bs = sr.getSubrecordData();
 
-			if (sr.getType().equals("EDID"))
+			if (sr.getSubrecordType().equals("EDID"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getType().equals("OBND"))
+			else if (sr.getSubrecordType().equals("OBND"))
 			{
 
 			}
-			else if (sr.getType().equals("TX00"))
+			else if (sr.getSubrecordType().equals("TX00"))
 			{
 				TX00 = new ZString(bs);
 			}
-			else if (sr.getType().equals("TX01"))
+			else if (sr.getSubrecordType().equals("TX01"))
 			{
 				TX01 = new ZString(bs);
 			}
-			else if (sr.getType().equals("TX02"))
+			else if (sr.getSubrecordType().equals("TX02"))
 			{
 				TX02 = new ZString(bs);
 			}
-			else if (sr.getType().equals("TX03"))
+			else if (sr.getSubrecordType().equals("TX03"))
 			{
 				TX03 = new ZString(bs);
 			}
-			else if (sr.getType().equals("TX04"))
+			else if (sr.getSubrecordType().equals("TX04"))
 			{
 				// none in esm 
 				TX04 = new ZString(bs);
 			}
-			else if (sr.getType().equals("TX05"))
+			else if (sr.getSubrecordType().equals("TX05"))
 			{
 				TX05 = new ZString(bs);
 			}
-			else if (sr.getType().equals("TX06"))
+			else if (sr.getSubrecordType().equals("TX06"))
 			{
 				TX06 = new ZString(bs);
 			}
-			else if (sr.getType().equals("TX07"))
+			else if (sr.getSubrecordType().equals("TX07"))
 			{
 				TX07 = new ZString(bs);
 			}
-			else if (sr.getType().equals("DODT"))
+			else if (sr.getSubrecordType().equals("DODT"))
 			{
 				// none in esm 
 
 			}
-			else if (sr.getType().equals("DNAM"))
+			else if (sr.getSubrecordType().equals("DNAM"))
 			{
 
 			}
-			else if (sr.getType().equals("MNAM"))
+			else if (sr.getSubrecordType().equals("MNAM"))
 			{
 				//new in FO4
 				MNAM = new ZString(bs);
 			}
 			else
 			{
-				System.out.println("unhandled : " + sr.getType() + " in record " + recordData + " in " + this);
+				System.out.println("unhandled : " + sr.getSubrecordType() + " in record " + recordData + " in " + this);
 			}
 
 		}

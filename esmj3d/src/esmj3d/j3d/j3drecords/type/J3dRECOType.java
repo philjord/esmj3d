@@ -3,16 +3,16 @@ package esmj3d.j3d.j3drecords.type;
 import javax.media.j3d.BranchGroup;
 import javax.vecmath.Color3f;
 
-import tools3d.utils.scenegraph.Fadable;
-import utils.source.MediaSources;
+import esmj3d.data.shared.records.RECO;
+import esmj3d.j3d.BethRenderSettings;
 import nif.NifJ3dHavokRoot;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.animation.J3dNiControllerSequence;
 import nif.j3d.particles.J3dNiParticleSystem;
-import esmj3d.data.shared.records.RECO;
-import esmj3d.j3d.BethRenderSettings;
+import tools3d.utils.scenegraph.Fadable;
+import utils.source.MediaSources;
 
 public abstract class J3dRECOType extends BranchGroup implements Fadable
 {

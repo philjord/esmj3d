@@ -1,8 +1,8 @@
 package esmj3d.j3d.cell;
 
-import javaawt.Rectangle;
-
 import javax.media.j3d.BranchGroup;
+
+import javaawt.Rectangle;
 
 public abstract class BethLodManager extends BranchGroup
 {

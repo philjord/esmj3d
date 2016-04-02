@@ -1,8 +1,8 @@
 package esmj3d.j3d.j3drecords.type;
 
-import utils.source.MediaSources;
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
+import utils.source.MediaSources;
 
 public class J3dRECOTypeStatic extends J3dRECOType 
 {

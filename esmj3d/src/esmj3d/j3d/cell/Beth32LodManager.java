@@ -8,11 +8,11 @@ import javax.media.j3d.LinearFog;
 import javax.media.j3d.Node;
 import javax.vecmath.Color3f;
 
-import tools3d.utils.Utils3D;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import javaawt.Point;
 import javaawt.Rectangle;
+import tools3d.utils.Utils3D;
 
 public class Beth32LodManager extends BethLodManager
 {

@@ -1,13 +1,13 @@
 package esmj3d.data.shared.records;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import tools.io.ESMByteConvert;
 import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.MODL;
 import esmj3d.data.shared.subrecords.ZString;
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
+import tools.io.ESMByteConvert;
 
 public class GenericDOOR extends RECO
 {
@@ -29,45 +29,45 @@ public class GenericDOOR extends RECO
 	{
 		super(recordData);
 
-		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
+		List<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getData();
+			byte[] bs = sr.getSubrecordData();
 
-			if (sr.getType().equals("EDID"))
+			if (sr.getSubrecordType().equals("EDID"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getType().equals("MODL"))
+			else if (sr.getSubrecordType().equals("MODL"))
 			{
 				MODL = new MODL(bs);
 			}
-			else if (sr.getType().equals("MODB"))
+			else if (sr.getSubrecordType().equals("MODB"))
 			{
 				MODL.addMODBSub(bs);
 			}
-			else if (sr.getType().equals("MODT"))
+			else if (sr.getSubrecordType().equals("MODT"))
 			{
 				MODL.addMODTSub(bs);
 			}
-			else if (sr.getType().equals("MODS"))
+			else if (sr.getSubrecordType().equals("MODS"))
 			{
 				MODL.addMODSSub(bs);
 			}
-			else if (sr.getType().equals("SNAM"))
+			else if (sr.getSubrecordType().equals("SNAM"))
 			{
 				SNAM = ESMByteConvert.extractInt(bs, 0);
 			}
-			else if (sr.getType().equals("BNAM"))
+			else if (sr.getSubrecordType().equals("BNAM"))
 			{
 				BNAM = ESMByteConvert.extractInt(bs, 0);
 			}
-			else if (sr.getType().equals("ANAM"))
+			else if (sr.getSubrecordType().equals("ANAM"))
 			{
 				ANAM = ESMByteConvert.extractInt(bs, 0);
 			}
-			else if (sr.getType().equals("FNAM"))
+			else if (sr.getSubrecordType().equals("FNAM"))
 			{
 				FNAM = bs[0];
 			}

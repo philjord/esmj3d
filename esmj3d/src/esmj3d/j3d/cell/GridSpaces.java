@@ -1,7 +1,5 @@
 package esmj3d.j3d.cell;
 
-import javaawt.Point;
-import javaawt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,13 +8,15 @@ import java.util.List;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 
-import utils.ESConfig;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
+import javaawt.Point;
+import javaawt.Rectangle;
+import utils.ESConfig;
 
 public class GridSpaces extends BranchGroup
 {

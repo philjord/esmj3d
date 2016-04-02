@@ -1,13 +1,14 @@
 package esmj3d.data.shared.records;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import tools.io.ESMByteConvert;
 import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.ZString;
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
+import tools.io.ESMByteConvert;
 
 public class CommonCELL extends InstRECO
 {
@@ -38,21 +39,21 @@ public class CommonCELL extends InstRECO
 	{
 		super(recordData);
 
-		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
+		List<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getData();
+			byte[] bs = sr.getSubrecordData();
 
-			if (sr.getType().equals("EDID"))
+			if (sr.getSubrecordType().equals("EDID"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getType().equals("FULL"))
+			else if (sr.getSubrecordType().equals("FULL"))
 			{
 				FULL = new LString(bs);
 			}
-			else if (sr.getType().equals("XCLC"))
+			else if (sr.getSubrecordType().equals("XCLC"))
 			{
 				x = ESMByteConvert.extractInt(bs, 0);
 				y = ESMByteConvert.extractInt(bs, 4);
@@ -66,27 +67,27 @@ public class CommonCELL extends InstRECO
 					    0x8 - Force Hide Land Quad 4 */
 				}
 			}
-			else if (sr.getType().equals("XOWN"))
+			else if (sr.getSubrecordType().equals("XOWN"))
 			{
 				//XOWN = new FormID(bs); //12 bytes in FO4
 			}
-			else if (sr.getType().equals("XCLL"))
+			else if (sr.getSubrecordType().equals("XCLL"))
 			{
 				XCLL = bs;
 			}
-			else if (sr.getType().equals("XCLR"))
+			else if (sr.getSubrecordType().equals("XCLR"))
 			{
 				//				XCLRs.add(new FormID(bs));
 			}
-			else if (sr.getType().equals("XCLW"))
+			else if (sr.getSubrecordType().equals("XCLW"))
 			{
 				XCLW = ESMByteConvert.extractFloat(bs, 0);
 			}
-			else if (sr.getType().equals("XCWT"))
+			else if (sr.getSubrecordType().equals("XCWT"))
 			{
 				XCWT = new FormID(bs);
 			}
-			else if (sr.getType().equals("XCCM"))
+			else if (sr.getSubrecordType().equals("XCCM"))
 			{
 				XCCM = new FormID(bs);
 			}

@@ -1,6 +1,6 @@
 package esmj3d.data.shared.records;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
@@ -86,7 +86,7 @@ public abstract class RECO
 
 	private int sri = 0;
 
-	protected Subrecord next(ArrayList<Subrecord> subrecords)
+	protected Subrecord next(List<Subrecord> subrecords)
 	{
 		if (sri < subrecords.size())
 			return subrecords.get(sri++);

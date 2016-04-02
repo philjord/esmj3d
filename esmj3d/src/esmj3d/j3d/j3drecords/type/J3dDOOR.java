@@ -5,12 +5,12 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Color3f;
 
+import esmj3d.data.shared.records.GenericDOOR;
+import esmj3d.j3d.BethRenderSettings;
 import nif.NifToJ3d;
 import tools3d.utils.TimedRunnableBehavior;
 import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
-import esmj3d.data.shared.records.GenericDOOR;
-import esmj3d.j3d.BethRenderSettings;
 
 public class J3dDOOR extends J3dRECOType
 {

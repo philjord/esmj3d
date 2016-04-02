@@ -1,11 +1,12 @@
 package esmj3d.j3d.cell;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
 import javax.media.j3d.BranchGroup;
+
+import com.frostwire.util.SparseArray;
 
 import esmmanager.common.PluginException;
 import esmmanager.common.data.plugin.PluginGroup;
@@ -28,11 +29,11 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 
 	protected MediaSources mediaSources;
 
-	protected HashMap<Integer, PluginGroup> persistentChildrenGroupByFormId = new HashMap<Integer, PluginGroup>();
+	protected SparseArray<PluginGroup> persistentChildrenGroupByFormId = new SparseArray<PluginGroup>();
 
-	protected HashMap<Integer, Record> persistentChildrenByFormId = new HashMap<Integer, Record>();
+	protected SparseArray<Record> persistentChildrenByFormId = new SparseArray<Record>();
 
-	protected HashMap<Integer, Integer> persistentCellIdByFormId = new HashMap<Integer, Integer>();
+	protected SparseArray<Integer> persistentCellIdByFormId = new SparseArray<Integer>();
 
 	public abstract String getMainESMFileName();
 
@@ -82,7 +83,7 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 						PluginGroup cellChildGroups = children.getCellChildren();
 						if (cellChildGroups != null && cellChildGroups.getRecordList() != null)
 						{
-							for (PluginRecord pgr : cellChildGroups.getRecordList())
+							for (Record pgr : cellChildGroups.getRecordList())
 							{
 								PluginGroup pg = (PluginGroup) pgr;
 								if (pg.getGroupType() == PluginGroup.CELL_PERSISTENT)
@@ -139,10 +140,10 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 		if (cellChildGroups != null && cellChildGroups.getRecordList() != null)
 		{
 			persistentChildrenGroupByFormId.put(parentId, cellChildGroups);
-			for (PluginRecord pr : cellChildGroups.getRecordList())
+			for (Record pr : cellChildGroups.getRecordList())
 			{
-				persistentChildrenByFormId.put(pr.getFormID(), new Record(pr));
-				persistentCellIdByFormId.put(pr.getFormID(), parentId);
+				persistentChildrenByFormId.put(pr.getFormID(), pr);
+				persistentCellIdByFormId.put(pr.getFormID(), new Integer(parentId));
 			}
 		}
 	}

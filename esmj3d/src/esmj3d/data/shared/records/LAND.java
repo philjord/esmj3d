@@ -3,7 +3,7 @@ package esmj3d.data.shared.records;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.List;
 
 import esmj3d.data.shared.subrecords.FormID;
 import esmmanager.common.data.record.Record;
@@ -60,39 +60,39 @@ public class LAND extends InstRECO
 
 		ArrayList<Integer> VTEXshortsv = new ArrayList<Integer>();
 
-		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
+		List<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getData();
+			byte[] bs = sr.getSubrecordData();
 
-			if (sr.getType().equals("DATA"))
+			if (sr.getSubrecordType().equals("DATA"))
 			{
 				DATA = new DATA(bs);
 			}
-			else if (sr.getType().equals("VNML"))
+			else if (sr.getSubrecordType().equals("VNML"))
 			{
 				VNML = bs;
 			}
-			else if (sr.getType().equals("VHGT"))
+			else if (sr.getSubrecordType().equals("VHGT"))
 			{
 				VHGT = bs;
 			}
-			else if (sr.getType().equals("VCLR"))
+			else if (sr.getSubrecordType().equals("VCLR"))
 			{
 				VCLR = bs;
 			}
-			else if (sr.getType().equals("MPCD"))
+			else if (sr.getSubrecordType().equals("MPCD"))
 			{
 				// new in FO4
 			}
-			else if (tes3 && sr.getType().equals("INTV"))
+			else if (tes3 && sr.getSubrecordType().equals("INTV"))
 			{
 				//Note this is not used except for debug output
 				landX = ESMByteConvert.extractInt(bs, 0);
 				landY = ESMByteConvert.extractInt(bs, 4);
 			}
-			else if (tes3 && sr.getType().equals("VTEX"))
+			else if (tes3 && sr.getSubrecordType().equals("VTEX"))
 			{
 				// An array made up of 4x4 sets of 4x4 short texture ids
 				for (int f = 0; f < bs.length; f += 2)
@@ -100,16 +100,16 @@ public class LAND extends InstRECO
 					VTEXshortsv.add(ESMByteConvert.extractShort(bs, f));
 				}
 			}
-			else if (tes3 && sr.getType().equals("WNAM"))
+			else if (tes3 && sr.getSubrecordType().equals("WNAM"))
 			{
 				// low-LOD heightmap (used for rendering the global map)
 				//signed char mWnam[81];
 			}
-			else if (!tes3 && sr.getType().equals("BTXT"))
+			else if (!tes3 && sr.getSubrecordType().equals("BTXT"))
 			{
 				BTXTsv.add(new BTXT(bs));
 			}
-			else if (!tes3 && sr.getType().equals("ATXT"))
+			else if (!tes3 && sr.getSubrecordType().equals("ATXT"))
 			{
 				ATXT atxt = new ATXT(bs);
 				//TODO: use next()
@@ -118,15 +118,15 @@ public class LAND extends InstRECO
 				{
 					Subrecord sr2 = subrecords.get(i + 1);
 
-					if (sr2.getType().equals("VTXT"))
+					if (sr2.getSubrecordType().equals("VTXT"))
 					{
-						atxt.vtxt = new VTXT(sr2.getData());
+						atxt.vtxt = new VTXT(sr2.getSubrecordData());
 						i++;
 					}
 				}
 				ATXTsv.add(atxt);
 			}
-			else if (!tes3 && sr.getType().equals("VTEX"))
+			else if (!tes3 && sr.getSubrecordType().equals("VTEX"))
 			{
 				//TODO: I think using parent world has made this redundant entriely
 				//VTEX (Optional): Texture FormIDs: A sequence of LTEX FormIDs. 
@@ -144,7 +144,7 @@ public class LAND extends InstRECO
 			}
 			else
 			{
-				System.out.println("unhandled : " + sr.getType() + " in record " + recordData + " in " + this);
+				System.out.println("unhandled : " + sr.getSubrecordType() + " in record " + recordData + " in " + this);
 			}
 
 		}

@@ -3,9 +3,9 @@ package esmj3d.data.shared.records;
 import javax.vecmath.Vector3f;
 
 import esmj3d.data.shared.subrecords.XESP;
-import tools.io.ESMByteConvert;
 import esmmanager.common.data.record.IRecordStore;
 import esmmanager.common.data.record.Record;
+import tools.io.ESMByteConvert;
 
 public abstract class InstRECO extends RECO
 {

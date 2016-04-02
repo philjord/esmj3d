@@ -1,19 +1,19 @@
 package esmj3d.j3d.cell;
 
-import javaawt.Point;
 import java.util.HashMap;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.Node;
 
-import tools.io.ESMByteConvert;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.BethRenderSettings.UpdateListener;
 import esmj3d.j3d.j3drecords.inst.J3dRECODynInst;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
+import javaawt.Point;
+import tools.io.ESMByteConvert;
 
 /**
  * Note whilst this extends branchgroup these GridSpace objects are not discarded, so to keep memory down GridSpace
@@ -118,9 +118,9 @@ public class GridSpace extends BranchGroup implements UpdateListener
 			if (record.getRecordType().equals("REFR") || (!makePhys && record.getRecordType().equals("ACRE"))
 					|| (!makePhys && record.getRecordType().equals("ACHR")))
 			{
-				if (updatedSubrecord.getType().equals("DATA"))
+				if (updatedSubrecord.getSubrecordType().equals("DATA"))
 				{
-					byte[] bs = updatedSubrecord.getData();
+					byte[] bs = updatedSubrecord.getSubrecordData();
 					float x = ESMByteConvert.extractFloat(bs, 0);
 					float y = ESMByteConvert.extractFloat(bs, 4);
 					float z = ESMByteConvert.extractFloat(bs, 8);

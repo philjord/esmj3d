@@ -2,10 +2,10 @@ package esmj3d.j3d.j3drecords.type;
 
 import javax.vecmath.Color3f;
 
-import tools3d.utils.scenegraph.Fadable;
-import utils.source.MediaSources;
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
+import tools3d.utils.scenegraph.Fadable;
+import utils.source.MediaSources;
 
 public class J3dRECOTypeDynamic extends J3dRECOType
 {

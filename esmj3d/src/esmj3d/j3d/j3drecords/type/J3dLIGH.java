@@ -10,6 +10,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
+import esmj3d.data.shared.records.CommonLIGH;
+import esmj3d.j3d.BethRenderSettings;
 import nif.NifJ3dHavokRoot;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
@@ -19,8 +21,6 @@ import nif.niobject.NiNode;
 import nif.niobject.NiObject;
 import utils.ESConfig;
 import utils.source.MediaSources;
-import esmj3d.data.shared.records.CommonLIGH;
-import esmj3d.j3d.BethRenderSettings;
 
 public class J3dLIGH extends J3dRECOType
 {

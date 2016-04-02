@@ -2,10 +2,10 @@ package esmj3d.j3d.j3drecords.type;
 
 import javax.vecmath.Color3f;
 
-import nif.character.NifCharacter;
-import tools3d.utils.scenegraph.Fadable;
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
+import nif.character.NifCharacter;
+import tools3d.utils.scenegraph.Fadable;
 
 public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 {

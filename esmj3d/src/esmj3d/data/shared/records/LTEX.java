@@ -1,12 +1,13 @@
 package esmj3d.data.shared.records;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import tools.io.ESMByteConvert;
 import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.data.shared.subrecords.ZString;
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
+import tools.io.ESMByteConvert;
 
 public class LTEX extends RECO
 {
@@ -30,61 +31,61 @@ public class LTEX extends RECO
 
 		ArrayList<FormID> GNAMsl = new ArrayList<FormID>();
 
-		ArrayList<Subrecord> subrecords = recordData.getSubrecords();
+		List<Subrecord> subrecords = recordData.getSubrecords();
 		for (int i = 0; i < subrecords.size(); i++)
 		{
 			Subrecord sr = subrecords.get(i);
-			byte[] bs = sr.getData();
+			byte[] bs = sr.getSubrecordData();
 
-			if (sr.getType().equals("EDID"))
+			if (sr.getSubrecordType().equals("EDID"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getType().equals("TNAM"))
+			else if (sr.getSubrecordType().equals("TNAM"))
 			{
 				textureSetId = ESMByteConvert.extractInt(bs, 0);// 4 bytes pointer to texture set?
 			}
-			else if (sr.getType().equals("ICON"))
+			else if (sr.getSubrecordType().equals("ICON"))
 			{
 				ICON = new ZString(bs);
 			}
-			else if (sr.getType().equals("HNAM"))
+			else if (sr.getSubrecordType().equals("HNAM"))
 			{
 				HNAM = bs; //3 bytes
 				//Havok Data This section allows you to choose the sound type for the selected landscape 
 				//texture from the Material Type dialogue, as well as the Friction and Restitution 
 			}
-			else if (sr.getType().equals("SNAM"))
+			else if (sr.getSubrecordType().equals("SNAM"))
 			{
 				SNAM = bs; //1 byte	 
 				//Texture Specular Exponent, not supported
 			}
-			else if (sr.getType().equals("GNAM"))
+			else if (sr.getSubrecordType().equals("GNAM"))
 			{
 				// not mandatory
 				GNAMsl.add(new FormID(bs));
 			}
-			else if (sr.getType().equals("MNAM"))
+			else if (sr.getSubrecordType().equals("MNAM"))
 			{
 
 			}
 			//TES3 only
-			else if (sr.getType().equals("NAME"))
+			else if (sr.getSubrecordType().equals("NAME"))
 			{
 				EDID = new ZString(bs);
 			}
-			else if (sr.getType().equals("INTV"))
+			else if (sr.getSubrecordType().equals("INTV"))
 			{
 				//ltexid = ESMByteConvert.extractInt(bs, 0);//used in the edid
 			}
-			else if (sr.getType().equals("DATA"))
+			else if (sr.getSubrecordType().equals("DATA"))
 			{
 				ICON = new ZString(bs);
 			}
 			
 			else
 			{
-				System.out.println("unhandled : " + sr.getType() + " in record " + recordData + " in " + this);
+				System.out.println("unhandled : " + sr.getSubrecordType() + " in record " + recordData + " in " + this);
 			}
 
 			// transfer to arrays

@@ -2,13 +2,13 @@ package esmj3d.j3d.j3drecords.type;
 
 import javax.vecmath.Color3f;
 
+import esmj3d.data.shared.records.GenericCONT;
+import esmj3d.j3d.BethRenderSettings;
 import nif.NifToJ3d;
 import nif.j3d.animation.J3dNiControllerManager;
 import nif.j3d.animation.J3dNiControllerSequence;
 import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
-import esmj3d.data.shared.records.GenericCONT;
-import esmj3d.j3d.BethRenderSettings;
 
 public class J3dCONT extends J3dRECOType
 {

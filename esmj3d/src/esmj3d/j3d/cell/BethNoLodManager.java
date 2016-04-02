@@ -1,10 +1,9 @@
 package esmj3d.j3d.cell;
 
-import javaawt.Rectangle;
-
 import javax.media.j3d.LinearFog;
 import javax.vecmath.Color3f;
 
+import javaawt.Rectangle;
 import tools3d.utils.Utils3D;
 
 public class BethNoLodManager extends BethLodManager
