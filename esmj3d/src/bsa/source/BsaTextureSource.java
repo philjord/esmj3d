@@ -31,11 +31,12 @@ public class BsaTextureSource implements TextureSource
 		}
 		if (bsas.size() == 0)
 		{
-			System.out.println("No hasDDS nor hasKTX archive files found in:");
+			System.out.print("No hasDDS nor hasKTX archive files found in:");
 			for (ArchiveFile archiveFile : allBsas)
 			{
-				System.out.println("ArchiveFiFSle:" + archiveFile.getName());
+				System.out.print(" Looked in Archive:" + archiveFile.getName());
 			}
+			System.out.println("");
 		}
 	}
 
