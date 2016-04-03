@@ -271,29 +271,8 @@ public class J3dLAND extends J3dRECOStatInst
 				app.setMaterial(createMat());
 				app.setRenderingAttributes(createRA());
 
-				//TODO: LAND vertex attributes proper
-				// tex coords setting along with multiple TUS causes huge problems
-				// Java3D make decisions and calls activeTextureUnit and bindTexture2D out of order
-
-				// ok so the texcoord stuff is bullshit, must use 2 vertex attributes with  4-floats of data
-				// but it's gonna require a lot of stuffing around!
-
 				ArrayList<ShaderAttributeValue> allShaderAttributeValues = new ArrayList<ShaderAttributeValue>();
 				ArrayList<TextureUnitState> allTextureUnitStates = new ArrayList<TextureUnitState>();
-
-				// need texcoord count up front for constructor
-				int layerCount = 1;
-				for (int a = 0; a < atxts.length; a++)
-				{
-					ATXT atxt = atxts[a];
-					//TODO: I've seen layer == 8 which is too many
-					if (atxt.quadrant == quadrant && atxt.layer < 8 && atxt.vtxt != null)
-					{
-						layerCount++;
-					}
-				}
-
-				allShaderAttributeValues.add(new ShaderAttributeValue("layerCount", new Integer(layerCount)));
 
 				TextureUnitState tus = null;
 
@@ -879,7 +858,7 @@ public class J3dLAND extends J3dRECOStatInst
 			};
 			shaderProgram.setShaders(shaders);
 
-			String[] shaderAttrNames = new String[11];
+			String[] shaderAttrNames = new String[10];
 
 			shaderAttrNames[0] = "baseMap";
 			for (int i = 0; i < 9; i++)
@@ -888,7 +867,6 @@ public class J3dLAND extends J3dRECOStatInst
 				if (OUTPUT_BINDINGS)
 					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
 			}
-			shaderAttrNames[10] = "layerCount";
 
 			shaderProgram.setShaderAttrNames(shaderAttrNames);
 
@@ -954,7 +932,7 @@ public class J3dLAND extends J3dRECOStatInst
 			{
 				int texFormId = land.VTEXshorts[t];
 				//ensure the TUS exists and we have a map to it's sampler id
-				if ( texIdToTUS.get(texFormId) == null)
+				if (texIdToTUS.get(texFormId) == null)
 				{
 					TextureUnitState tus = getTextureTes3(texFormId, master, textureSource);
 					allTextureUnitStates.add(tus);
