@@ -126,6 +126,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 				Shape3D baseQuadShape = new Shape3D();
 				baseQuadShape.clearCapabilities();
+				baseQuadShape.setPickable(false);
+				baseQuadShape.setCollidable(false);
 				baseQuadShape.setAppearance(app);
 				GeometryArray ga = makeQuadrantBaseSubGeom(loc, heights, normals, colors, quadrantsPerSide, quadrant, 0, null,
 						reduceFactor);
@@ -328,6 +330,8 @@ public class J3dLANDFar extends J3dRECOStatInst
 
 			Shape3D baseQuadShape = new Shape3D();
 			baseQuadShape.clearCapabilities();
+			baseQuadShape.setPickable(false);
+			baseQuadShape.setCollidable(false);
 			baseQuadShape.setAppearance(app);
 
 			int[] attributeSizes = new int[] { 4, 4, 4, 4 };

@@ -166,6 +166,8 @@ public class J3dLAND extends J3dRECOStatInst
 
 			Shape3D shape = new Shape3D();
 			shape.clearCapabilities();
+			shape.setPickable(false);
+			shape.setCollidable(false);
 			IndexedTriangleStripArray physicsTriStripArray = new IndexedTriangleStripArray(terrainData.vertexCount,
 					GeometryArray.COORDINATES | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE
 							| GeometryArray.BY_REFERENCE_INDICES | GeometryArray.USE_COORD_INDEX_ONLY,
@@ -296,6 +298,8 @@ public class J3dLAND extends J3dRECOStatInst
 
 				Shape3D baseQuadShape = new Shape3D();
 				baseQuadShape.clearCapabilities();
+				baseQuadShape.setPickable(false);
+				baseQuadShape.setCollidable(false);
 				baseQuadShape.setAppearance(app);
 
 				int[] attributeSizes = new int[] { 4, 4, 4 };
@@ -905,6 +909,8 @@ public class J3dLAND extends J3dRECOStatInst
 
 			Shape3D baseQuadShape = new Shape3D();
 			baseQuadShape.clearCapabilities();
+			baseQuadShape.setPickable(false);
+			baseQuadShape.setCollidable(false);
 			baseQuadShape.setAppearance(app);
 
 			int[] attributeSizes = new int[] { 4, 4, 4, 4 };
