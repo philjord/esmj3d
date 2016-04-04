@@ -12,7 +12,6 @@ import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.SharedGroup;
-import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.media.j3d.TransparencyAttributes;
 import javax.media.j3d.TriangleArray;
@@ -48,7 +47,7 @@ public class TreeMaker
 				// give it the InstREco to prebake
 				Node node = createShapeX(treeName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE,
 						billBoardHeight * ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource(), inst);
-				
+
 				return node;
 			}
 			else
@@ -240,9 +239,9 @@ public class TreeMaker
 		GeometryArray geom = createGeometryX(billWidth, billHeight, ir);
 		if (app == null)
 		{
-			Texture tex = textureSource.getTexture("textures\\trees\\billboards\\" + treeLODTextureName);
+			TextureUnitState tus = textureSource.getTextureUnitState("textures\\trees\\billboards\\" + treeLODTextureName);
 
-			app = createAppearance(tex);
+			app = createAppearance(tus);
 
 			PolygonAttributes pa = new PolygonAttributes();
 			pa.setCullFace(PolygonAttributes.CULL_NONE);
@@ -359,16 +358,10 @@ public class TreeMaker
 		return rect;
 	}
 
-	private static Appearance createAppearance(Texture tex)
+	private static Appearance createAppearance(TextureUnitState tus0)
 	{
 		Appearance app = new SimpleShaderAppearance(true);
-
-		TextureUnitState[] tus = new TextureUnitState[1];
-		TextureUnitState tus0 = new TextureUnitState();
-		tus0.setTexture(tex);
-		tus[0] = tus0;
-		app.setTextureUnitState(tus);
-
+		app.setTextureUnitState(new TextureUnitState[] { tus0 });
 		app.setMaterial(getMaterial());
 		return app;
 	}
