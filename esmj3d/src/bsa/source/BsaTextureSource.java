@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Texture;
+import javax.media.j3d.TextureUnitState;
 
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
@@ -173,6 +174,90 @@ public class BsaTextureSource implements TextureSource
 		return null;
 	}
 
+	
+	@Override
+	public TextureUnitState getTextureUnitState(String texName)
+	{
+		if (texName != null && texName.length() > 0)
+		{
+			texName = texName.toLowerCase();
+
+			// remove incorrect file path prefix, if it exists
+			if (texName.startsWith("data\\"))
+			{
+				texName = texName.substring(5);
+			}
+
+			// add the textures path part
+			if (!texName.startsWith("textures"))
+			{
+				texName = "textures\\" + texName;
+			}
+
+			TextureUnitState tex = null;
+
+			//check cache hit
+			tex = DDSTextureLoader.checkCachedTextureUnitState(texName);
+			if (tex != null)
+			{
+				return tex;
+			}
+
+			for (ArchiveFile archiveFile : bsas)
+			{
+				if (archiveFile.hasKTX())
+				{
+					texName = texName.replace(".dds", ".ktx");
+				}
+				else if (archiveFile.hasASTC())
+				{
+					texName = texName.replace(".dds", ".tga.astc");
+				}
+
+				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
+				if (archiveEntry != null)
+				{
+					try
+					{
+						//note that we want all disk activity now, (mappedbytebuffers can delay it until the j3d thread)
+						InputStream in = archiveFile.getInputStream(archiveEntry);
+
+						if (texName.endsWith(".dds"))
+						{
+							tex = DDSTextureLoader.getTextureUnitState(texName, in);
+						}
+						else if (texName.endsWith(".astc") || texName.endsWith(".atc"))
+						{
+							tex = ASTCTextureLoader.getTextureUnitState(texName, in);
+						}
+						else if (texName.endsWith(".ktx"))
+						{
+							tex = KTXTextureLoader.getTextureUnitState(texName, in);
+						}
+						else
+						{
+							//FIXME: generic texture loading system
+							/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
+							tex = tl.getTexture();*/
+						}
+
+						if (tex != null)
+						{
+							return tex;
+						}
+					}
+					catch (IOException e)
+					{
+						System.out.println("BsaTextureSource  " + texName + " " + e + " " + e.getStackTrace()[0]);
+					}
+				}
+
+			}
+		}
+		//System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
+		//new Throwable().printStackTrace();
+		return null;
+	}
 	@Override
 	public List<String> getFilesInFolder(String folderName)
 	{
