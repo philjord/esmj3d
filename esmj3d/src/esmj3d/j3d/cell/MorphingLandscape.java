@@ -61,6 +61,7 @@ public class MorphingLandscape extends BranchGroup
 
 	protected void addGeometryArray(GeometryArray baseItsa)
 	{
+		baseItsa.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
 		baseItsa.setCapability(GeometryArray.ALLOW_REF_DATA_WRITE);
 		baseItsas.add(baseItsa);
 	}
