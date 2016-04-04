@@ -970,26 +970,28 @@ public class J3dLAND extends J3dRECOStatInst
 					quadCol = quadCol >= quadrantsPerSide ? quadrantsPerSide - 1 : quadCol;
 
 					int quadrant = ((((quadrantsPerSide - 1) - quadRow) * quadrantsPerSide)) + quadCol;
+					if (quadrant < land.VTEXshorts.length)
+					{
+						// look up sampler id from texture id mapped earlier
+						int samplerId = texIdToTUS.get(land.VTEXshorts[quadrant]);
+						//	System.out.println("quadRow " + quadRow + "  " + quadCol + " quadrant = " + quadrant + " vertexIdx " + vertexIdx
+						//			+ " land.VTEXshorts[quadrant] " + land.VTEXshorts[quadrant] + " sampler id = " + samplerId);
 
-					// look up sampler id from texture id mapped earlier
-					int samplerId = texIdToTUS.get(land.VTEXshorts[quadrant]);
-					//	System.out.println("quadRow " + quadRow + "  " + quadCol + " quadrant = " + quadrant + " vertexIdx " + vertexIdx
-					//			+ " land.VTEXshorts[quadrant] " + land.VTEXshorts[quadrant] + " sampler id = " + samplerId);
+						//NOTICE 1s! as this is the base only
+						// 0.5 etc are for the layers in a moment
 
-					//NOTICE 1s! as this is the base only
-					// 0.5 etc are for the layers in a moment
-
-					int idx = (vertexIdx * 4) + (samplerId % 4);
-					if (samplerId < 4)
-						samplers0.put(idx, 1);
-					else if (samplerId < 8)
-						samplers1.put(idx, 1);
-					else if (samplerId < 12)
-						samplers2.put(idx, 1);
-					else if (samplerId < 16)
-						samplers3.put(idx, 1);
-					else
-						new Throwable("SamplerId too big! " + samplerId).printStackTrace();
+						int idx = (vertexIdx * 4) + (samplerId % 4);
+						if (samplerId < 4)
+							samplers0.put(idx, 1);
+						else if (samplerId < 8)
+							samplers1.put(idx, 1);
+						else if (samplerId < 12)
+							samplers2.put(idx, 1);
+						else if (samplerId < 16)
+							samplers3.put(idx, 1);
+						else
+							new Throwable("SamplerId too big! " + samplerId).printStackTrace();
+					}
 				}
 			}
 

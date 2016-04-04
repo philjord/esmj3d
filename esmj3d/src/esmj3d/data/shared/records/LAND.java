@@ -149,7 +149,7 @@ public class LAND extends InstRECO
 
 		}
 
-		if (VTEXshortsv.size() > 0)
+		if (tes3)
 		{
 			//I'm going to unroll them here because it's painful later on 
 			//IIRC the textures are not in a 16x16 grid, but in a 4x4 grid in a 4x4 grid.
@@ -171,7 +171,7 @@ public class LAND extends InstRECO
 				VTEXshorts[quadrant] = VTEXshortsv.get(a);
 			}
 		}
-		if (!tes3)
+		else
 		{
 			//now make the BTXT and ATXT ordered
 			for (int j = 0; j < BTXTsv.size(); j++)
@@ -204,7 +204,7 @@ public class LAND extends InstRECO
 			}
 		}
 
-	//	HashSet<Integer> allTexIds = new HashSet<Integer>();
+		//	HashSet<Integer> allTexIds = new HashSet<Integer>();
 		/*for (int j = 0; j < BTXTsv.size(); j++)
 		{
 			allTexIds.add(BTXTsv.get(j).textureFormID);
@@ -217,18 +217,18 @@ public class LAND extends InstRECO
 		//ok no more unrolling the outer 4x4 of tes3
 		// I need to just do the inner 4x4 
 
-	/*	for (int a = 0; a < 16; a++)
-		{
-			//allTexIds.clear();
-			for (int b = 0; b < 16; b++)
+		/*	for (int a = 0; a < 16; a++)
 			{
-				allTexIds.add(VTEXshortsv.get((a * 16) + b));
-			}
-
-			//System.out.println("Total count of VTEXshortsv texture Ids for " + this + " " + a + " " + allTexIds.size());
-		}*/
-	//	System.out.println(
-	//			"Total count of VTEXshortsv texture Ids for " + this + " " + allTexIds.size() + " landX " + landX + " landY " + landY);
+				//allTexIds.clear();
+				for (int b = 0; b < 16; b++)
+				{
+					allTexIds.add(VTEXshortsv.get((a * 16) + b));
+				}
+		
+				//System.out.println("Total count of VTEXshortsv texture Ids for " + this + " " + a + " " + allTexIds.size());
+			}*/
+		//	System.out.println(
+		//			"Total count of VTEXshortsv texture Ids for " + this + " " + allTexIds.size() + " landX " + landX + " landY " + landY);
 	}
 
 	public String showDetails()
