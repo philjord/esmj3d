@@ -33,8 +33,10 @@ import utils.source.TextureSource;
 public class TreeMaker
 {
 
-	/** far trees need to be trival TG with shape and no BG or other over heads
-	 * This is ULTRA optomized, location is baked into X verts, No Groups involved
+	public static final boolean PRE_BAKE = false;
+
+	/** far trees need to be trivial TG with shape and no BG or other over heads
+	 * This is ULTRA optimized, location is baked into X verts, No Groups involved
 	 */
 	public static Node makeTreeFar(InstRECO inst, boolean makePhys, MediaSources mediaSources, String treeName, float billBoardWidth,
 			float billBoardHeight)

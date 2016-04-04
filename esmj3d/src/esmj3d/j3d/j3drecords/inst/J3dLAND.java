@@ -548,7 +548,7 @@ public class J3dLAND extends J3dRECOStatInst
 			Record ltexRec = master.getRecord(textureFormID);
 			if (ltexRec.getRecordType().equals("LTEX"))
 			{
-				TextureUnitState tus = new TextureUnitState();
+				TextureUnitState tus = null;
 				LTEX ltex = new LTEX(ltexRec);
 				int texSetId = ltex.textureSetId;
 
@@ -558,8 +558,7 @@ public class J3dLAND extends J3dRECOStatInst
 					TXST textureSet = new TXST(texSetRec);
 					if (textureSet.TX00 != null)
 					{
-						tus.setTexture(textureSource.getTexture(textureSet.TX00.str));
-						tus.setName(textureSet.TX00.str);
+						tus = textureSource.getTextureUnitState(textureSet.TX00.str);
 					}
 					else if (textureSet.MNAM != null)
 					{
@@ -569,8 +568,7 @@ public class J3dLAND extends J3dRECOStatInst
 							BSMaterial material = BgsmSource.getMaterial("Materials\\" + textureSet.MNAM.str);
 							if (material != null)
 							{
-								tus.setTexture(textureSource.getTexture(material.textureList.get(0)));
-								tus.setName(material.textureList.get(0));
+								tus = textureSource.getTextureUnitState(material.textureList.get(0));
 							}
 
 						}
@@ -583,8 +581,7 @@ public class J3dLAND extends J3dRECOStatInst
 				else if (ltex.ICON != null)
 				{
 					//obliv uses simpler system					
-					tus.setTexture(textureSource.getTexture("Landscape\\" + ltex.ICON.str));
-					tus.setName("Landscape\\" + ltex.ICON.str);
+					tus = textureSource.getTextureUnitState("Landscape\\" + ltex.ICON.str);
 				}
 				return tus;
 			}
@@ -607,26 +604,21 @@ public class J3dLAND extends J3dRECOStatInst
 		//Obliv //textures\\landscape\\default.dds
 		if (defaultTex == null)
 		{
-			defaultTex = new TextureUnitState();
 			if (textureSource.textureFileExists("Landscape\\dirt01.dds"))
 			{
-				defaultTex.setTexture(textureSource.getTexture("Landscape\\dirt01.dds"));
-				defaultTex.setName("Landscape\\dirt01.dds");
+				defaultTex = textureSource.getTextureUnitState("Landscape\\dirt01.dds");
 			}
 			else if (textureSource.textureFileExists("Landscape\\default.dds"))
 			{
-				defaultTex.setTexture(textureSource.getTexture("Landscape\\default.dds"));
-				defaultTex.setName("Landscape\\default.dds");
+				defaultTex = textureSource.getTextureUnitState("Landscape\\default.dds");
 			}
 			else if (textureSource.textureFileExists("_land_default.dds"))
 			{
-				defaultTex.setTexture(textureSource.getTexture("_land_default.dds"));
-				defaultTex.setName("_land_default.dds");
+				defaultTex = textureSource.getTextureUnitState("_land_default.dds");
 			}
 			else if (textureSource.textureFileExists("Landscape\\Ground\\BlastedForestDirt01_d.DDS"))
 			{
-				defaultTex.setTexture(textureSource.getTexture("Landscape\\Ground\\BlastedForestDirt01_d.DDS"));
-				defaultTex.setName("Landscape\\Ground\\BlastedForestDirt01_d.DDS");
+				defaultTex = textureSource.getTextureUnitState("Landscape\\Ground\\BlastedForestDirt01_d.DDS");
 			}
 			else
 			{
