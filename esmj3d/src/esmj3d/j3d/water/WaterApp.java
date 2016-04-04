@@ -54,8 +54,7 @@ public class WaterApp extends BranchGroup
 
 		setCapability(BranchGroup.ALLOW_DETACH);
 
-		Texture tex = textureSource.getTexture(textureStrings[0]);
-		app = createAppearance(tex);
+		app = createAppearance(textureSource.getTextureUnitState(textureStrings[0]));
 		if (textureStrings.length > 1)
 		{
 			// we need a flip controller type thing now
@@ -122,7 +121,7 @@ public class WaterApp extends BranchGroup
 
 	private static ShaderProgram shaderProgram = null;
 
-	protected Appearance createAppearance(Texture tex)
+	protected Appearance createAppearance(TextureUnitState tus)
 	{
 		app = null;
 		if (!USE_SHADERS)
@@ -205,14 +204,7 @@ public class WaterApp extends BranchGroup
 			((ShaderAppearance) app).setShaderAttributeSet(shaderAttributeSet);
 		}
 
-		TextureUnitState[] tus = new TextureUnitState[1];
-		TextureUnitState tus0 = new TextureUnitState();
-		tus0.setTexture(tex);
-
-		//TextureCubeMap textureCubeMap = new TextureCubeMap();
-
-		tus[0] = tus0;
-		app.setTextureUnitState(tus);
+		app.setTextureUnitState(new TextureUnitState[] { tus });
 
 		app.setMaterial(getLandMaterial());
 
