@@ -147,6 +147,7 @@ public class MorphingLandscape extends BranchGroup
 
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
+		tus0.clearCapabilities();
 		tus0.setTexture(tex);
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);

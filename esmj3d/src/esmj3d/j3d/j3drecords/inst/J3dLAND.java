@@ -526,12 +526,9 @@ public class J3dLAND extends J3dRECOStatInst
 					LTEX ltex = new LTEX(ltexRec);
 					if (ltex.ICON != null)
 					{
-						Texture texture = J3dNiGeometry.loadTexture(ltex.ICON.str, textureSource);
-						if (texture != null)
-						{
-							TextureUnitState tus = new TextureUnitState();
-							tus.setTexture(texture);
-							tus.setName(ltex.ICON.str);
+						TextureUnitState tus = J3dNiGeometry.loadTextureUnitState(ltex.ICON.str, textureSource);
+						if (tus != null)
+						{							
 							return tus;
 						}
 					}
