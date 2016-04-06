@@ -130,6 +130,7 @@ public class MorphingLandscape extends BranchGroup
 	protected static Appearance createAppearance(Texture tex)
 	{
 		ShaderAppearance app = new ShaderAppearance();
+		app.clearCapabilities();
 		Material mat = new Material();
 		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
 		mat.setShininess(1.0f);

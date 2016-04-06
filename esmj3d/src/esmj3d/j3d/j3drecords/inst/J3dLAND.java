@@ -269,7 +269,7 @@ public class J3dLAND extends J3dRECOStatInst
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
 				ShaderAppearance app = new ShaderAppearance();
-
+				app.clearCapabilities();
 				app.setMaterial(createMat());
 				app.setRenderingAttributes(createRA());
 
@@ -900,7 +900,7 @@ public class J3dLAND extends J3dRECOStatInst
 			Color4f[][] colors = extractColors(colorBytes);
 
 			ShaderAppearance app = new ShaderAppearance();
-
+			app.clearCapabilities();
 			app.setMaterial(createMat());
 			app.setRenderingAttributes(createRA());
 

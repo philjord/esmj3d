@@ -134,7 +134,7 @@ public class WaterApp extends BranchGroup
 			ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
 
 			app = new ShaderAppearance();
-
+			app.clearCapabilities();
 			if (shaderProgram == null)
 			{
 
@@ -244,6 +244,15 @@ public class WaterApp extends BranchGroup
 		public WaterTexBehavior(Appearance app, Texture[] textures)
 		{
 			this.app2 = app;
+			if (app2.getTextureUnitCount() > 0)
+			{
+				app2.setCapability(Appearance.ALLOW_TEXTURE_UNIT_STATE_READ);
+				app2.getTextureUnitState(0).setCapability(Appearance.ALLOW_TEXTURE_WRITE);
+			}
+			else
+			{
+				app2.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
+			}
 			this.textures = textures;
 
 			wakeUp = new WakeupOnElapsedTime(50);
