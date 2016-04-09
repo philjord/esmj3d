@@ -11,6 +11,7 @@ import javax.media.j3d.TextureUnitState;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
+import tools.compressedtexture.CompressedTextureLoader;
 import tools.compressedtexture.astc.ASTCTextureLoader;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.compressedtexture.ktx.KTXTextureLoader;
@@ -62,7 +63,7 @@ public class BsaTextureSource implements TextureSource
 
 			Texture tex = null;
 			//check cache hit
-			tex = DDSTextureLoader.checkCachedTexture(texName);
+			tex = CompressedTextureLoader.checkCachedTexture(texName);
 			if (tex != null)
 			{
 				return true;
@@ -112,7 +113,7 @@ public class BsaTextureSource implements TextureSource
 			Texture tex = null;
 
 			//check cache hit
-			tex = DDSTextureLoader.checkCachedTexture(texName);
+			tex = CompressedTextureLoader.checkCachedTexture(texName);
 			if (tex != null)
 			{
 				return tex;
@@ -120,16 +121,17 @@ public class BsaTextureSource implements TextureSource
 
 			for (ArchiveFile archiveFile : bsas)
 			{
+				String texNameForArchive = texName;
 				if (archiveFile.hasKTX())
 				{
-					texName = texName.replace(".dds", ".ktx");
+					texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
 				}
 				else if (archiveFile.hasASTC())
 				{
-					texName = texName.replace(".dds", ".tga.astc");
+					texNameForArchive = texNameForArchive.replace(".dds", ".tga.astc");
 				}
 
-				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
+				ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
 				if (archiveEntry != null)
 				{
 					try
@@ -137,17 +139,17 @@ public class BsaTextureSource implements TextureSource
 						//note that we want all disk activity now, (mappedbytebuffers can delay it until the j3d thread)
 						InputStream in = archiveFile.getInputStream(archiveEntry);
 
-						if (texName.endsWith(".dds"))
+						if (texNameForArchive.endsWith(".dds"))
 						{
-							tex = DDSTextureLoader.getTexture(texName, in);
+							tex = DDSTextureLoader.getTexture(texNameForArchive, in);
 						}
-						else if (texName.endsWith(".astc") || texName.endsWith(".atc"))
+						else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc"))
 						{
-							tex = ASTCTextureLoader.getTexture(texName, in);
+							tex = ASTCTextureLoader.getTexture(texNameForArchive, in);
 						}
-						else if (texName.endsWith(".ktx"))
+						else if (texNameForArchive.endsWith(".ktx"))
 						{
-							tex = KTXTextureLoader.getTexture(texName, in);
+							tex = KTXTextureLoader.getTexture(texNameForArchive, in);
 						}
 						else
 						{
@@ -163,7 +165,7 @@ public class BsaTextureSource implements TextureSource
 					}
 					catch (IOException e)
 					{
-						System.out.println("BsaTextureSource  " + texName + " " + e + " " + e.getStackTrace()[0]);
+						System.out.println("BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 					}
 				}
 
@@ -197,7 +199,7 @@ public class BsaTextureSource implements TextureSource
 			TextureUnitState tex = null;
 
 			//check cache hit
-			tex = DDSTextureLoader.checkCachedTextureUnitState(texName);
+			tex = CompressedTextureLoader.checkCachedTextureUnitState(texName);
 			if (tex != null)
 			{
 				return tex;
@@ -205,16 +207,17 @@ public class BsaTextureSource implements TextureSource
 
 			for (ArchiveFile archiveFile : bsas)
 			{
+				String texNameForArchive = texName;
 				if (archiveFile.hasKTX())
 				{
-					texName = texName.replace(".dds", ".ktx");
+					texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
 				}
 				else if (archiveFile.hasASTC())
 				{
-					texName = texName.replace(".dds", ".tga.astc");
+					texNameForArchive = texNameForArchive.replace(".dds", ".tga.astc");
 				}
 
-				ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
+				ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
 				if (archiveEntry != null)
 				{
 					try
@@ -222,17 +225,17 @@ public class BsaTextureSource implements TextureSource
 						//note that we want all disk activity now, (mappedbytebuffers can delay it until the j3d thread)
 						InputStream in = archiveFile.getInputStream(archiveEntry);
 
-						if (texName.endsWith(".dds"))
+						if (texNameForArchive.endsWith(".dds"))
 						{
-							tex = DDSTextureLoader.getTextureUnitState(texName, in);
+							tex = DDSTextureLoader.getTextureUnitState(texNameForArchive, in);
 						}
-						else if (texName.endsWith(".astc") || texName.endsWith(".atc"))
+						else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc"))
 						{
-							tex = ASTCTextureLoader.getTextureUnitState(texName, in);
+							tex = ASTCTextureLoader.getTextureUnitState(texNameForArchive, in);
 						}
-						else if (texName.endsWith(".ktx"))
+						else if (texNameForArchive.endsWith(".ktx"))
 						{
-							tex = KTXTextureLoader.getTextureUnitState(texName, in);
+							tex = KTXTextureLoader.getTextureUnitState(texNameForArchive, in);
 						}
 						else
 						{
@@ -248,13 +251,15 @@ public class BsaTextureSource implements TextureSource
 					}
 					catch (IOException e)
 					{
-						System.out.println("BsaTextureSource  " + texName + " " + e + " " + e.getStackTrace()[0]);
+						System.out.println("BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 					}
 				}
 
 			}
 		}
-		//System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
+		 
+		//No many times this will fall through here, if texture doesn't exist for example
+		//System.out.println("BsaTextureSource TextureUnitState not found in archive bsas: " + texName);
 		//new Throwable().printStackTrace();
 		return null;
 	}
