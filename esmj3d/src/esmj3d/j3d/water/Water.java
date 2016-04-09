@@ -6,6 +6,7 @@ import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
 import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Shape3D;
+import javax.media.j3d.TriangleArray;
 import javax.media.j3d.TriangleStripArray;
 
 import org.j3d.geom.GeometryData;
@@ -29,7 +30,7 @@ public class Water extends Group
 		}
 	}
 
-	private static HashMap<Float, TriangleStripArray> preLoadedQuads = new HashMap<Float, TriangleStripArray>();
+	private static HashMap<Float, TriangleArray> preLoadedQuads = new HashMap<Float, TriangleArray>();
 
 	private static GeometryArray createQuad(float size)
 	{
@@ -54,19 +55,25 @@ public class Water extends Group
 			quads.setColor(2, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
 			quads.setColor(3, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));*/
 
-		TriangleStripArray quads = preLoadedQuads.get(size);
+		TriangleArray quads = preLoadedQuads.get(size);
 
 		if (quads == null)
 		{
 			ElevationGridGenerator elevationGridGenerator = new ElevationGridGenerator(size, size, 30, 30);
 			GeometryData gd = new GeometryData();
-			gd.geometryType = GeometryData.TRIANGLE_STRIPS;
+			//TODO: once tristrips work set back to tristrips (indexed too!)
+
+			//	gd.geometryType = GeometryData.TRIANGLE_STRIPS;
+			gd.geometryType = GeometryData.TRIANGLES;
 			gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
 			float[] flatHeights = new float[900];
 			elevationGridGenerator.setTerrainDetail(flatHeights, 0);
 			elevationGridGenerator.generate(gd);
-			quads = new TriangleStripArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
-					| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE, gd.stripCounts);
+			//	quads = new TriangleStripArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
+			//			| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE, gd.stripCounts);
+
+			quads = new TriangleArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.TEXTURE_COORDINATE_2
+					| GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
 
 			// repeat image every say 10 of size?
 			for (int i = 0; i < gd.textureCoordinates.length; i++)

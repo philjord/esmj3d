@@ -22,7 +22,6 @@ import javax.media.j3d.ShaderAttributeValue;
 import javax.media.j3d.ShaderProgram;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.SourceCodeShader;
-import javax.media.j3d.Texture;
 import javax.media.j3d.TextureUnitState;
 import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
@@ -74,7 +73,8 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static boolean INTERLEAVE = false;// DO NOT TURN ON until pipeline supports it
 
-	public static boolean STRIPIFY = true;
+	//FIXME: one tristrips are a single call turn this back on
+	public static boolean STRIPIFY = false;// DO NOT TURN ON massive increase in draw calls, wait until tristrips made into a single draw call 
 
 	//LOD tristrip in 5.12 increments (2.56?)
 	//public static float HEIGHT_TO_J3D_SCALE = 0.057f;
