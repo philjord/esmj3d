@@ -31,6 +31,7 @@ import org.j3d.geom.GeometryData;
 
 import com.frostwire.util.SparseArray;
 import com.sun.j3d.utils.geometry.GeometryInfo;
+import com.sun.j3d.utils.geometry.Stripifier;
 
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.ATXT;
@@ -73,8 +74,9 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static boolean INTERLEAVE = false;// DO NOT TURN ON until pipeline supports it
 
-	//FIXME: one tristrips are a single call turn this back on
-	public static boolean STRIPIFY = false;// DO NOT TURN ON massive increase in draw calls, wait until tristrips made into a single draw call 
+	//FIXME: can't turn on because vertex attributes need to be stripified at the same time
+	// tristrips are stitched now, but the landgen thing makes a mess of getting tristrips
+	public static boolean STRIPIFY = false;// DO NOT TURN ON massive increase in draw calls 
 
 	//LOD tristrip in 5.12 increments (2.56?)
 	//public static float HEIGHT_TO_J3D_SCALE = 0.057f;
@@ -459,10 +461,12 @@ public class J3dLAND extends J3dRECOStatInst
 				quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
-		if (STRIPIFY)
-			gridGenerator.generateIndexedTriangleStrips(terrainData);
-		else
-			gridGenerator.generateIndexedTriangles(terrainData);
+
+		//generator generates madness
+		//if (STRIPIFY)
+		//	gridGenerator.generateIndexedTriangleStrips(terrainData);
+		//else
+		gridGenerator.generateIndexedTriangles(terrainData);
 
 		//offset for quadrant and location
 		Vector3f offset = quadOffSet(quadrantsPerSide, quadrant);
@@ -528,7 +532,7 @@ public class J3dLAND extends J3dRECOStatInst
 					{
 						TextureUnitState tus = J3dNiGeometry.loadTextureUnitState(ltex.ICON.str, textureSource);
 						if (tus != null)
-						{							
+						{
 							return tus;
 						}
 					}
@@ -771,6 +775,7 @@ public class J3dLAND extends J3dRECOStatInst
 		{
 			if (STRIPIFY)
 			{
+				//	iga=null;
 				iga = new IndexedTriangleStripArray(terrainData.vertexCount, basicFormat, texCoordCount, texMap, vertexAttrCount,
 						vertexAttrSizes, //
 						terrainData.indexesCount, terrainData.stripCounts);
@@ -802,11 +807,28 @@ public class J3dLAND extends J3dRECOStatInst
 				}
 				else
 				{
+
+					/*			GeometryInfo gi = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
+								gi.setCoordinateIndices(terrainData.indexes);
+								gi.setUseCoordIndexOnly(true);
+								gi.setCoordinates(terrainData.coordinates);
+								gi.setColors4(terrainData.colors);
+								gi.setNormals(terrainData.normals);
+								gi.setTextureCoordinateParams(1, 2);
+								gi.setTextureCoordinates(0, terrainData.textureCoordinates);
+					
+							
+								Stripifier stripifer = new Stripifier();
+								stripifer.stripify(gi);
+								iga = gi.getIndexedGeometryArray(true, true, false, true, true);
+					*/
+
 					iga.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.coordinates)));
 					iga.setCoordIndicesRef(terrainData.indexes);
 					iga.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.normals)));
 					iga.setColorRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.colors)));
 					iga.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.textureCoordinates)));
+
 				}
 			}
 

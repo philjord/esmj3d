@@ -201,9 +201,9 @@ public class J3dLANDFar extends J3dRECOStatInst
 				quadrantSquareCount, quadrantSquareCount, quadrantHeights, quadrantNormals, quadrantColors, quadrantTexCoords);
 
 		GeometryData terrainData = new GeometryData();
-		if (J3dLAND.STRIPIFY)
-			gridGenerator.generateIndexedTriangleStrips(terrainData);
-		else
+		//if (J3dLAND.STRIPIFY)
+		//	gridGenerator.generateIndexedTriangleStrips(terrainData);
+		//else
 			gridGenerator.generateIndexedTriangles(terrainData);
 
 		//offset for quadrant
