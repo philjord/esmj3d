@@ -31,7 +31,6 @@ import org.j3d.geom.GeometryData;
 
 import com.frostwire.util.SparseArray;
 import com.sun.j3d.utils.geometry.GeometryInfo;
-import com.sun.j3d.utils.geometry.Stripifier;
 
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.ATXT;
@@ -149,7 +148,7 @@ public class J3dLAND extends J3dRECOStatInst
 	/**
 	 * Makes the physics version of land
 	 */
-	public J3dLAND(LAND land, Vector3f loc)
+	public J3dLAND(LAND land)
 	{
 		super(land, false, false);
 		this.land = land;
@@ -188,8 +187,6 @@ public class J3dLAND extends J3dRECOStatInst
 			shape.setAppearance(PhysAppearance.makeAppearance());
 			addNodeChild(shape);
 		}
-
-		super.setLocation(loc);
 	}
 
 	public GeometryInfo getGeometryInfo()
@@ -229,16 +226,18 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private static ShaderProgram shaderProgram = null;
 
-	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource, Vector3f loc)
+	private static final Object shaderLock = new Object();
+
+	public J3dLAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		super(land, false, false);
 		if (land.tes3)
-			tes3LAND(land, master, textureSource, loc);
+			tes3LAND(land, master, textureSource);
 		else
-			LAND(land, master, textureSource, loc);
+			LAND(land, master, textureSource);
 	}
 
-	private void LAND(LAND land, IRecordStore master, TextureSource textureSource, Vector3f loc)
+	private void LAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		this.land = land;
 		int quadrantsPerSide = 2;
@@ -305,7 +304,7 @@ public class J3dLAND extends J3dRECOStatInst
 				baseQuadShape.setAppearance(app);
 
 				int[] attributeSizes = new int[] { 4, 4, 4 };
-				GeometryArray ga = makeQuadrantBaseSubGeom(loc, heights, normals, colors, quadrantsPerSide, quadrant, 1, 3, attributeSizes);
+				GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, quadrantsPerSide, quadrant, 1, 3, attributeSizes);
 				ga.setName(land.toString() + ":LAND " + quadrant + " " + land.landX + " " + land.landY);
 
 				baseQuadShape.setGeometry(ga);
@@ -397,11 +396,6 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 	}
 
-	public void setLocation(Vector3f loc)
-	{
-		throw new UnsupportedOperationException("Location must be handed into the constructor");
-	}
-
 	private static Material mat;
 
 	public static Material createMat()
@@ -444,7 +438,7 @@ public class J3dLAND extends J3dRECOStatInst
 		return new Vector3f(x, 0, -y);
 	}
 
-	protected static GeometryArray makeQuadrantBaseSubGeom(Vector3f loc, float[][] heights, Vector3f[][] normals, Color4f[][] colors,
+	protected static GeometryArray makeQuadrantBaseSubGeom(float[][] heights, Vector3f[][] normals, Color4f[][] colors,
 			int quadrantsPerSide, int quadrant, int texCoordCount, int vertexAttrCount, int[] vertexAttrSizes)
 	{
 		int quadrantSquareCount = (GRID_COUNT / quadrantsPerSide) + 1;
@@ -472,9 +466,9 @@ public class J3dLAND extends J3dRECOStatInst
 		Vector3f offset = quadOffSet(quadrantsPerSide, quadrant);
 		for (int i = 0; i < terrainData.coordinates.length; i += 3)
 		{
-			terrainData.coordinates[i + 0] += offset.x + loc.x;
-			terrainData.coordinates[i + 1] += offset.y + loc.y;
-			terrainData.coordinates[i + 2] += offset.z + loc.z;
+			terrainData.coordinates[i + 0] += offset.x;
+			terrainData.coordinates[i + 1] += offset.y;
+			terrainData.coordinates[i + 2] += offset.z;
 		}
 
 		return createGA(terrainData, texCoordCount, vertexAttrCount, vertexAttrSizes);
@@ -845,49 +839,52 @@ public class J3dLAND extends J3dRECOStatInst
 	}
 
 	private static void createShaderProgram()
-	{
-		if (shaderProgram == null)
+	{// in case 2 threads come in trying to lazy create
+		synchronized (shaderLock)
 		{
-			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/land.vert");
-			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/land.frag");
-
-			Shader[] shaders = new Shader[2];
-			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
-				public String toString()
-				{
-					return "vertexProgram";
-				}
-			};
-			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
-				public String toString()
-				{
-					return "fragmentProgram";
-				}
-			};
-
-			shaderProgram = new GLSLShaderProgram() {
-				public String toString()
-				{
-					return "Land Shader Program";
-				}
-			};
-			shaderProgram.setShaders(shaders);
-
-			String[] shaderAttrNames = new String[10];
-
-			shaderAttrNames[0] = "baseMap";
-			for (int i = 0; i < 9; i++)
+			if (shaderProgram == null)
 			{
-				shaderAttrNames[i + 1] = "layerMap" + i;
-				if (OUTPUT_BINDINGS)
-					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+				String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/land.vert");
+				String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/land.frag");
+
+				Shader[] shaders = new Shader[2];
+				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+					public String toString()
+					{
+						return "vertexProgram";
+					}
+				};
+				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+					public String toString()
+					{
+						return "fragmentProgram";
+					}
+				};
+
+				shaderProgram = new GLSLShaderProgram() {
+					public String toString()
+					{
+						return "Land Shader Program";
+					}
+				};
+				shaderProgram.setShaders(shaders);
+
+				String[] shaderAttrNames = new String[10];
+
+				shaderAttrNames[0] = "baseMap";
+				for (int i = 0; i < 9; i++)
+				{
+					shaderAttrNames[i + 1] = "layerMap" + i;
+					if (OUTPUT_BINDINGS)
+						System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+				}
+
+				shaderProgram.setShaderAttrNames(shaderAttrNames);
+
+				String[] vertexAttrNames = new String[] { "alphas04", "alphas58", "alphas912" };
+				shaderProgram.setVertexAttrNames(vertexAttrNames);
+
 			}
-
-			shaderProgram.setShaderAttrNames(shaderAttrNames);
-
-			String[] vertexAttrNames = new String[] { "alphas04", "alphas58", "alphas912" };
-			shaderProgram.setVertexAttrNames(vertexAttrNames);
-
 		}
 	}
 
@@ -896,7 +893,7 @@ public class J3dLAND extends J3dRECOStatInst
 		return lowestHeight;
 	}
 
-	public void tes3LAND(LAND land, IRecordStore master, TextureSource textureSource, Vector3f loc)
+	public void tes3LAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		this.land = land;
 		int quadrantsPerSide = 16;
@@ -933,7 +930,7 @@ public class J3dLAND extends J3dRECOStatInst
 			baseQuadShape.setAppearance(app);
 
 			int[] attributeSizes = new int[] { 4, 4, 4, 4 };
-			GeometryArray ga = makeQuadrantBaseSubGeom(loc, heights, normals, colors, 1, 0, 1, 4, attributeSizes);
+			GeometryArray ga = makeQuadrantBaseSubGeom(heights, normals, colors, 1, 0, 1, 4, attributeSizes);
 			ga.setName(land.toString() + ":LAND " + 0 + " " + land.landX + " " + land.landY);
 
 			baseQuadShape.setGeometry(ga);
@@ -1047,46 +1044,50 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private static void createShaderProgramTes3()
 	{
-		if (shaderProgram == null)
+		// in case 2 threads come in trying to lazy create
+		synchronized (shaderLock)
 		{
-			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.vert");
-			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.frag");
-
-			Shader[] shaders = new Shader[2];
-			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
-				public String toString()
-				{
-					return "Tes3 land vertex Program";
-				}
-			};
-			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
-				public String toString()
-				{
-					return "Tes3 land fragment Program";
-				}
-			};
-
-			shaderProgram = new GLSLShaderProgram() {
-				public String toString()
-				{
-					return "Land Shader Program";
-				}
-			};
-			shaderProgram.setShaders(shaders);
-
-			String[] shaderAttrNames = new String[20];
-			for (int i = 0; i < 20; i++)
+			if (shaderProgram == null)
 			{
-				shaderAttrNames[i] = "sampler" + i;
-				if (OUTPUT_BINDINGS)
-					System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+				String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.vert");
+				String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.frag");
+
+				Shader[] shaders = new Shader[2];
+				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+					public String toString()
+					{
+						return "Tes3 land vertex Program";
+					}
+				};
+				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+					public String toString()
+					{
+						return "Tes3 land fragment Program";
+					}
+				};
+
+				shaderProgram = new GLSLShaderProgram() {
+					public String toString()
+					{
+						return "Land Shader Program";
+					}
+				};
+				shaderProgram.setShaders(shaders);
+
+				String[] shaderAttrNames = new String[20];
+				for (int i = 0; i < 20; i++)
+				{
+					shaderAttrNames[i] = "sampler" + i;
+					if (OUTPUT_BINDINGS)
+						System.out.println("shaderAttrNames " + shaderAttrNames[i]);
+				}
+
+				shaderProgram.setShaderAttrNames(shaderAttrNames);
+
+				String[] vertexAttrNames = new String[] { "samplers0", "samplers1", "samplers2", "samplers3" };
+				shaderProgram.setVertexAttrNames(vertexAttrNames);
+
 			}
-
-			shaderProgram.setShaderAttrNames(shaderAttrNames);
-
-			String[] vertexAttrNames = new String[] { "samplers0", "samplers1", "samplers2", "samplers3" };
-			shaderProgram.setVertexAttrNames(vertexAttrNames);
-
 		}
 	}
 
