@@ -76,8 +76,10 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 
 				for (WRLDTopGroup WRLDTopGroup : ((ESMManager) esmManager).getWRLDTopGroups())
 				{
-					for (PluginRecord wrldPR : WRLDTopGroup.WRLDByFormId.values())
+					for (int i = 0; i < WRLDTopGroup.WRLDByFormId.size(); i++)
 					{
+						PluginRecord wrldPR = WRLDTopGroup.WRLDByFormId.get(WRLDTopGroup.WRLDByFormId.keyAt(i));
+
 						// it looks like no temps in wrld cell so no saving by making a special call
 						WRLDChildren children = esmManager.getWRLDChildren(wrldPR.getFormID());
 						PluginGroup cellChildGroups = children.getCellChildren();
