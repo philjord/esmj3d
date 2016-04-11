@@ -113,7 +113,7 @@ public class BsaMeshSource implements MeshSource
 				}
 			}
 
-			System.out.print("nif " + nifName + " not found in archive bsas");
+			System.out.print("getNifFile nif " + nifName + " not found in archive bsas");
 			for (ArchiveFile archiveFile : bsas)
 			{
 				System.out.print(" checked: " + archiveFile.getName() + ", ");
@@ -166,7 +166,7 @@ public class BsaMeshSource implements MeshSource
 				}
 			}
 
-			System.out.print("nif " + fileName + " not found in archive bsas");
+			System.out.print("getInputStreamForFile nif " + fileName + " not found in archive bsas");
 			for (ArchiveFile archiveFile : bsas)
 			{
 				System.out.print(" checked: " + archiveFile.getName() + ", ");
@@ -198,7 +198,7 @@ public class BsaMeshSource implements MeshSource
 				}
 			}
 
-			System.out.print("nif " + fileName + " not found in archive bsas");
+			System.out.print("getByteBuffer nif " + fileName + " not found in archive bsas");
 			for (ArchiveFile archiveFile : bsas)
 			{
 				System.out.print(" checked: " + archiveFile.getName() + ", ");
