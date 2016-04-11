@@ -87,18 +87,6 @@ public class BsaMeshSource implements MeshSource
 						{
 							System.out.println("BsaMeshSource:  " + nifName + " " + e + " " + e.getStackTrace()[0]);
 						}
-						/*	finally
-							{
-								try
-								{
-									if (inputStream != null)
-										inputStream.close();
-								}
-								catch (IOException e)
-								{
-									e.printStackTrace();
-								}
-							}*/
 
 						if (nifFile != null)
 						{
