@@ -2,6 +2,7 @@ package bsa.source;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,8 +137,8 @@ public class BsaTextureSource implements TextureSource
 				{
 					try
 					{
-						//note that we want all disk activity now, (mappedbytebuffers can delay it until the j3d thread)
-						InputStream in = archiveFile.getInputStream(archiveEntry);
+						//InputStream in = archiveFile.getInputStream(archiveEntry);
+						ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
 
 						if (texNameForArchive.endsWith(".dds"))
 						{
@@ -176,7 +177,6 @@ public class BsaTextureSource implements TextureSource
 		return null;
 	}
 
-	
 	@Override
 	public TextureUnitState getTextureUnitState(String texName)
 	{
@@ -222,9 +222,9 @@ public class BsaTextureSource implements TextureSource
 				{
 					try
 					{
-						//note that we want all disk activity now, (mappedbytebuffers can delay it until the j3d thread)
-						InputStream in = archiveFile.getInputStream(archiveEntry);
-
+						//InputStream in = archiveFile.getInputStream(archiveEntry);
+						ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
+						
 						if (texNameForArchive.endsWith(".dds"))
 						{
 							tex = DDSTextureLoader.getTextureUnitState(texNameForArchive, in);
@@ -257,12 +257,13 @@ public class BsaTextureSource implements TextureSource
 
 			}
 		}
-		 
+
 		//No many times this will fall through here, if texture doesn't exist for example
 		//System.out.println("BsaTextureSource TextureUnitState not found in archive bsas: " + texName);
 		//new Throwable().printStackTrace();
 		return null;
 	}
+
 	@Override
 	public List<String> getFilesInFolder(String folderName)
 	{
