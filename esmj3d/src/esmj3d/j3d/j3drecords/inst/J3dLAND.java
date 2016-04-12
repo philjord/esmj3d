@@ -30,7 +30,6 @@ import javax.vecmath.Vector3f;
 import org.j3d.geom.GeometryData;
 
 import com.frostwire.util.SparseArray;
-import com.sun.j3d.utils.geometry.GeometryInfo;
 
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.ATXT;
@@ -141,7 +140,7 @@ public class J3dLAND extends J3dRECOStatInst
 		TEX_REPEAT = 0.25f;
 	}
 
-	private GeometryInfo gi;//for Bullet later
+	//private GeometryInfo gi;//for Bullet later
 
 	private LAND land;
 
@@ -176,20 +175,31 @@ public class J3dLAND extends J3dRECOStatInst
 			physicsTriStripArray.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(terrainData.coordinates)));
 			physicsTriStripArray.setCoordIndicesRef(terrainData.indexes);
 
-			gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
-			gi.setStripCounts(terrainData.stripCounts);
-			gi.setCoordinates(terrainData.coordinates);
-			gi.setCoordinateIndices(terrainData.indexes);
-
 			//apply them
 			physicsTriStripArray.setName("LAND phys geo");
 			shape.setGeometry(physicsTriStripArray);
 			shape.setAppearance(PhysAppearance.makeAppearance());
 			addNodeChild(shape);
+
+		//	gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
+		//	gi.setStripCounts(terrainData.stripCounts);
+		//	gi.setCoordinates(terrainData.coordinates);
+		//	gi.setCoordinateIndices(terrainData.indexes);
 		}
 	}
-
-	public GeometryInfo getGeometryInfo()
+	public float[][] getHeights()
+	{
+		if (land.VHGT != null)
+		{
+			// extract the heights
+			byte[] heightBytes = land.VHGT;
+			return extractHeights(heightBytes);
+		}
+		return null;
+	}
+	
+	
+/*	public GeometryInfo getGeometryInfo()
 	{
 		//Weird new build physics off visuals system
 		if (gi == null)
@@ -214,7 +224,7 @@ public class J3dLAND extends J3dRECOStatInst
 			}
 		}
 		return gi;
-	}
+	}*/
 
 	/**
 	 * makes the visual version of land

@@ -7,7 +7,6 @@ import javax.media.j3d.Group;
 import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TriangleArray;
-import javax.media.j3d.TriangleStripArray;
 
 import org.j3d.geom.GeometryData;
 import org.j3d.geom.terrain.ElevationGridGenerator;
@@ -30,6 +29,8 @@ public class Water extends Group
 		}
 	}
 
+	//private static HashMap<Float, IndexedTriangleStripArray> preLoadedQuads = new HashMap<Float, IndexedTriangleStripArray>();
+	//private static HashMap<Float, IndexedTriangleArray> preLoadedQuads = new HashMap<Float, IndexedTriangleArray>();
 	private static HashMap<Float, TriangleArray> preLoadedQuads = new HashMap<Float, TriangleArray>();
 
 	private static GeometryArray createQuad(float size)
@@ -55,37 +56,53 @@ public class Water extends Group
 			quads.setColor(2, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
 			quads.setColor(3, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));*/
 
-		TriangleArray quads = preLoadedQuads.get(size);
-
-		if (quads == null)
+		// don't let two threads try to create the quad
+		//	IndexedTriangleStripArray quads = null;
+		//IndexedTriangleArray quads = null;
+		TriangleArray quads = null;
+		synchronized (preLoadedQuads)
 		{
-			ElevationGridGenerator elevationGridGenerator = new ElevationGridGenerator(size, size, 30, 30);
-			GeometryData gd = new GeometryData();
-			//TODO: once tristrips work set back to tristrips (indexed too!)
+			quads = preLoadedQuads.get(size);
 
-			//	gd.geometryType = GeometryData.TRIANGLE_STRIPS;
-			gd.geometryType = GeometryData.TRIANGLES;
-			gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
-			float[] flatHeights = new float[900];
-			elevationGridGenerator.setTerrainDetail(flatHeights, 0);
-			elevationGridGenerator.generate(gd);
-			//	quads = new TriangleStripArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
-			//			| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE, gd.stripCounts);
-
-			quads = new TriangleArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.TEXTURE_COORDINATE_2
-					| GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
-
-			// repeat image every say 10 of size?
-			for (int i = 0; i < gd.textureCoordinates.length; i++)
+			if (quads == null)
 			{
-				gd.textureCoordinates[i] *= size / 10f;
-			}
+				ElevationGridGenerator elevationGridGenerator = new ElevationGridGenerator(size, size, 30, 30);
+				GeometryData gd = new GeometryData();
+				//TODO: many problems here, not sure what the hell works now
+				// I get this all the tiem now - Unhandled textured generation case in ElevationGridGenerator
 
-			quads.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.coordinates)));
-			quads.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.normals)));
-			quads.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(gd.textureCoordinates)));
-			quads.setName("Water");
-			preLoadedQuads.put(size, quads);
+				//gd.geometryType = GeometryData.INDEXED_TRIANGLE_STRIPS;
+				gd.geometryType = GeometryData.TRIANGLES;
+				//gd.geometryType = GeometryData.INDEXED_TRIANGLES;
+				gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
+				float[] flatHeights = new float[900];
+				elevationGridGenerator.setTerrainDetail(flatHeights, 0);
+				elevationGridGenerator.generate(gd);
+				//	quads = new IndexedTriangleStripArray(gd.vertexCount,
+				//			GeometryArray.COORDINATES | GeometryArray.USE_COORD_INDEX_ONLY | GeometryArray.NORMALS
+				//					| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE,
+				//			gd.indexesCount, gd.stripCounts);
+
+				quads = new TriangleArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
+						| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
+
+				//	quads = new IndexedTriangleArray(gd.vertexCount,
+				//			GeometryArray.COORDINATES | GeometryArray.USE_COORD_INDEX_ONLY | GeometryArray.NORMALS
+				//					| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE,
+				//			gd.indexesCount);
+
+				// repeat image every say 10 of size?
+				for (int i = 0; i < gd.textureCoordinates.length; i++)
+				{
+					gd.textureCoordinates[i] *= size / 10f;
+				}
+				//	quads.setCoordinateIndices(0, gd.indexes);
+				quads.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.coordinates)));
+				quads.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.normals)));
+				quads.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(gd.textureCoordinates)));
+				quads.setName("Water");
+				preLoadedQuads.put(size, quads);
+			}
 		}
 		return quads;
 	}
