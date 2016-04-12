@@ -1,10 +1,10 @@
 package esmj3d.j3d.cell;
 
-import java.util.HashMap;
-
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.Node;
+
+import com.frostwire.util.SparseArray;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.BethRenderSettings.UpdateListener;
@@ -28,9 +28,9 @@ public class GridSpace extends BranchGroup implements UpdateListener
 
 	private boolean makePhys = false;
 
-	private HashMap<Integer, Record> recordsById = new HashMap<Integer, Record>();
+	private SparseArray<Record> recordsById = new SparseArray<Record>();
 
-	private HashMap<Integer, J3dRECOInst> j3dRECOsById = new HashMap<Integer, J3dRECOInst>();
+	private SparseArray<J3dRECOInst> j3dRECOsById = new SparseArray<J3dRECOInst>();
 
 	public String name = "GridSpace";
 
@@ -55,7 +55,7 @@ public class GridSpace extends BranchGroup implements UpdateListener
 		BethRenderSettings.addUpdateListener(this);
 	}
 
-	public HashMap<Integer, J3dRECOInst> getJ3dRECOsById()
+	public SparseArray<J3dRECOInst> getJ3dRECOsById()
 	{
 
 		return j3dRECOsById;
@@ -67,8 +67,9 @@ public class GridSpace extends BranchGroup implements UpdateListener
 	{
 		if (!makePhys)
 		{
-			for (J3dRECOInst j3dRECOInst : j3dRECOsById.values())
+			for (int i = 0; i < j3dRECOsById.size(); i++)
 			{
+				J3dRECOInst j3dRECOInst = j3dRECOsById.get(j3dRECOsById.keyAt(i));
 				j3dRECOInst.renderSettingsUpdated();
 			}
 		}
@@ -82,9 +83,9 @@ public class GridSpace extends BranchGroup implements UpdateListener
 
 	public void addRecord(Record record)
 	{
-		if (!recordsById.containsKey(new Integer(record.getFormID())))
+		if (recordsById.get(record.getFormID()) == null)
 		{
-			recordsById.put(new Integer(record.getFormID()), record);
+			recordsById.put(record.getFormID(), record);
 		}
 	}
 
@@ -95,11 +96,12 @@ public class GridSpace extends BranchGroup implements UpdateListener
 	 */
 	public synchronized J3dRECOInst removeRecord(int id)
 	{
-		if (recordsById.containsKey(new Integer(id)))
+		if (recordsById.get(id) != null)
 		{
-			recordsById.remove(new Integer(id));
+			recordsById.remove(id);
 
-			J3dRECOInst j3dRECO = j3dRECOsById.remove(new Integer(id));
+			J3dRECOInst j3dRECO = j3dRECOsById.get(id);
+			j3dRECOsById.remove(id);
 			if (j3dRECO != null)
 			{
 				((BranchGroup) j3dRECO).detach();
@@ -146,13 +148,14 @@ public class GridSpace extends BranchGroup implements UpdateListener
 			children.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 			children.setCapability(Group.ALLOW_CHILDREN_WRITE);
 
-			for (Record record : recordsById.values())
+			for (int i = 0; i < recordsById.size(); i++)
 			{
+				Record record = recordsById.get(recordsById.keyAt(i));
 				J3dRECOInst j3dRECOInst = j3dCELL.makeJ3dRECO(record);
 				if (j3dRECOInst != null)
 				{
 					// now attach and record the j3dRECO					
-					j3dRECOsById.put(new Integer(record.getFormID()), j3dRECOInst);
+					j3dRECOsById.put(record.getFormID(), j3dRECOInst);
 					children.addChild((Node) j3dRECOInst);
 				}
 			}

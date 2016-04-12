@@ -1,6 +1,5 @@
 package esmj3d.j3d.cell;
 
-import java.util.HashMap;
 import java.util.List;
 
 import javax.media.j3d.BranchGroup;
@@ -9,6 +8,8 @@ import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3f;
+
+import com.frostwire.util.SparseArray;
 
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
@@ -26,7 +27,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 	protected List<Record> children;
 
-	protected HashMap<Integer, J3dRECOInst> j3dRECOs = new HashMap<Integer, J3dRECOInst>();
+	protected SparseArray<J3dRECOInst> j3dRECOs = new SparseArray<J3dRECOInst>();
 
 	protected boolean makePhys;
 
@@ -68,7 +69,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		return instCell;
 	}
 
-	public HashMap<Integer, J3dRECOInst> getJ3dRECOs()
+	public SparseArray<J3dRECOInst> getJ3dRECOs()
 	{
 		return j3dRECOs;
 	}

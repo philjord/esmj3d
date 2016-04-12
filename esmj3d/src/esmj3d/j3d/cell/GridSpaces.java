@@ -8,6 +8,8 @@ import java.util.List;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 
+import com.frostwire.util.SparseArray;
+
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
@@ -26,9 +28,9 @@ public class GridSpaces extends BranchGroup
 
 	private HashMap<Point, GridSpace> attachedGridSpaces = new HashMap<Point, GridSpace>();
 
-	private HashMap<Integer, Record> recordsById = new HashMap<Integer, Record>();
+	private SparseArray<Record> recordsById = new SparseArray<Record>();
 
-	private HashMap<Integer, GridSpace> gridSpaceByRecordId = new HashMap<Integer, GridSpace>();
+	private SparseArray<GridSpace> gridSpaceByRecordId = new SparseArray<GridSpace>();
 
 	private J3dCELLGeneral j3dCELL;
 
@@ -57,8 +59,8 @@ public class GridSpaces extends BranchGroup
 		}
 
 		gs.addRecord(record);
-		recordsById.put(new Integer(record.getFormID()), record);
-		gridSpaceByRecordId.put(new Integer(record.getFormID()), gs);
+		recordsById.put(record.getFormID(), record);
+		gridSpaceByRecordId.put(record.getFormID(), gs);
 	}
 
 	public void updateAll()
@@ -147,7 +149,7 @@ public class GridSpaces extends BranchGroup
 
 	public void handleRecordUpdate(Record record, Subrecord updatedSubrecord)
 	{
-		GridSpace gridSpaceForEvent = gridSpaceByRecordId.get(new Integer(record.getFormID()));
+		GridSpace gridSpaceForEvent = gridSpaceByRecordId.get(record.getFormID());
 		gridSpaceForEvent.handleRecordUpdate(record, updatedSubrecord);
 
 		//TODO: now check for movement of the record such that it needs to be in a different gridspace
