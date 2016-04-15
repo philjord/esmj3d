@@ -101,7 +101,6 @@ public abstract class J3dCELLGeneral extends BranchGroup
 	{
 		if (waterLevel != Float.POSITIVE_INFINITY)
 		{
-			//TODO: could bake in transform coords
 			Water water = new Water(J3dLAND.LAND_SIZE, waterApp);
 
 			TransformGroup transformGroup = new TransformGroup();
@@ -109,6 +108,10 @@ public abstract class J3dCELLGeneral extends BranchGroup
 			Transform3D transform = new Transform3D();
 
 			Vector3f loc = new Vector3f(cellLocation);
+
+			// center it!
+			loc.x -= (J3dLAND.LAND_SIZE / 2f);
+			loc.z -= (J3dLAND.LAND_SIZE / 2f);
 
 			loc.y = waterLevel;
 			transform.set(loc);
