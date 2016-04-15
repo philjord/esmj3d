@@ -155,7 +155,8 @@ public class WaterApp extends BranchGroup
 					}
 				};
 
-				final String[] shaderAttrNames = { "envMap", "numWaves", "amplitude", "wavelength", "speed", "direction", "time" };
+				final String[] shaderAttrNames = { "isCubeMap", "envMap", "tex", "numWaves", "amplitude", "wavelength", "speed",
+						"direction", "time" };
 
 				shaderProgram = new GLSLShaderProgram() {
 					public String toString()
@@ -166,17 +167,30 @@ public class WaterApp extends BranchGroup
 				shaderProgram.setShaders(shaders);
 				shaderProgram.setShaderAttrNames(shaderAttrNames);
 
-				ShaderAttribute shaderAttribute = new ShaderAttributeValue("envMap", new Integer(0));
+				int isCubeMap = 0;
+				ShaderAttribute shaderAttribute = new ShaderAttributeValue("isCubeMap", new Integer(isCubeMap));
 				shaderAttributeSet.put(shaderAttribute);
 
-				shaderAttribute = new ShaderAttributeValue("numWaves", new Integer(4));
+				if (isCubeMap == 1)
+				{
+					shaderAttribute = new ShaderAttributeValue("envMap", new Integer(0));
+					shaderAttributeSet.put(shaderAttribute);
+				}
+				else
+				{
+					shaderAttribute = new ShaderAttributeValue("tex", new Integer(0));
+					shaderAttributeSet.put(shaderAttribute);
+				}
+
+				int numWaves = 4;
+				shaderAttribute = new ShaderAttributeValue("numWaves", new Integer(numWaves));
 				shaderAttributeSet.put(shaderAttribute);
 
-				Float[] amplitude = new Float[4];
-				Float[] wavelength = new Float[4];
-				Float[] speed = new Float[4];
-				Point2f[] direction = new Point2f[4];
-				for (int i = 0; i < 4; ++i)
+				Float[] amplitude = new Float[numWaves];
+				Float[] wavelength = new Float[numWaves];
+				Float[] speed = new Float[numWaves];
+				Point2f[] direction = new Point2f[numWaves];
+				for (int i = 0; i < numWaves; ++i)
 				{
 					amplitude[i] = 0.2f / (i + 1);
 					wavelength[i] = (float) (8 * Math.PI / (i + 1));

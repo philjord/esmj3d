@@ -4,13 +4,16 @@ import java.util.HashMap;
 
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Group;
+import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.J3DBuffer;
 import javax.media.j3d.Shape3D;
-import javax.media.j3d.TriangleArray;
+import javax.vecmath.Color4f;
+import javax.vecmath.TexCoord2f;
+import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
-import org.j3d.geom.terrain.ElevationGridGenerator;
 
+import esmj3d.j3d.TESLANDGen;
 import tools3d.utils.Utils3D;
 
 public class Water extends Group
@@ -30,75 +33,56 @@ public class Water extends Group
 	}
 
 	//private static HashMap<Float, IndexedTriangleStripArray> preLoadedQuads = new HashMap<Float, IndexedTriangleStripArray>();
-	//private static HashMap<Float, IndexedTriangleArray> preLoadedQuads = new HashMap<Float, IndexedTriangleArray>();
-	private static HashMap<Float, TriangleArray> preLoadedQuads = new HashMap<Float, TriangleArray>();
+	private static HashMap<Float, IndexedTriangleArray> preLoadedQuads = new HashMap<Float, IndexedTriangleArray>();
 
 	private static GeometryArray createQuad(float size)
 	{
-
-		/*	QuadArray quads = new QuadArray(4, GeometryArray.COORDINATES | GeometryArray.NORMALS | GeometryArray.TEXTURE_COORDINATE_2
-					| GeometryArray.COLOR_4);
-		
-			quads.setCoordinate(0, new Point3f(-size / 2f, 0, -size / 2f));
-			quads.setCoordinate(1, new Point3f(-size / 2f, 0, size / 2f));
-			quads.setCoordinate(2, new Point3f(size / 2f, 0, size / 2f));
-			quads.setCoordinate(3, new Point3f(size / 2f, 0, -size / 2f));
-			quads.setNormal(0, new Vector3f(0f, 1f, 0f));
-			quads.setNormal(1, new Vector3f(0f, 1f, 0f));
-			quads.setNormal(2, new Vector3f(0f, 1f, 0f));
-			quads.setNormal(3, new Vector3f(0f, 1f, 0f));
-			quads.setTextureCoordinate(0, 0, new TexCoord2f(0f, 0f));
-			quads.setTextureCoordinate(0, 1, new TexCoord2f(0f, 4f));
-			quads.setTextureCoordinate(0, 2, new TexCoord2f(4f, 4f));
-			quads.setTextureCoordinate(0, 3, new TexCoord2f(4f, 0f));
-			quads.setColor(0, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
-			quads.setColor(1, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
-			quads.setColor(2, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));
-			quads.setColor(3, new Color4f(0.8f, 0.9f, 1.0f, 0.5f));*/
-
 		// don't let two threads try to create the quad
 		//	IndexedTriangleStripArray quads = null;
-		//IndexedTriangleArray quads = null;
-		TriangleArray quads = null;
+		IndexedTriangleArray quads = null;
 		synchronized (preLoadedQuads)
 		{
 			quads = preLoadedQuads.get(size);
 
 			if (quads == null)
 			{
-				ElevationGridGenerator elevationGridGenerator = new ElevationGridGenerator(size, size, 30, 30);
-				GeometryData gd = new GeometryData();
-				//TODO: many problems here, not sure what the hell works now
-				// I get this all the tiem now - Unhandled textured generation case in ElevationGridGenerator
 
-				//gd.geometryType = GeometryData.INDEXED_TRIANGLE_STRIPS;
-				gd.geometryType = GeometryData.TRIANGLES;
-				//gd.geometryType = GeometryData.INDEXED_TRIANGLES;
-				gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
-				float[] flatHeights = new float[900];
-				elevationGridGenerator.setTerrainDetail(flatHeights, 0);
-				elevationGridGenerator.generate(gd);
-				//	quads = new IndexedTriangleStripArray(gd.vertexCount,
-				//			GeometryArray.COORDINATES | GeometryArray.USE_COORD_INDEX_ONLY | GeometryArray.NORMALS
-				//					| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE,
-				//			gd.indexesCount, gd.stripCounts);
+				float TEX_REPEAT = 2f;// suggests how many times to repeat the texture over the entire square
 
-				quads = new TriangleArray(gd.vertexCount, GeometryArray.COORDINATES | GeometryArray.NORMALS
-						| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE);
-
-				//	quads = new IndexedTriangleArray(gd.vertexCount,
-				//			GeometryArray.COORDINATES | GeometryArray.USE_COORD_INDEX_ONLY | GeometryArray.NORMALS
-				//					| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE,
-				//			gd.indexesCount);
-
-				// repeat image every say 10 of size?
-				for (int i = 0; i < gd.textureCoordinates.length; i++)
+				int quadrantSquareCount = 10;
+				float[][] quadrantHeights = new float[quadrantSquareCount][quadrantSquareCount];
+				Vector3f[][] quadrantNormals = new Vector3f[quadrantSquareCount][quadrantSquareCount];
+				Color4f[][] quadrantColors = new Color4f[quadrantSquareCount][quadrantSquareCount];
+				TexCoord2f[][] quadrantTexCoords = new TexCoord2f[quadrantSquareCount][quadrantSquareCount];
+				for (int row = 0; row < quadrantSquareCount; row++)
 				{
-					gd.textureCoordinates[i] *= size / 10f;
+					for (int col = 0; col < quadrantSquareCount; col++)
+					{
+						quadrantHeights[row][col] = 0;
+						quadrantNormals[row][col] = new Vector3f(0, 1, 0);
+						quadrantColors[row][col] = new Color4f(0.8f, 0.8f, 0.9f, 0.8f);
+						quadrantTexCoords[row][col] = new TexCoord2f(((row / (float) quadrantSquareCount) * TEX_REPEAT),
+								((col / (float) quadrantSquareCount) * TEX_REPEAT));
+					}
 				}
-				//	quads.setCoordinateIndices(0, gd.indexes);
+
+				TESLANDGen gridGenerator = new TESLANDGen(size, size, quadrantSquareCount, quadrantSquareCount, quadrantHeights,
+						quadrantNormals, quadrantColors, quadrantTexCoords);
+
+				GeometryData gd = new GeometryData();
+				gd.geometryType = GeometryData.INDEXED_TRIANGLES;
+				gd.geometryComponents = GeometryData.NORMAL_DATA | GeometryData.TEXTURE_2D_DATA;
+
+				gridGenerator.generateIndexedTriangles(gd);
+				quads = new IndexedTriangleArray(gd.vertexCount,
+						GeometryArray.COORDINATES | GeometryArray.USE_COORD_INDEX_ONLY | GeometryArray.NORMALS | GeometryArray.COLOR_4
+								| GeometryArray.TEXTURE_COORDINATE_2 | GeometryArray.USE_NIO_BUFFER | GeometryArray.BY_REFERENCE,
+						gd.indexesCount);
+
+				quads.setCoordinateIndices(0, gd.indexes);
 				quads.setCoordRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.coordinates)));
 				quads.setNormalRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.normals)));
+				quads.setColorRefBuffer(new J3DBuffer(Utils3D.makeFloatBuffer(gd.colors)));
 				quads.setTexCoordRefBuffer(0, new J3DBuffer(Utils3D.makeFloatBuffer(gd.textureCoordinates)));
 				quads.setName("Water");
 				preLoadedQuads.put(size, quads);
