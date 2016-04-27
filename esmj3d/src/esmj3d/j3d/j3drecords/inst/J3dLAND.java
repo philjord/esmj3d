@@ -49,20 +49,21 @@ import tools.io.ESMByteConvert;
 import tools3d.utils.PhysAppearance;
 import tools3d.utils.ShaderSourceIO;
 import tools3d.utils.Utils3D;
+import utils.ESConfig;
 import utils.source.TextureSource;
 
 public class J3dLAND extends J3dRECOStatInst
 {
 	public static int GRID_COUNT = 32;
 
-	public static final float TERRIAN_SQUARE_SIZE = 2.56f;// confirmed empirically
+	public static final float TERRIAN_SQUARE_SIZE = 128 * ESConfig.ES_TO_METERS_SCALE;//2.56 confirmed empirically = 128 units
 
 	static final boolean OUTPUT_BINDINGS = false;
 
 	public static float TEX_REPEAT = 0.5f;// suggests how many times to repeat the texture over a grid square
 
 	//	NOTE nif x,y,z to j3d x,z,-y
-	public static float HEIGHT_TO_J3D_SCALE = 0.04f; //where does this come from? 1/25th?
+	public static float HEIGHT_TO_J3D_SCALE = ESConfig.ES_TO_METERS_SCALE * 2f;//0.04f; //this is one inch!
 
 	public static float LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE; //= (32*2.56) = 81.92
 
@@ -181,12 +182,13 @@ public class J3dLAND extends J3dRECOStatInst
 			shape.setAppearance(PhysAppearance.makeAppearance());
 			addNodeChild(shape);
 
-		//	gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
-		//	gi.setStripCounts(terrainData.stripCounts);
-		//	gi.setCoordinates(terrainData.coordinates);
-		//	gi.setCoordinateIndices(terrainData.indexes);
+			//	gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
+			//	gi.setStripCounts(terrainData.stripCounts);
+			//	gi.setCoordinates(terrainData.coordinates);
+			//	gi.setCoordinateIndices(terrainData.indexes);
 		}
 	}
+
 	public float[][] getHeights()
 	{
 		if (land.VHGT != null)
@@ -197,34 +199,33 @@ public class J3dLAND extends J3dRECOStatInst
 		}
 		return null;
 	}
-	
-	
-/*	public GeometryInfo getGeometryInfo()
-	{
-		//Weird new build physics off visuals system
-		if (gi == null)
+
+	/*	public GeometryInfo getGeometryInfo()
 		{
-			if (land.VHGT != null)
+			//Weird new build physics off visuals system
+			if (gi == null)
 			{
-				// extract the heights
-				byte[] heightBytes = land.VHGT;
-				float[][] heights = extractHeights(heightBytes);
-
-				//now translate the heights into a nice mesh, 82 has been confirmed empirically			
-				//Note that 33 by 33 sets of point equals 32 by 32 sets of triangles between them
-				TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights,
-						null, null, null);
-				GeometryData terrainData = new GeometryData();
-				gridGenerator.generateIndexedTriangleStrips(terrainData);
-
-				gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
-				gi.setStripCounts(terrainData.stripCounts);
-				gi.setCoordinates(terrainData.coordinates);
-				gi.setCoordinateIndices(terrainData.indexes);
+				if (land.VHGT != null)
+				{
+					// extract the heights
+					byte[] heightBytes = land.VHGT;
+					float[][] heights = extractHeights(heightBytes);
+	
+					//now translate the heights into a nice mesh, 82 has been confirmed empirically			
+					//Note that 33 by 33 sets of point equals 32 by 32 sets of triangles between them
+					TESLANDGen gridGenerator = new TESLANDGen(J3dLAND.LAND_SIZE, J3dLAND.LAND_SIZE, (GRID_COUNT + 1), (GRID_COUNT + 1), heights,
+							null, null, null);
+					GeometryData terrainData = new GeometryData();
+					gridGenerator.generateIndexedTriangleStrips(terrainData);
+	
+					gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
+					gi.setStripCounts(terrainData.stripCounts);
+					gi.setCoordinates(terrainData.coordinates);
+					gi.setCoordinateIndices(terrainData.indexes);
+				}
 			}
-		}
-		return gi;
-	}*/
+			return gi;
+		}*/
 
 	/**
 	 * makes the visual version of land
