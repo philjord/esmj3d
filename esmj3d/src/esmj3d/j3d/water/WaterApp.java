@@ -8,7 +8,6 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.GLSLShaderProgram;
 import javax.media.j3d.Material;
 import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shader;
 import javax.media.j3d.ShaderAppearance;
 import javax.media.j3d.ShaderAttribute;
@@ -222,7 +221,7 @@ public class WaterApp extends BranchGroup
 
 		app.setMaterial(getLandMaterial());
 
-		app.setRenderingAttributes(new RenderingAttributes());
+		//app.setRenderingAttributes(new RenderingAttributes());
 
 		return app;
 	}

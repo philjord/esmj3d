@@ -95,7 +95,7 @@ public class J3dLANDFar extends J3dRECOStatInst
 				ShaderAppearance app = new ShaderAppearance();
 				app.clearCapabilities();
 				app.setMaterial(J3dLAND.createMat());
-				app.setRenderingAttributes(J3dLAND.createRA());
+				//app.setRenderingAttributes(J3dLAND.createRA());
 
 				app.setShaderProgram(shaderProgram);
 				app.setShaderAttributeSet(shaderAttributeSet);

@@ -283,7 +283,7 @@ public class J3dLAND extends J3dRECOStatInst
 				ShaderAppearance app = new ShaderAppearance();
 				app.clearCapabilities();
 				app.setMaterial(createMat());
-				app.setRenderingAttributes(createRA());
+				//app.setRenderingAttributes(createRA());
 
 				ArrayList<ShaderAttributeValue> allShaderAttributeValues = new ArrayList<ShaderAttributeValue>();
 				ArrayList<TextureUnitState> allTextureUnitStates = new ArrayList<TextureUnitState>();
@@ -932,7 +932,7 @@ public class J3dLAND extends J3dRECOStatInst
 			ShaderAppearance app = new ShaderAppearance();
 			app.clearCapabilities();
 			app.setMaterial(createMat());
-			app.setRenderingAttributes(createRA());
+			//app.setRenderingAttributes(createRA());
 
 			Shape3D baseQuadShape = new Shape3D();
 			baseQuadShape.clearCapabilities();
