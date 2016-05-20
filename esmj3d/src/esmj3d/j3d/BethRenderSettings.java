@@ -37,7 +37,7 @@ public class BethRenderSettings
 
 	private static float globalDirLightLevel = GLOBAL_DIR_LIGHT_LEVEL_DEFAULT;
 
-	private static boolean enablePlacedLights = true;
+	private static boolean enablePlacedLights = false;
 
 	private static boolean showPhysics = false;
 
