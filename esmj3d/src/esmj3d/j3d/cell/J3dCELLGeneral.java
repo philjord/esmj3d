@@ -109,9 +109,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 			Vector3f loc = new Vector3f(cellLocation);
 
-			// center it!
-			loc.x -= (J3dLAND.LAND_SIZE / 2f);
-			loc.z -= (J3dLAND.LAND_SIZE / 2f);
+			// Notice we don't need to longer center like this loc.x -= (J3dLAND.LAND_SIZE / 2f);loc.z -= (J3dLAND.LAND_SIZE / 2f);
 
 			loc.y = waterLevel;
 			transform.set(loc);
