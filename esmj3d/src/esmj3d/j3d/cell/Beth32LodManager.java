@@ -27,6 +27,8 @@ public class Beth32LodManager extends BethLodManager
 	private String lodWorldFormId = "";
 
 	private J3dICellFactory j3dCellFactory;
+	
+	private LinearFog fog = new LinearFog(new Color3f(0.8f, 0.8f, 0.8f), 500, 3500);
 
 	public Beth32LodManager(J3dICellFactory j3dCellFactory)
 	{
@@ -34,12 +36,14 @@ public class Beth32LodManager extends BethLodManager
 		this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 
-		//create a hillarious distance fog
+		//create a hilarious distance fog
 		//LinearFog, ExponentialFog
-		LinearFog fog = new LinearFog(new Color3f(0.8f, 0.8f, 0.8f), 500, 3500);
-		fog.addScope(this);
+		
+		//fog.addScope(this);
 		fog.setInfluencingBounds(Utils3D.defaultBounds);
-		addChild(fog);
+		
+		
+		this.setName("Beth32LodManager");
 
 	}
 
@@ -49,6 +53,7 @@ public class Beth32LodManager extends BethLodManager
 		if (!this.lodWorldFormId.equals(newLodWorldFormId))
 		{
 			this.removeAllChildren();
+			addChild(fog);
 			this.lodWorldFormId = newLodWorldFormId;
 
 			long start = System.currentTimeMillis();
