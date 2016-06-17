@@ -27,7 +27,7 @@ public class BsaTextureSource implements TextureSource
 		this.bsas = new ArrayList<ArchiveFile>();
 		for (ArchiveFile archiveFile : allBsas)
 		{
-			if (archiveFile.hasDDS() || archiveFile.hasKTX())
+			if (archiveFile != null && (archiveFile.hasDDS() || archiveFile.hasKTX()))
 			{
 				bsas.add(archiveFile);
 			}
@@ -224,7 +224,7 @@ public class BsaTextureSource implements TextureSource
 					{
 						//InputStream in = archiveFile.getInputStream(archiveEntry);
 						ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
-						
+
 						if (texNameForArchive.endsWith(".dds"))
 						{
 							tex = DDSTextureLoader.getTextureUnitState(texNameForArchive, in);
