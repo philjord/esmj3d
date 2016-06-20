@@ -35,11 +35,21 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	private InstRECO instRECO = null;
 
+	private boolean popOnly = false;
+
 	public J3dRECOStatInst(InstRECO instRECO, boolean enableSimpleFade, boolean makePhys)
 	{
-		this(instRECO, null, enableSimpleFade, makePhys);
-		transformGroup.clearCapabilities();
-		clearCapabilities();
+		this(instRECO, enableSimpleFade, false, makePhys);
+	}
+
+	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean makePhys)
+	{
+		this(instRECO, j3dRECOType, enableSimpleFade, false, makePhys);
+	}
+
+	public J3dRECOStatInst(InstRECO instRECO, boolean enableSimpleFade, boolean popOnly, boolean makePhys)
+	{
+		this(instRECO, null, enableSimpleFade, popOnly, makePhys);
 	}
 
 	/**
@@ -49,8 +59,9 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	 * @param enableSimpleFade
 	 * @param makePhys
 	 */
-	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean makePhys)
+	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean popOnly, boolean makePhys)
 	{
+		this.popOnly = popOnly;
 		transformGroup.clearCapabilities();
 		clearCapabilities();
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
@@ -129,7 +140,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 			Group parent = new Group();
 			parent.clearCapabilities();
 			transformGroup.addChild(parent);
-			dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getObjectFade() });
+			dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getObjectFade() }, popOnly);
 			transformGroup.addChild(dl);//Note must use super here
 			dl.setSchedulingBounds(Utils3D.defaultBounds);
 			dl.setEnable(true);

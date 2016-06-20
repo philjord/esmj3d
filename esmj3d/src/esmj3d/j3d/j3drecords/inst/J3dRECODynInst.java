@@ -33,9 +33,17 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 
 	private InstRECO instRECO = null;
 
+	private boolean popOnly;
+
 	public J3dRECODynInst(InstRECO instRECO, boolean enableSimpleFade, boolean makePhys)
 	{
+		this(instRECO, enableSimpleFade, false, makePhys);
+	}
+
+	public J3dRECODynInst(InstRECO instRECO, boolean enableSimpleFade, boolean popOnly, boolean makePhys)
+	{
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
+		this.popOnly = popOnly;
 
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		transformGroup.clearCapabilities();
@@ -114,7 +122,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 			Group parent = new Group();
 			parent.clearCapabilities();
 			transformGroup.addChild(parent);
-			dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getItemFade() });
+			dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getItemFade() }, popOnly);
 			transformGroup.addChild(dl);//Note must use super here
 			dl.setSchedulingBounds(Utils3D.defaultBounds);
 			dl.setEnable(true);
@@ -125,6 +133,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 		}
 	}
 
+	@Override
 	public J3dRECOType getJ3dRECOType()
 	{
 		return j3dRECOType;
