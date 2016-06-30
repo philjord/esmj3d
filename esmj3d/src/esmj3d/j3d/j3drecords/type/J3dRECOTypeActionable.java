@@ -4,6 +4,9 @@ import javax.vecmath.Color3f;
 
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
+import nif.NifJ3dHavokRoot;
+import nif.NifJ3dVisRoot;
+import nif.NifToJ3d;
 import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
 
@@ -21,19 +24,33 @@ public class J3dRECOTypeActionable extends J3dRECOType
 		if (!BethRenderSettings.isShowEditorMarkers() && nifFileName.toLowerCase().contains("marker"))
 			return;
 
-		j3dNiAVObject = loadNif(nifFileName, makePhys, mediaSources);
-		if (j3dNiAVObject != null)
+		if (makePhys)
 		{
-
-			//prep for possible outlines later
-			if (j3dNiAVObject instanceof Fadable && !makePhys)
+			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
+			if (nhr != null)
 			{
-				((Fadable) j3dNiAVObject).setOutline(outlineColor);
-				((Fadable) j3dNiAVObject).setOutline(null);
+				j3dNiAVObject = nhr.getHavokRoot();
+				addChild(j3dNiAVObject);
+				fireIdle();
 			}
+		}
+		else
+		{
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
+			if (nvr != null)
+			{
+				j3dNiAVObject = nvr.getVisualRoot();
 
-			addChild(j3dNiAVObject);
-			fireIdle();
+				//prep for possible outlines later
+				if (j3dNiAVObject instanceof Fadable && !makePhys)
+				{
+					((Fadable) j3dNiAVObject).setOutline(outlineColor);
+					((Fadable) j3dNiAVObject).setOutline(null);
+				}
+
+				addChild(j3dNiAVObject);
+				fireIdle(nvr);
+			}
 		}
 	}
 

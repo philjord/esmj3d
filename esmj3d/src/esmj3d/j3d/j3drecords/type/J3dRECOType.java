@@ -1,6 +1,9 @@
 package esmj3d.j3d.j3drecords.type;
 
+import java.util.ArrayList;
+
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.Node;
 import javax.vecmath.Color3f;
 
 import esmj3d.data.shared.records.RECO;
@@ -8,10 +11,14 @@ import esmj3d.j3d.BethRenderSettings;
 import nif.NifJ3dHavokRoot;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
+import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiAVObject;
+import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiControllerSequence;
 import nif.j3d.particles.J3dNiParticleSystem;
+import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.Fadable;
+import tools3d.utils.scenegraph.VaryingLODBehaviour;
 import utils.source.MediaSources;
 
 public abstract class J3dRECOType extends BranchGroup implements Fadable
@@ -24,13 +31,16 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 
 	protected J3dNiAVObject j3dNiAVObject;
 
+	private ArrayList<J3dNiSkinInstance> allSkins;
+	private NifJ3dSkeletonRoot inputSkeleton;
+
 	public J3dRECOType(RECO RECO, String physNifFile)
 	{
 		clearCapabilities();
 		this.RECO = RECO;
 		this.physNifFile = physNifFile;
 		if (physNifFile != null && physNifFile.lastIndexOf("\\") != -1)
-			shortName = physNifFile.substring(physNifFile.lastIndexOf("\\")+1, physNifFile.length() - 4);
+			shortName = physNifFile.substring(physNifFile.lastIndexOf("\\") + 1, physNifFile.length() - 4);
 	}
 
 	public RECO getRECO()
@@ -68,6 +78,40 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 		}
 	}
 
+	/**
+	 *  animate skins, notice only for visuals at this stage
+	 */
+	protected void fireIdle(NifJ3dVisRoot nvr)
+	{
+		fireIdle();
+
+		//Fire off any skins
+		if (j3dNiAVObject != null)
+		{
+			if (NifJ3dSkeletonRoot.hasSkeletonRoot(nvr.getNiToJ3dData()))
+			{
+
+				inputSkeleton = new NifJ3dSkeletonRoot(nvr);
+				// create skins from the skeleton and skin nif
+				allSkins = J3dNiSkinInstance.createSkins(nvr.getNiToJ3dData(), inputSkeleton);
+
+				if (allSkins.size() > 0)
+				{
+					// add the skins to the scene
+					for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
+					{
+						addChild(j3dNiSkinInstance);
+					}
+
+					SkinUpdateBehavior pub = new SkinUpdateBehavior(j3dNiAVObject, new float[] { 10, 20, 100 });
+					addChild(pub);
+					addChild(inputSkeleton);
+				}
+			}
+		}
+
+	}
+
 	protected void fireIdle()
 	{
 		//TODO: some texture transforms appear to be a bit shakey?
@@ -79,16 +123,18 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 			{
 				if (seqName.toLowerCase().indexOf("idle") != -1)
 				{
+					long randStart = (long) (Math.random() * 500);
 					J3dNiControllerSequence seq = j3dNiAVObject.getJ3dNiControllerManager().getSequence(seqName);
 					if (seq.isNotRunning())
-						seq.fireSequence();
+						seq.fireSequence(randStart);
 					else
-						System.out.println("refiring " + seqName + " for " + j3dNiAVObject + " : "
-								+ j3dNiAVObject.getNiAVObject().nVer.fileName);
+						System.out.println(
+								"refiring " + seqName + " for " + j3dNiAVObject + " : " + j3dNiAVObject.getNiAVObject().nVer.fileName);
 					break;
 				}
 			}
 		}
+
 	}
 
 	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MediaSources mediaSources)
@@ -111,6 +157,33 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 		}
 
 		return j3dNiAVObject;
+
+	}
+
+	class SkinUpdateBehavior extends VaryingLODBehaviour
+	{
+		public SkinUpdateBehavior(Node node, float[] dists)
+		{
+			super(node, dists, true, true);
+			setSchedulingBounds(Utils3D.defaultBounds);
+		}
+
+		@Override
+		public void initialize()
+		{
+			super.initialize();
+		}
+
+		@Override
+		public void process()
+		{
+			// must be called to update the accum transform
+			inputSkeleton.updateBones();
+			for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
+			{
+				j3dNiSkinInstance.processSkinInstance();
+			}
+		}
 
 	}
 
