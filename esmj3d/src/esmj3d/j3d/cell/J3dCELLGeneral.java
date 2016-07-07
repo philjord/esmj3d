@@ -49,6 +49,8 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		this.mediaSources = mediaSources;
 		clearCapabilities();
 		this.setCapability(BranchGroup.ALLOW_DETACH);
+		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
 	}
 
 	public abstract Node makeJ3dRECOFar(Record record);

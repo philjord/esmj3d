@@ -34,16 +34,34 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	//Notice fader is ALWAYS true and physics is ALWAYS false
 	public J3dRECOChaInst(InstRECO instRECO)
 	{
+		this.instRECO = instRECO;
 		this.setCapability(BranchGroup.ALLOW_DETACH);
-		transformGroup.clearCapabilities(); 
+		transformGroup.clearCapabilities();
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+
+		//MAGIC cut down for performance
+
+		// for syda neen other people
+		/*	if( doSkip(new Vector3f(-142, 3, 903)) )return;
+			if( doSkip(new Vector3f(-141, 3, 898)) )return;
+			if( doSkip(new Vector3f(-144,3,889)) )return;
+			if( doSkip(new Vector3f(-145,4,866)) )return;
+			if( doSkip(new Vector3f(-145,4,860)) )return;*/
+
 		super.addChild(transformGroup);//Note must use super here
 
 		setLocation(instRECO);
-		this.instRECO = instRECO;
 
 		BethRenderSettings.addUpdateListener(this);
 
+	}
+
+	private boolean doSkip(Vector3f v)
+	{
+		Vector3f t = instRECO.getTrans();
+		t.set(t.x * ESConfig.ES_TO_METERS_SCALE, t.z * ESConfig.ES_TO_METERS_SCALE, -t.y * ESConfig.ES_TO_METERS_SCALE);
+		t.sub(v);
+		return t.length() < 5;
 	}
 
 	@Override
@@ -83,13 +101,13 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		this.j3dRECOType = j3dRECOType;
 
 		BranchGroup far = new BranchGroup();// empty group for no rendering
-		far.clearCapabilities(); 
+		far.clearCapabilities();
 		far.addChild(SHOW_FADE_OUT_MARKER ? new Cube(0.1) : new BranchGroup());
 
 		myNodes.add(j3dRECOType);
 		myNodes.add(far);
 		Group parent = new Group();
-		parent.clearCapabilities(); 
+		parent.clearCapabilities();
 		transformGroup.addChild(parent);
 		dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getActorFade() });
 		transformGroup.addChild(dl);

@@ -4,6 +4,7 @@ import tools.WeakListenerList;
 
 public class BethRenderSettings
 {
+	private static WeakListenerList<UpdateListener> updateListeners = new WeakListenerList<UpdateListener>();
 
 	public static final int ACTOR_FADE_MAX = 500;
 
@@ -61,7 +62,7 @@ public class BethRenderSettings
 
 	private static boolean outlineFocused = true;
 
-	private static WeakListenerList<UpdateListener> updateListeners = new WeakListenerList<UpdateListener>();
+	private static boolean isShowPathGrid = false;
 
 	public static interface UpdateListener
 	{
@@ -287,6 +288,7 @@ public class BethRenderSettings
 	public static void setGlobalAmbLightLevel(float globalAmbLightLevel)
 	{
 		BethRenderSettings.globalAmbLightLevel = globalAmbLightLevel;
+		fireUpdate();
 	}
 
 	public static float getGlobalDirLightLevel()
@@ -297,6 +299,7 @@ public class BethRenderSettings
 	public static void setGlobalDirLightLevel(float globalDirLightLevel)
 	{
 		BethRenderSettings.globalDirLightLevel = globalDirLightLevel;
+		fireUpdate();
 	}
 
 	public static boolean isFlipParentEnableDefault()
@@ -307,6 +310,18 @@ public class BethRenderSettings
 	public static void setFlipParentEnableDefault(boolean flipParentEnableDefault)
 	{
 		BethRenderSettings.flipParentEnableDefault = flipParentEnableDefault;
+		fireUpdate();
+	}
+
+	public static boolean isShowPathGrid()
+	{
+		return isShowPathGrid;
+	}
+
+	public static void setShowPathGrid(boolean isShowPathGrid)
+	{
+		BethRenderSettings.isShowPathGrid = isShowPathGrid;
+		fireUpdate();
 	}
 
 }
