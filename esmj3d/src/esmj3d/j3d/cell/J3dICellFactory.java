@@ -55,6 +55,10 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 
 	public abstract BranchGroup makeLODLandscape(int lodX, int lodY, int scale, String lodWorldName);
 
+	public abstract AICellGeneral makeAICell(int cellId, AIActorLocator aiActorLocator);
+
+	public abstract AICellGeneral makeAICell(int wrldFormId, int x, int y, AIActorLocator aiActorLocator);
+
 	public abstract boolean isWRLD(int worldFormId);
 
 	public void setSources(IESMManager esmManager2, MediaSources mediaSources)
@@ -64,6 +68,7 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 
 		//Carefully load on a separate thread, might cause trouble
 		Thread t = new Thread() {
+			@Override
 			public void run()
 			{
 
@@ -152,7 +157,7 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 
 	public int getCellIdOfPersistentTarget(int formId)
 	{
-		return persistentCellIdByFormId.get(formId);
+		return persistentCellIdByFormId.get(formId).intValue();
 	}
 
 	@Override

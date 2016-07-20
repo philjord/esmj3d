@@ -7,6 +7,7 @@ import javax.media.j3d.Group;
 import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import esmj3d.data.shared.records.InstRECO;
@@ -29,7 +30,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 	private TransformGroup transformGroup = new TransformGroup();
 
-	private Transform3D transform = new Transform3D();
+	private Transform3D transform = new Transform3D();// for performance
 
 	protected J3dRECOType j3dRECOType;
 
@@ -215,11 +216,8 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 		setLocation(t.x, t.y, t.z, er.x, er.y, er.z, ir.getScale());
 	}
 
-	/**
-	 * NOTE MUSt be pre * ESConfig.ES_TO_METERS_SCALE multiplied
-	 * @param loc
-	 */
-	public void setLocation(Vector3f loc)
+	@Override
+	public void setLocation(Vector3f loc, Quat4f rotation)
 	{
 		transform.setTranslation(loc);
 		transformGroup.setTransform(transform);

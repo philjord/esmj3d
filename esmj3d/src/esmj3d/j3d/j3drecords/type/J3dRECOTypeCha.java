@@ -5,6 +5,8 @@ import javax.vecmath.Color3f;
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
 import nif.character.NifCharacter;
+import tools3d.utils.PhysAppearance;
+import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.Fadable;
 
 public class J3dRECOTypeCha extends J3dRECOType implements Fadable
@@ -15,9 +17,17 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 
 	private Color3f outlineColor = new Color3f(1.0f, 1.0f, 0f);
 
-	public J3dRECOTypeCha(RECO reco)
+	public J3dRECOTypeCha(RECO reco, boolean makePhys)
 	{
 		super(reco, null);
+
+		// if physics just put a box on to to make debug easier
+		if (makePhys)
+		{
+			Cube cube = new Cube(0.5, 2, 0.5);
+			cube.setAppearance(PhysAppearance.makeAppearance());
+			addChild(cube);
+		}
 	}
 
 	@Override

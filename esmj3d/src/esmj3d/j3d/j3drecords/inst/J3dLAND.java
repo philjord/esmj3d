@@ -56,16 +56,16 @@ public class J3dLAND extends J3dRECOStatInst
 {
 	public static int GRID_COUNT = 32;
 
-	public static final float TERRIAN_SQUARE_SIZE = 128 * ESConfig.ES_TO_METERS_SCALE;//2.56 confirmed empirically = 128 units
+	public static final float TERRIAN_SQUARE_SIZE = 128 * ESConfig.ES_TO_METERS_SCALE;// = 1.6256m
 
 	static final boolean OUTPUT_BINDINGS = false;
 
 	public static float TEX_REPEAT = 0.5f;// suggests how many times to repeat the texture over a grid square
 
 	//	NOTE nif x,y,z to j3d x,z,-y
-	public static float HEIGHT_TO_J3D_SCALE = ESConfig.ES_TO_METERS_SCALE * 2f;//0.04f; //this is one inch!
+	public static float HEIGHT_TO_J3D_SCALE = ESConfig.ES_TO_METERS_SCALE * 2f;//this is one inch! 0.0254m
 
-	public static float LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE; //= (32*2.56) = 81.92
+	public static float LAND_SIZE = GRID_COUNT * TERRIAN_SQUARE_SIZE; //= (32*1.6256) = 52.0192 (or 104.0384 tes3)
 
 	public static boolean BY_REF = true;
 

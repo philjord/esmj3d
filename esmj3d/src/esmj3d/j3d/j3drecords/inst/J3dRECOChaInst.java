@@ -7,6 +7,7 @@ import javax.media.j3d.Group;
 import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import esmj3d.data.shared.records.InstRECO;
@@ -26,6 +27,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	private ArrayList<BranchGroup> myNodes = new ArrayList<BranchGroup>();
 
 	protected TransformGroup transformGroup = new TransformGroup();
+	private Transform3D transform = new Transform3D();// for performance
 
 	protected J3dRECOTypeCha j3dRECOType;
 
@@ -37,6 +39,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		this.instRECO = instRECO;
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		transformGroup.clearCapabilities();
+		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
 		//MAGIC cut down for performance
@@ -133,7 +136,45 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	 */
 	public void setLocation(float x, float y, float z, float rx, float ry, float rz, float scale)
 	{
-		Transform3D transform = new Transform3D();
+		setLocation(toJ3d(x, y, z, rx, ry, rz, scale));
+	}
+
+	public void setLocation(Transform3D t)
+	{
+		transform.set(t);
+		transformGroup.setTransform(transform);
+	}
+
+	public void setLocation(InstRECO ir)
+	{
+		Vector3f t = ir.getTrans();
+		Vector3f er = ir.getEulerRot();
+		setLocation(t.x, t.y, t.z, er.x, er.y, er.z, ir.getScale());
+	}
+
+	@Override
+	public void setLocation(Vector3f loc, Quat4f rotation)
+	{
+		transform.setTranslation(loc);
+		transformGroup.setTransform(transform);
+	}
+
+	@Override
+	public Transform3D getLocation(Transform3D out)
+	{
+		out.set(transform);
+		return out;
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + " from " + instRECO;
+	}
+
+	public static Transform3D toJ3d(float x, float y, float z, float rx, float ry, float rz, float scale)
+	{
+		Transform3D t = new Transform3D();
 
 		Transform3D xrotT = new Transform3D();
 		xrotT.rotX(-rx);
@@ -145,49 +186,13 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		xrotT.mul(zrotT);
 		xrotT.mul(yrotT);
 
-		transform.set(xrotT);
+		t.set(xrotT);
 
-		transform.setTranslation(
-				new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y * ESConfig.ES_TO_METERS_SCALE));
+		t.setTranslation(new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y * ESConfig.ES_TO_METERS_SCALE));
 
-		transform.setScale(scale);
+		t.setScale(scale);
 
-		transformGroup.setTransform(transform);
-	}
+		return t;
 
-	public void setLocation(Transform3D t)
-	{
-		transformGroup.setTransform(t);
-	}
-
-	public void setLocation(InstRECO ir)
-	{
-		Vector3f t = ir.getTrans();
-		Vector3f er = ir.getEulerRot();
-		setLocation(t.x, t.y, t.z, er.x, er.y, er.z, ir.getScale());
-	}
-
-	/**
-	 * NOTE loc MUST include * ESConfig.ES_TO_METERS_SCALE multiplied
-	 * @param loc
-	 */
-	public void setLocation(Vector3f loc)
-	{
-		Transform3D transform = new Transform3D();
-		transform.setTranslation(loc);
-		transformGroup.setTransform(transform);
-	}
-
-	@Override
-	public Transform3D getLocation(Transform3D out)
-	{
-		transformGroup.getTransform(out);
-		return out;
-	}
-
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + " from " + instRECO;
 	}
 }

@@ -19,15 +19,18 @@ public class BethNoLodManager extends BethLodManager
 		addChild(fog);
 	}
 
+	@Override
 	public void setWorldFormId(int worldFormId)
 	{
 
 	}
 
+	@Override
 	public void updateGross(float charX, float charY)
 	{
 	}
 
+	@Override
 	public Rectangle getGridBounds(float charX, float charY, int nearLoadGridCount)
 	{
 		return Beth32LodManager.getBounds(charX, charY, nearLoadGridCount);

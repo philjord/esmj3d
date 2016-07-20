@@ -47,6 +47,7 @@ public class Beth32LodManager extends BethLodManager
 
 	}
 
+	@Override
 	public void setWorldFormId(int worldFormId)
 	{
 		String newLodWorldFormId = j3dCellFactory.getLODWorldName(worldFormId);
@@ -75,6 +76,7 @@ public class Beth32LodManager extends BethLodManager
 		}
 	}
 
+	@Override
 	public void updateGross(float charX, float charY)
 	{
 		long start = System.currentTimeMillis();
@@ -111,6 +113,7 @@ public class Beth32LodManager extends BethLodManager
 	 * 4 ints represent the near grid x,y locations (not floats of real points)
 	 * @return
 	 */
+	@Override
 	public Rectangle getGridBounds(float charX, float charY, int loadGridCount)
 	{
 		return getBounds(charX, charY, loadGridCount);

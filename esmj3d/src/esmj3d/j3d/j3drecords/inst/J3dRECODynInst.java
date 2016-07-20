@@ -7,6 +7,7 @@ import javax.media.j3d.Group;
 import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import esmj3d.data.shared.records.InstRECO;
@@ -28,6 +29,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	private ArrayList<BranchGroup> myNodes = new ArrayList<BranchGroup>();
 
 	protected TransformGroup transformGroup = new TransformGroup();
+	private Transform3D transform = new Transform3D();// for performance
 
 	protected J3dRECOType j3dRECOType;
 
@@ -185,13 +187,9 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 		setLocation(t.x, t.y, t.z, er.x, er.y, er.z, ir.getScale());
 	}
 
-	/**
-	 * NOTE loc MUST include * ESConfig.ES_TO_METERS_SCALE multiplied
-	 * @param loc
-	 */
-	public void setLocation(Vector3f loc)
+	@Override
+	public void setLocation(Vector3f loc, Quat4f rotation)
 	{
-		Transform3D transform = new Transform3D();
 		transform.setTranslation(loc);
 		transformGroup.setTransform(transform);
 	}
@@ -199,7 +197,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	@Override
 	public Transform3D getLocation(Transform3D out)
 	{
-		transformGroup.getTransform(out);
+		out.set(transform);
 		return out;
 	}
 

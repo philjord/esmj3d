@@ -59,6 +59,7 @@ public class Beth32_4LodManager extends BethLodManager
 
 	}
 
+	@Override
 	public void setWorldFormId(int worldFormId)
 	{
 		String newLodWorldName = j3dCellFactory.getLODWorldName(worldFormId);
@@ -70,6 +71,7 @@ public class Beth32_4LodManager extends BethLodManager
 		}
 	}
 
+	@Override
 	public void updateGross(float charX, float charY)
 	{
 		if (LOD_SCOPE_EXTREMES != 0)
@@ -258,6 +260,7 @@ public class Beth32_4LodManager extends BethLodManager
 		return new Point(charLodX, charLodY);
 	}
 
+	@Override
 	public Rectangle getGridBounds(float charX, float charY, int nearLoadGridCount)
 	{
 		// the 4x4 limit removed, morph like oblivion
