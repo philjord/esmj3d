@@ -13,12 +13,15 @@ import javax.vecmath.Vector3f;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOTypeCha;
+import nif.character.NifJ3dSkeletonRoot;
+import nif.j3d.J3dNiAVObject;
+import nif.j3d.J3dNiAVObject.TransformListener;
 import tools3d.utils.Utils3D;
 import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
 import utils.ESConfig;
 
-public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst
+public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst, TransformListener
 {
 	public static boolean SHOW_FADE_OUT_MARKER = false;
 
@@ -33,6 +36,9 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 	private InstRECO instRECO = null;
 
+	private NifJ3dSkeletonRoot outputSkeleton;
+	private J3dNiAVObject accumRoot;
+
 	//Notice fader is ALWAYS true and physics is ALWAYS false
 	public J3dRECOChaInst(InstRECO instRECO)
 	{
@@ -42,29 +48,12 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
-		//MAGIC cut down for performance
-
-		// for syda neen other people
-		/*	if( doSkip(new Vector3f(-142, 3, 903)) )return;
-			if( doSkip(new Vector3f(-141, 3, 898)) )return;
-			if( doSkip(new Vector3f(-144,3,889)) )return;
-			if( doSkip(new Vector3f(-145,4,866)) )return;
-			if( doSkip(new Vector3f(-145,4,860)) )return;*/
-
 		super.addChild(transformGroup);//Note must use super here
 
 		setLocation(instRECO);
 
 		BethRenderSettings.addUpdateListener(this);
 
-	}
-
-	private boolean doSkip(Vector3f v)
-	{
-		Vector3f t = instRECO.getTrans();
-		t.set(t.x * ESConfig.ES_TO_METERS_SCALE, t.z * ESConfig.ES_TO_METERS_SCALE, -t.y * ESConfig.ES_TO_METERS_SCALE);
-		t.sub(v);
-		return t.length() < 5;
 	}
 
 	@Override
@@ -116,6 +105,23 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		transformGroup.addChild(dl);
 		dl.setSchedulingBounds(Utils3D.defaultBounds);
 		dl.setEnable(true);
+
+		// now I need to watch the outputskeleton and accum any animation accum data into myself
+		outputSkeleton = j3dRECOType.getNifCharacter().getOutputSkeleton();
+		accumRoot = outputSkeleton.getAccumRoot();
+		accumRoot.addTransformListener(this);
+
+	}
+
+	@Override
+	public void transformSet(Transform3D t1)
+	{
+		//TODO: somehow physics need to hear about these changes?? and make decisions about if they are allowed??
+
+		Vector3f v = new Vector3f();
+		t1.get(v);
+		//System.out.println("me a char inst have just heard my character got some accum " + v);
+
 	}
 
 	@Override

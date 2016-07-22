@@ -64,6 +64,8 @@ public class BethRenderSettings
 
 	private static boolean isShowPathGrid = false;
 
+	private static boolean isFogEnabled = true;
+
 	public static interface UpdateListener
 	{
 		public void renderSettingsUpdated();
@@ -321,6 +323,17 @@ public class BethRenderSettings
 	public static void setShowPathGrid(boolean isShowPathGrid)
 	{
 		BethRenderSettings.isShowPathGrid = isShowPathGrid;
+		fireUpdate();
+	}
+
+	public static boolean isFogEnabled()
+	{
+		return isFogEnabled;
+	}
+
+	public static void setFogEnabled(boolean isFogEnabled)
+	{
+		BethRenderSettings.isFogEnabled = isFogEnabled;
 		fireUpdate();
 	}
 

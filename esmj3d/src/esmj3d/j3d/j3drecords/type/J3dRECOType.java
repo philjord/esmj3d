@@ -88,7 +88,7 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 		//Fire off any skins
 		if (j3dNiAVObject != null)
 		{
-			if (NifJ3dSkeletonRoot.hasSkeletonRoot(nvr.getNiToJ3dData()))
+			if (NifJ3dSkeletonRoot.isSkeleton(nvr.getNiToJ3dData()))
 			{
 
 				inputSkeleton = new NifJ3dSkeletonRoot(nvr);

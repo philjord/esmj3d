@@ -72,4 +72,10 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 			}
 		}
 	}
+
+	public NifCharacter getNifCharacter()
+	{
+		return nifCharacter;
+	}
+
 }
