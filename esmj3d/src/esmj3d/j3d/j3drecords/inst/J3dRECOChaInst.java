@@ -107,9 +107,17 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		dl.setEnable(true);
 
 		// now I need to watch the outputskeleton and accum any animation accum data into myself
-		outputSkeleton = j3dRECOType.getNifCharacter().getOutputSkeleton();
-		accumRoot = outputSkeleton.getAccumRoot();
-		accumRoot.addTransformListener(this);
+
+		if (j3dRECOType.getNifCharacter() != null)
+		{
+			outputSkeleton = j3dRECOType.getNifCharacter().getOutputSkeleton();
+			accumRoot = outputSkeleton.getAccumRoot();
+			accumRoot.addTransformListener(this);
+		}
+		else
+		{
+			System.out.println("j3dRECOType.getNifCharacter() null " + j3dRECOType.getRECO());
+		}
 
 	}
 
