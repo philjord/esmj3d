@@ -47,7 +47,11 @@ public class BsaSoundSource implements SoundSource
 	@Override
 	public MediaContainer getMediaContainer(String mediaName)
 	{
-		String soundFile = soundKeyToName.getFileName(mediaName);
+		String soundFile = mediaName;
+		
+		// do we have the key system?
+		if (soundKeyToName != null)
+			soundFile = soundKeyToName.getFileName(mediaName);
 
 		for (ArchiveFile archiveFile : bsas)
 		{

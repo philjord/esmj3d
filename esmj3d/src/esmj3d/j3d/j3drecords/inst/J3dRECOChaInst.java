@@ -116,7 +116,8 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		}
 		else
 		{
-			System.out.println("j3dRECOType.getNifCharacter() null " + j3dRECOType.getRECO());
+			//FIXME: why so many of these? what's going on?
+			//System.out.println("j3dRECOType.getNifCharacter() null " + j3dRECOType.getRECO());
 		}
 
 	}
