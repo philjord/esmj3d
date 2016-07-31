@@ -4,13 +4,15 @@ import java.util.List;
 
 import javax.vecmath.Vector3f;
 
+import esmj3d.ai.AIActor;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
+import esmj3d.j3d.j3drecords.inst.J3dRECOChaInst;
 import esmj3d.physics.PhysicsSystemInterface;
 import esmmanager.common.data.record.IRecordStore;
 import esmmanager.common.data.record.Record;
 
-public abstract class AICellGeneral implements AIActorLocator
+public abstract class AICellGeneral implements AIActorServices
 {
 	protected IRecordStore master;
 
