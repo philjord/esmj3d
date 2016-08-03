@@ -15,13 +15,13 @@ import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOTypeCha;
 import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiAVObject;
-import nif.j3d.J3dNiAVObject.TransformListener;
+import nif.j3d.J3dNiAVObject.AccumNodeListener;
 import tools3d.utils.Utils3D;
 import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
 import utils.ESConfig;
 
-public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst, TransformListener
+public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst, AccumNodeListener
 {
 	public static boolean SHOW_FADE_OUT_MARKER = false;
 
@@ -36,7 +36,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 	private InstRECO instRECO = null;
 
-	private NifJ3dSkeletonRoot outputSkeleton;
+	private NifJ3dSkeletonRoot inputSkeleton;
 	private J3dNiAVObject accumRoot;
 
 	//Notice fader is ALWAYS true and physics is ALWAYS false
@@ -110,9 +110,19 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 		if (j3dRECOType.getNifCharacter() != null)
 		{
-			outputSkeleton = j3dRECOType.getNifCharacter().getOutputSkeleton();
-			accumRoot = outputSkeleton.getAccumRoot();
+			// notice input because we want updates direct from the controllers
+			inputSkeleton = j3dRECOType.getNifCharacter().getInputSkeleton();
+			accumRoot = inputSkeleton.getAccumRoot();
 			accumRoot.addTransformListener(this);
+
+			accumRoot.getTransform(accumRootStart);
+			
+			accumRootStart.get(vec);
+			prevAccum.set(vec);
+
+			// add the root translation in		
+			temp.set(vec);
+			transform.mul(temp);
 		}
 		else
 		{
@@ -122,15 +132,53 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 	}
 
+	private Transform3D accumRootStart = new Transform3D();
+	private Transform3D prevAccum = new Transform3D();
+	private Transform3D temp = new Transform3D();
+	private Vector3f vec = new Vector3f();
+	private static Vector3f emptyVec = new Vector3f();
+
 	@Override
 	public void transformSet(Transform3D t1)
 	{
-		//TODO: somehow physics need to hear about these changes?? and make decisions about if they are allowed??
 
-		Vector3f v = new Vector3f();
-		t1.get(v);
-		//System.out.println("me a char inst have just heard my character got some accum " + v);
+		//TODO: the AI will send these visual changes through to physics, but if physics wants to 
+		// stop me or push me around then I need a feedback to here as well via the AI
 
+		//ok there is no useful rotations the turn left and right lack anything interesting
+		// so just accum x y and z for now		
+
+		t1.get(vec);
+		temp.set(vec);
+
+		// clear it out as this will still be used in teh accum node for minor rotations
+		t1.setTranslation(emptyVec);
+
+		transform.mulInverse(prevAccum);
+		transform.mul(temp);
+
+		transformGroup.setTransform(transform);
+
+		prevAccum.set(temp);
+
+	}
+
+	@Override
+	public void sequenceStarted()
+	{
+		// let's reset the start point back to the original position	
+		accumRootStart.get(vec);
+		prevAccum.set(vec);
+	}
+
+	@Override
+	public void sequenceFinished()
+	{
+	}
+
+	@Override
+	public void sequenceLooped(boolean inner)
+	{
 	}
 
 	@Override
@@ -156,7 +204,16 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 	public void setLocation(Transform3D t)
 	{
-		transform.set(t);
+		transform.set(t);		
+		t.get(vec);
+
+		//damn accumroot start point seems like the pelvis ground problem
+		accumRootStart.get(vec);
+		// add the root translation in
+
+		temp.set(vec);
+		transform.mul(temp);
+
 		transformGroup.setTransform(transform);
 	}
 
@@ -170,7 +227,13 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	@Override
 	public void setLocation(Vector3f loc, Quat4f rotation)
 	{
-		transform.setTranslation(loc);
+		transform.set(rotation, loc, 1f);
+	
+		accumRootStart.get(vec);
+		// add the root translation in		
+		temp.set(vec);
+		transform.mul(temp);
+
 		transformGroup.setTransform(transform);
 	}
 
@@ -178,6 +241,13 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	public Transform3D getLocation(Transform3D out)
 	{
 		out.set(transform);
+
+		// remove the accum root adjustment out of the returned
+		// transform, pelvis/ground issue		
+		accumRootStart.get(vec);
+
+		temp.set(vec);
+		out.mulInverse(temp);
 		return out;
 	}
 
@@ -210,4 +280,5 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		return t;
 
 	}
+
 }

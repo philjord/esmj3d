@@ -1,5 +1,8 @@
 package esmj3d.j3d.j3drecords.type;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.vecmath.Color3f;
 
 import esmj3d.data.shared.records.RECO;
@@ -76,6 +79,16 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 	public NifCharacter getNifCharacter()
 	{
 		return nifCharacter;
+	}
+
+	protected void addIdleAnimations(ArrayList<String> idleAnimations, List<String> filesInFolder)
+	{
+		for (String fireName : filesInFolder)
+		{
+			if (fireName.toLowerCase().contains("idle"))
+				idleAnimations.add(fireName);
+		}
+
 	}
 
 }
