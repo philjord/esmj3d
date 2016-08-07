@@ -16,6 +16,7 @@ import esmj3d.j3d.j3drecords.type.J3dRECOTypeCha;
 import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiAVObject.AccumNodeListener;
+import tools3d.audio.SimpleSounds;
 import tools3d.utils.Utils3D;
 import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
@@ -116,7 +117,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 			accumRoot.addTransformListener(this);
 
 			accumRoot.getTransform(accumRootStart);
-			
+
 			accumRootStart.get(vec);
 			prevAccum.set(vec);
 
@@ -204,7 +205,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 	public void setLocation(Transform3D t)
 	{
-		transform.set(t);		
+		transform.set(t);
 		t.get(vec);
 
 		//damn accumroot start point seems like the pelvis ground problem
@@ -228,7 +229,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	public void setLocation(Vector3f loc, Quat4f rotation)
 	{
 		transform.set(rotation, loc, 1f);
-	
+
 		accumRootStart.get(vec);
 		// add the root translation in		
 		temp.set(vec);
@@ -281,4 +282,5 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 	}
 
+	
 }

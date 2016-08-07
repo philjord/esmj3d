@@ -48,7 +48,7 @@ public class BsaSoundSource implements SoundSource
 	public MediaContainer getMediaContainer(String mediaName)
 	{
 		String soundFile = mediaName;
-		
+
 		// do we have the key system?
 		if (soundKeyToName != null)
 			soundFile = soundKeyToName.getFileName(mediaName);
@@ -83,6 +83,53 @@ public class BsaSoundSource implements SoundSource
 				if (mediaContainer != null)
 				{
 					return mediaContainer;
+				}
+			}
+
+		}
+
+		System.out.println("BsaSoundSource Error getting sound from bsas key: " + mediaName + " file: " + soundFile);
+		return null;
+	}
+
+	@Override
+	public InputStream getInputStream(String mediaName)
+	{
+		String soundFile = mediaName;
+
+		// do we have the key system?
+		if (soundKeyToName != null)
+			soundFile = soundKeyToName.getFileName(mediaName);
+
+		for (ArchiveFile archiveFile : bsas)
+		{
+
+			ArchiveEntry archiveEntry = archiveFile.getEntry(soundFile);
+			if (archiveEntry != null)
+			{
+
+				InputStream inputStream = null;
+
+				try
+				{
+					inputStream = archiveFile.getInputStream(archiveEntry);
+					//String fileName = archiveEntry.getName();
+
+				}
+				catch (SoundException e)
+				{
+					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+							+ e.getStackTrace()[0]);
+				}
+				catch (IOException e)
+				{
+					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+							+ e.getStackTrace()[0]);
+				}
+
+				if (inputStream != null)
+				{
+					return inputStream;
 				}
 			}
 
