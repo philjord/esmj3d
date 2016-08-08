@@ -2,15 +2,11 @@ package esmj3d.j3d.cell;
 
 import java.util.List;
 
-import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.Node;
-import javax.media.j3d.PointSound;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
 import com.frostwire.util.SparseArray;
@@ -123,33 +119,9 @@ public abstract class J3dCELLGeneral extends BranchGroup
 			transformGroup.setTransform(transform);
 			transformGroup.addChild(water);
 
-			//attachLoopingSound("Sound\\Fx\\envrn\\watr_wave.wav", mediaSources, transformGroup, new Point3f(5, 0, 0), 1, 2);
 			return transformGroup;
 		}
 		return null;
 	}
 
-	/*public static void attachLoopingSound(String fileName, MediaSources mediaSources, Group botBg, Point3f position,
-			float minimumAttenuationDistance, float maximumAttenuationDistance)
-	{
-		PointSound ps = new PointSound();
-		ps.setSoundData(mediaSources.getSoundSource().getMediaContainer(fileName));
-		ps.setPosition(position);
-		float staticAttenuation = 10f;
-		float maxGain = staticAttenuation / 100f;
-		ps.setInitialGain(0.5f);
-
-		ps.setDistanceGain(new float[] { 0, minimumAttenuationDistance, maximumAttenuationDistance }, new float[] { maxGain, maxGain, 0 });
-		ps.setEnable(true);
-		ps.setPause(false);
-
-		ps.setSchedulingBounds(new BoundingSphere(new Point3d(), maximumAttenuationDistance));
-		ps.setLoop(-1);
-		ps.setContinuousEnable(true);
-
-		BranchGroup bg = new BranchGroup();
-		bg.addChild(ps);
-		botBg.addChild(bg);
-
-	}*/
 }
