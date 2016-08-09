@@ -10,9 +10,11 @@ import utils.source.MediaSources;
 public class J3dRECOTypeStatic extends J3dRECOType
 {
 
+	
+
 	public J3dRECOTypeStatic(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources)
 	{
-		super(reco, nifFileName);
+		super(reco, nifFileName, mediaSources);
 
 		//ignore markers and targets for now (note only on load, not dynamic)
 		if (!BethRenderSettings.isShowEditorMarkers() && nifFileName.toLowerCase().contains("marker"))
@@ -37,6 +39,10 @@ public class J3dRECOTypeStatic extends J3dRECOType
 
 				addChild(j3dNiAVObject);
 				fireIdle(nvr);
+
+				
+				
+
 			}
 		}
 

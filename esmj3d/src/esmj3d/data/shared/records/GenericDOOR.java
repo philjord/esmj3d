@@ -78,6 +78,7 @@ public class GenericDOOR extends RECO
 		}
 	}
 
+	@Override
 	public String showDetails()
 	{
 		return "DOOR : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str;

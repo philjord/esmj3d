@@ -33,6 +33,7 @@ public class GenericSOUN extends RECO
 		}
 	}
 
+	@Override
 	public String showDetails()
 	{
 		return "SOUN : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str;

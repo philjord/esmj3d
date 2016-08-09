@@ -1,5 +1,6 @@
 package esmj3d.j3d.j3drecords.type;
 
+import javax.media.j3d.Group;
 import javax.vecmath.Color3f;
 
 import esmj3d.data.shared.records.RECO;
@@ -18,7 +19,7 @@ public class J3dRECOTypeActionable extends J3dRECOType
 
 	public J3dRECOTypeActionable(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources)
 	{
-		super(reco, nifFileName);
+		super(reco, nifFileName, mediaSources);
 
 		//ignore markers and targets for now (note only on load, not dynamic)
 		if (!BethRenderSettings.isShowEditorMarkers() && nifFileName.toLowerCase().contains("marker"))
@@ -50,9 +51,47 @@ public class J3dRECOTypeActionable extends J3dRECOType
 
 				addChild(j3dNiAVObject);
 				fireIdle(nvr);
+
+				if (nifFileName.toLowerCase().contains("siltstrider.nif"))
+				{
+					this.setCapability(Group.ALLOW_CHILDREN_WRITE);
+					this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+				
+					Thread t = new Thread() {
+						@Override
+						public void run()
+						{
+							while (true)
+							{
+								try
+								{
+									Thread.sleep(500);
+								}
+								catch (InterruptedException e)
+								{
+									 
+									e.printStackTrace();
+								}
+								if (System.currentTimeMillis() - siltstriderLastPlayed > 5000)
+								{
+									siltLastSound++;
+									siltLastSound = siltLastSound > 3 ? 1 : siltLastSound;
+									
+									playSound("Sound\\Cr\\silt\\silt0" + siltLastSound + ".wav", 20, 1);
+
+									siltstriderLastPlayed = System.currentTimeMillis();
+								}
+							}
+						}
+					};
+					t.start();
+				}
 			}
 		}
 	}
+
+	private long siltstriderLastPlayed;// temp rubbish
+	private int siltLastSound = 0;// temp rubbish
 
 	@Override
 	public void renderSettingsUpdated()

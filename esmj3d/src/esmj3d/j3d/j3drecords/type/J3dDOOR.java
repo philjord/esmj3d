@@ -4,11 +4,12 @@ import javax.vecmath.Color3f;
 
 import esmj3d.data.shared.records.GenericDOOR;
 import esmj3d.j3d.BethRenderSettings;
+import esmj3d.j3d.j3drecords.Doorable;
 import nif.NifToJ3d;
 import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
 
-public class J3dDOOR extends J3dRECOType
+public class J3dDOOR extends J3dRECOType implements Doorable
 {
 	private boolean isOpen = false;
 
@@ -16,14 +17,12 @@ public class J3dDOOR extends J3dRECOType
 
 	private Color3f outlineColor = new Color3f(1.0f, 0.5f, 0f);
 
+	private GenericDOOR reco;
+
 	public J3dDOOR(GenericDOOR reco, boolean makePhys, MediaSources mediaSources)
 	{
-		this(reco, makePhys, mediaSources, false);
-	}
-
-	public J3dDOOR(GenericDOOR reco, boolean makePhys, MediaSources mediaSources, boolean hasPivot)
-	{
-		super(reco, reco.MODL.model.str);
+		super(reco, reco.MODL.model.str, mediaSources);
+		this.reco = reco;
 
 		if (makePhys)
 		{
@@ -45,11 +44,6 @@ public class J3dDOOR extends J3dRECOType
 					((Fadable) j3dNiAVObject).setOutline(null);
 			}
 
-			//TES3 pivot doors will add j3dNiAVObject to the pivot instead
-			if (!hasPivot)
-			{
-				addChild(j3dNiAVObject);
-			}
 			fireIdle();
 		}
 
@@ -83,6 +77,7 @@ public class J3dDOOR extends J3dRECOType
 		}
 	}
 
+	@Override
 	public void toggleOpen()
 	{
 		isOpen = !isOpen;
@@ -95,6 +90,7 @@ public class J3dDOOR extends J3dRECOType
 		animateDoor();
 	}
 
+	@Override
 	public boolean isOpen()
 	{
 		return isOpen;
@@ -110,6 +106,22 @@ public class J3dDOOR extends J3dRECOType
 			j3dNiAVObject.getJ3dNiControllerManager().getSequence(isOpen ? "Open" : "Close").fireSequenceOnce();
 		}
 
+	}
+
+	@Override
+	public String getDoorName()
+	{
+		if (reco.FULL != null)
+			return reco.FULL.str;
+		return "";
+
+	}
+
+	@Override
+	public void playBothSounds()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -1,8 +1,10 @@
 package esmj3d.j3d.j3drecords.type;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.MediaContainer;
 import javax.media.j3d.Node;
 import javax.vecmath.Color3f;
 
@@ -16,6 +18,7 @@ import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiControllerSequence;
 import nif.j3d.particles.J3dNiParticleSystem;
+import tools3d.audio.SimpleSounds;
 import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.Fadable;
 import tools3d.utils.scenegraph.VaryingLODBehaviour;
@@ -34,6 +37,8 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 	private ArrayList<J3dNiSkinInstance> allSkins;
 	private NifJ3dSkeletonRoot inputSkeleton;
 
+	protected MediaSources mediaSources;
+
 	public J3dRECOType(RECO RECO, String physNifFile)
 	{
 		clearCapabilities();
@@ -41,6 +46,12 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 		this.physNifFile = physNifFile;
 		if (physNifFile != null && physNifFile.lastIndexOf("\\") != -1)
 			shortName = physNifFile.substring(physNifFile.lastIndexOf("\\") + 1, physNifFile.length() - 4);
+	}
+
+	public J3dRECOType(RECO reco2, String nifFileName, MediaSources mediaSources2)
+	{
+		this(reco2, nifFileName);
+		this.mediaSources = mediaSources2;
 	}
 
 	public RECO getRECO()
@@ -185,6 +196,56 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 			}
 		}
 
+	}
+
+	/**
+	 * start at the Sound\\ folder for media source
+	 * @param soundFileName
+	 */
+	public void playSound(String soundFileName, float maximumAttenuationDistance, int loopCount)
+	{
+		playSound(soundFileName, maximumAttenuationDistance, loopCount, 1.0f);
+	}
+
+	/**
+	 * add child capability must be set if sounds are going to be played
+	 * @param soundFileName
+	 * @param maximumAttenuationDistance
+	 * @param loopCount
+	 * @param gain
+	 */
+	public void playSound(String soundFileName, float maximumAttenuationDistance, int loopCount, float gain)
+	{
+
+		//TODO: I need to detach and discard these sounds once played the loop count times
+		if (soundFileName.endsWith("mp3"))
+		{
+			InputStream is = mediaSources.getSoundSource().getInputStream(soundFileName);
+			BranchGroup soundBG = SimpleSounds.createPointSoundMp3(is, maximumAttenuationDistance, loopCount, gain);
+			if (soundBG != null)
+				this.addChild(soundBG);
+		}
+		else
+		{
+			MediaContainer mc = mediaSources.getSoundSource().getMediaContainer(soundFileName);
+			BranchGroup soundBG = SimpleSounds.createPointSound(mc, maximumAttenuationDistance, loopCount, gain);
+			if (soundBG != null)
+				this.addChild(soundBG);
+		}
+	}
+
+	public void playBackgroundSound(String soundFileName, int loopCount, float gain)
+	{
+		if (soundFileName.endsWith("mp3"))
+		{
+			InputStream is = mediaSources.getSoundSource().getInputStream(soundFileName);
+			SimpleSounds.playBackgroundSoundMp3(is, loopCount, gain);
+		}
+		else
+		{
+			MediaContainer mc = mediaSources.getSoundSource().getMediaContainer(soundFileName);
+			SimpleSounds.playBackgroundSound(mc, loopCount, gain);
+		}
 	}
 
 	@Override

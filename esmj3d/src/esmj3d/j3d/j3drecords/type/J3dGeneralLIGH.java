@@ -22,13 +22,13 @@ import nif.niobject.NiObject;
 import utils.ESConfig;
 import utils.source.MediaSources;
 
-public class J3dLIGH extends J3dRECOType
+public class J3dGeneralLIGH extends J3dRECOType
 {
 	private Light light = null;
 
 	private BoundingLeaf bl = new BoundingLeaf();
 
-	public J3dLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources)
+	public J3dGeneralLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources)
 	{
 		super(ligh, ligh.MODL == null ? "" : ligh.MODL.model.str);
 
@@ -55,6 +55,7 @@ public class J3dLIGH extends J3dRECOType
 					Vector3f attachNode = findAttachLight(j3dNiAVObject.getNiAVObject(), vr.getNiToJ3dData());
 					if (attachNode != null)
 						lightPosition = new Point3f(attachNode);
+					
 				}
 			}
 
@@ -124,6 +125,7 @@ public class J3dLIGH extends J3dRECOType
 		return null;
 	}
 
+	@Override
 	public void renderSettingsUpdated()
 	{
 		super.renderSettingsUpdated();
