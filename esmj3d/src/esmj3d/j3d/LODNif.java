@@ -31,9 +31,6 @@ public class LODNif extends Group
 {
 	public LODNif(String nifFileName, MediaSources mediaSources)
 	{
-		clearCapabilities();
- 
-
 		// TODO: can I optomise this like the X form ones
 		// need to make a generic lod nif loading system, fallout uses this for all lod things
 		// return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);

@@ -16,7 +16,6 @@ import esmj3d.j3d.j3drecords.type.J3dRECOTypeCha;
 import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiAVObject.AccumNodeListener;
-import tools3d.audio.SimpleSounds;
 import tools3d.utils.Utils3D;
 import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
@@ -45,7 +44,6 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 	{
 		this.instRECO = instRECO;
 		this.setCapability(BranchGroup.ALLOW_DETACH);
-		transformGroup.clearCapabilities();
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
@@ -94,13 +92,11 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 		this.j3dRECOType = j3dRECOType;
 
 		BranchGroup far = new BranchGroup();// empty group for no rendering
-		far.clearCapabilities();
 		far.addChild(SHOW_FADE_OUT_MARKER ? new Cube(0.1) : new BranchGroup());
 
 		myNodes.add(j3dRECOType);
 		myNodes.add(far);
 		Group parent = new Group();
-		parent.clearCapabilities();
 		transformGroup.addChild(parent);
 		dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getActorFade() });
 		transformGroup.addChild(dl);

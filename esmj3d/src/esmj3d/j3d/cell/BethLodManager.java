@@ -8,7 +8,6 @@ public abstract class BethLodManager extends BranchGroup
 {
 	public BethLodManager()
 	{
-		clearCapabilities();
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 	}
 

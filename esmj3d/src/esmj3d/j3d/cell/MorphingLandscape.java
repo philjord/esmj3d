@@ -51,7 +51,6 @@ public class MorphingLandscape extends BranchGroup
 
 	public MorphingLandscape(int lodX, int lodY, int scale)
 	{
-		clearCapabilities();
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 
 		this.lodX = lodX;
@@ -130,7 +129,6 @@ public class MorphingLandscape extends BranchGroup
 	protected static Appearance createAppearance(Texture tex)
 	{
 		ShaderAppearance app = new ShaderAppearance();
-		app.clearCapabilities();
 		Material mat = new Material();
 		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
 		mat.setShininess(1.0f);
@@ -148,7 +146,6 @@ public class MorphingLandscape extends BranchGroup
 
 		TextureUnitState[] tus = new TextureUnitState[1];
 		TextureUnitState tus0 = new TextureUnitState();
-		tus0.clearCapabilities();
 		tus0.setTexture(tex);
 		tus[0] = tus0;
 		app.setTextureUnitState(tus);

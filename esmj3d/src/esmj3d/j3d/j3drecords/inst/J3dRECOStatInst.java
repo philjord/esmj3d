@@ -63,8 +63,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 	public J3dRECOStatInst(InstRECO instRECO, J3dRECOType j3dRECOType, boolean enableSimpleFade, boolean popOnly, boolean makePhys)
 	{
 		this.popOnly = popOnly;
-		transformGroup.clearCapabilities();
-		clearCapabilities();
 		this.fader = enableSimpleFade && !makePhys;// no fader ever for phys
 
 		super.addChild(transformGroup);//Note must use super here
@@ -115,7 +113,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 			if (SHOW_FADE_OUT_MARKER)
 			{
 				BranchGroup bg = new BranchGroup();// empty group for no rendering
-				bg.clearCapabilities();
 				bg.addChild(new Cube(0.1));
 				setJ3dRECOType(j3dRECOType, bg);
 			}
@@ -139,7 +136,6 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 			myNodes.add(j3dRECOType);
 			myNodes.add(j3dRECOTypeFar);
 			Group parent = new Group();
-			parent.clearCapabilities();
 			transformGroup.addChild(parent);
 			dl = new BetterDistanceLOD(parent, myNodes, new float[] { BethRenderSettings.getObjectFade() }, popOnly);
 			transformGroup.addChild(dl);//Note must use super here

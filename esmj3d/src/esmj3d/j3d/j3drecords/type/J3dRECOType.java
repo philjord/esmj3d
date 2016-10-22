@@ -41,7 +41,6 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 
 	public J3dRECOType(RECO RECO, String physNifFile)
 	{
-		clearCapabilities();
 		this.RECO = RECO;
 		this.physNifFile = physNifFile;
 		if (physNifFile != null && physNifFile.lastIndexOf("\\") != -1)

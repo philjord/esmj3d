@@ -47,7 +47,6 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		this.children = children;
 		this.makePhys = makePhys;
 		this.mediaSources = mediaSources;
-		clearCapabilities();
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
@@ -106,7 +105,6 @@ public abstract class J3dCELLGeneral extends BranchGroup
 			Water water = new Water(J3dLAND.LAND_SIZE, waterApp);
 
 			TransformGroup transformGroup = new TransformGroup();
-			transformGroup.clearCapabilities();
 			Transform3D transform = new Transform3D();
 
 			Vector3f loc = new Vector3f(cellLocation);

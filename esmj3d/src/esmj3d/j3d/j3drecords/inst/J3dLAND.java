@@ -166,7 +166,6 @@ public class J3dLAND extends J3dRECOStatInst
 			gridGenerator.generateIndexedTriangleStrips(terrainData);
 
 			Shape3D shape = new Shape3D();
-			shape.clearCapabilities();
 			shape.setPickable(false);
 			shape.setCollidable(false);
 			IndexedTriangleStripArray physicsTriStripArray = new IndexedTriangleStripArray(terrainData.vertexCount,
@@ -281,7 +280,6 @@ public class J3dLAND extends J3dRECOStatInst
 			for (int quadrant = 0; quadrant < totalQuadrants; quadrant++)
 			{
 				ShaderAppearance app = new ShaderAppearance();
-				app.clearCapabilities();
 				app.setMaterial(createMat());
 				//app.setRenderingAttributes(createRA());
 
@@ -309,7 +307,6 @@ public class J3dLAND extends J3dRECOStatInst
 				allShaderAttributeValues.add(new ShaderAttributeValue("baseMap", new Integer(0)));
 
 				Shape3D baseQuadShape = new Shape3D();
-				baseQuadShape.clearCapabilities();
 				baseQuadShape.setPickable(false);
 				baseQuadShape.setCollidable(false);
 				baseQuadShape.setAppearance(app);
@@ -930,12 +927,10 @@ public class J3dLAND extends J3dRECOStatInst
 			Color4f[][] colors = extractColors(colorBytes);
 
 			ShaderAppearance app = new ShaderAppearance();
-			app.clearCapabilities();
 			app.setMaterial(createMat());
 			//app.setRenderingAttributes(createRA());
 
 			Shape3D baseQuadShape = new Shape3D();
-			baseQuadShape.clearCapabilities();
 			baseQuadShape.setPickable(false);
 			baseQuadShape.setCollidable(false);
 			baseQuadShape.setAppearance(app);

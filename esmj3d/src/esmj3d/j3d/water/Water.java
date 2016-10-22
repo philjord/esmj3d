@@ -23,7 +23,6 @@ public class Water extends Group
 		if (waterApp != null)
 		{
 			Shape3D s = new Shape3D(createQuad(size), waterApp.getApp());
-			s.clearCapabilities();
 			addChild(s);
 		}
 		else

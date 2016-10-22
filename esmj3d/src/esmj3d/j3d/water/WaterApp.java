@@ -133,7 +133,7 @@ public class WaterApp extends BranchGroup
 			ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
 
 			app = new ShaderAppearance();
-			app.clearCapabilities();
+ 
 			if (shaderProgram == null)
 			{
 
