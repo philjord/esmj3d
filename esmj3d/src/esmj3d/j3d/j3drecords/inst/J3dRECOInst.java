@@ -1,8 +1,9 @@
 package esmj3d.j3d.j3drecords.inst;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
+
+import org.jogamp.java3d.Transform3D;
 
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.j3drecords.type.J3dRECOType;

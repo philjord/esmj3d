@@ -2,26 +2,27 @@ package esmj3d.j3d.water;
 
 import java.util.Enumeration;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.Behavior;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.GLSLShaderProgram;
-import javax.media.j3d.Material;
-import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.Shader;
-import javax.media.j3d.ShaderAppearance;
-import javax.media.j3d.ShaderAttribute;
-import javax.media.j3d.ShaderAttributeArray;
-import javax.media.j3d.ShaderAttributeObject;
-import javax.media.j3d.ShaderAttributeSet;
-import javax.media.j3d.ShaderAttributeValue;
-import javax.media.j3d.ShaderProgram;
-import javax.media.j3d.SourceCodeShader;
-import javax.media.j3d.Texture;
-import javax.media.j3d.TextureUnitState;
-import javax.media.j3d.TransparencyAttributes;
-import javax.media.j3d.WakeupOnElapsedTime;
 import javax.vecmath.Point2f;
+
+import org.jogamp.java3d.Appearance;
+import org.jogamp.java3d.Behavior;
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.GLSLShaderProgram;
+import org.jogamp.java3d.Material;
+import org.jogamp.java3d.PolygonAttributes;
+import org.jogamp.java3d.Shader;
+import org.jogamp.java3d.ShaderAppearance;
+import org.jogamp.java3d.ShaderAttribute;
+import org.jogamp.java3d.ShaderAttributeArray;
+import org.jogamp.java3d.ShaderAttributeObject;
+import org.jogamp.java3d.ShaderAttributeSet;
+import org.jogamp.java3d.ShaderAttributeValue;
+import org.jogamp.java3d.ShaderProgram;
+import org.jogamp.java3d.SourceCodeShader;
+import org.jogamp.java3d.Texture;
+import org.jogamp.java3d.TextureUnitState;
+import org.jogamp.java3d.TransparencyAttributes;
+import org.jogamp.java3d.WakeupOnElapsedTime;
 
 import nif.NifToJ3d;
 import nif.j3d.J3dNiGeometry;

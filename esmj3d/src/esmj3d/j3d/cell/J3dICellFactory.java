@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-import javax.media.j3d.BranchGroup;
+import org.jogamp.java3d.BranchGroup;
 
 import com.frostwire.util.SparseArray;
 

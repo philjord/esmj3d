@@ -2,16 +2,16 @@ package esmj3d.j3d.water;
 
 import java.util.HashMap;
 
-import javax.media.j3d.GeometryArray;
-import javax.media.j3d.Group;
-import javax.media.j3d.IndexedTriangleArray;
-import javax.media.j3d.J3DBuffer;
-import javax.media.j3d.Shape3D;
 import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
+import org.jogamp.java3d.GeometryArray;
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.IndexedTriangleArray;
+import org.jogamp.java3d.J3DBuffer;
+import org.jogamp.java3d.Shape3D;
 
 import esmj3d.j3d.TESLANDGen;
 import tools3d.utils.Utils3D;

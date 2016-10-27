@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Texture;
-import javax.media.j3d.TextureUnitState;
+import org.jogamp.java3d.Texture;
+import org.jogamp.java3d.TextureUnitState;
 
 import archive.ArchiveEntry;
 import archive.ArchiveFile;

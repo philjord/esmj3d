@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.MediaContainer;
-import javax.media.j3d.SoundException;
+import org.jogamp.java3d.MediaContainer;
+import org.jogamp.java3d.SoundException;
 
 import archive.ArchiveEntry;
 import archive.ArchiveFile;

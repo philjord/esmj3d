@@ -1,6 +1,6 @@
 package esmj3d.j3d.cell;
 
-import javax.media.j3d.BranchGroup;
+import org.jogamp.java3d.BranchGroup;
 
 import javaawt.Rectangle;
 

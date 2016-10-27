@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Group;
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Group;
 
 import com.frostwire.util.SparseArray;
 

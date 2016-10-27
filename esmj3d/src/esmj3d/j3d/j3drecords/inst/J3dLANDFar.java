@@ -5,23 +5,23 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import javax.media.j3d.GLSLShaderProgram;
-import javax.media.j3d.GeometryArray;
-import javax.media.j3d.Group;
-import javax.media.j3d.J3DBuffer;
-import javax.media.j3d.Shader;
-import javax.media.j3d.ShaderAppearance;
-import javax.media.j3d.ShaderAttributeSet;
-import javax.media.j3d.ShaderAttributeValue;
-import javax.media.j3d.ShaderProgram;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.SourceCodeShader;
-import javax.media.j3d.TextureUnitState;
 import javax.vecmath.Color4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
 import org.j3d.geom.GeometryData;
+import org.jogamp.java3d.GLSLShaderProgram;
+import org.jogamp.java3d.GeometryArray;
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.J3DBuffer;
+import org.jogamp.java3d.Shader;
+import org.jogamp.java3d.ShaderAppearance;
+import org.jogamp.java3d.ShaderAttributeSet;
+import org.jogamp.java3d.ShaderAttributeValue;
+import org.jogamp.java3d.ShaderProgram;
+import org.jogamp.java3d.Shape3D;
+import org.jogamp.java3d.SourceCodeShader;
+import org.jogamp.java3d.TextureUnitState;
 
 import com.frostwire.util.SparseArray;
 

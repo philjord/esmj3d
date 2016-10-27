@@ -1,6 +1,6 @@
 package esmj3d.j3d;
 
-import javax.media.j3d.Group;
+import org.jogamp.java3d.Group;
 
 import nif.NifFile;
 import nif.NifToJ3d;

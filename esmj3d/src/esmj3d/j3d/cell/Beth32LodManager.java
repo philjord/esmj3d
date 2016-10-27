@@ -3,10 +3,11 @@ package esmj3d.j3d.cell;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import javax.media.j3d.Group;
-import javax.media.j3d.LinearFog;
-import javax.media.j3d.Node;
 import javax.vecmath.Color3f;
+
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.LinearFog;
+import org.jogamp.java3d.Node;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;

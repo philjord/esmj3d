@@ -3,10 +3,11 @@ package esmj3d.j3d.j3drecords.type;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.MediaContainer;
-import javax.media.j3d.Node;
 import javax.vecmath.Color3f;
+
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.MediaContainer;
+import org.jogamp.java3d.Node;
 
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;

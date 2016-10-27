@@ -1,7 +1,8 @@
 package esmj3d.j3d.j3drecords.type;
 
-import javax.media.j3d.Group;
 import javax.vecmath.Color3f;
+
+import org.jogamp.java3d.Group;
 
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
