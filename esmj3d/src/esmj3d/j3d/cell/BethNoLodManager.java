@@ -1,8 +1,7 @@
 package esmj3d.j3d.cell;
 
-import javax.vecmath.Color3f;
-
 import org.jogamp.java3d.LinearFog;
+import org.jogamp.vecmath.Color3f;
 
 import javaawt.Rectangle;
 import tools3d.utils.Utils3D;

@@ -2,8 +2,6 @@ package esmj3d.j3d.water;
 
 import java.util.Enumeration;
 
-import javax.vecmath.Point2f;
-
 import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.Behavior;
 import org.jogamp.java3d.BranchGroup;
@@ -23,6 +21,7 @@ import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.TransparencyAttributes;
 import org.jogamp.java3d.WakeupOnElapsedTime;
+import org.jogamp.vecmath.Point2f;
 
 import nif.NifToJ3d;
 import nif.j3d.J3dNiGeometry;

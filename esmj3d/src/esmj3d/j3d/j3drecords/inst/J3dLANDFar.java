@@ -5,10 +5,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import javax.vecmath.Color4f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3f;
-
 import org.j3d.geom.GeometryData;
 import org.jogamp.java3d.GLSLShaderProgram;
 import org.jogamp.java3d.GeometryArray;
@@ -22,6 +18,9 @@ import org.jogamp.java3d.ShaderProgram;
 import org.jogamp.java3d.Shape3D;
 import org.jogamp.java3d.SourceCodeShader;
 import org.jogamp.java3d.TextureUnitState;
+import org.jogamp.vecmath.Color4f;
+import org.jogamp.vecmath.TexCoord2f;
+import org.jogamp.vecmath.Vector3f;
 
 import com.frostwire.util.SparseArray;
 

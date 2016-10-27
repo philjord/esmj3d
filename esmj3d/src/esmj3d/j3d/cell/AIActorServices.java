@@ -1,6 +1,6 @@
 package esmj3d.j3d.cell;
 
-import javax.vecmath.Vector3f;
+import org.jogamp.vecmath.Vector3f;
 
 import esmj3d.ai.AIActor;
 import esmj3d.j3d.j3drecords.inst.J3dRECOChaInst;

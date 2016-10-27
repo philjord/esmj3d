@@ -1,6 +1,6 @@
 package esmj3d.data.shared.records;
 
-import javax.vecmath.Color3f;
+import org.jogamp.vecmath.Color3f;
 
 import esmj3d.data.shared.subrecords.MODL;
 import esmmanager.common.data.record.Record;

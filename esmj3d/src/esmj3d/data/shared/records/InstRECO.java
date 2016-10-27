@@ -1,6 +1,6 @@
 package esmj3d.data.shared.records;
 
-import javax.vecmath.Vector3f;
+import org.jogamp.vecmath.Vector3f;
 
 import esmj3d.data.shared.subrecords.XESP;
 import esmmanager.common.data.record.IRecordStore;

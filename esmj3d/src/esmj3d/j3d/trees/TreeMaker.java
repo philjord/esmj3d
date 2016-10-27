@@ -1,7 +1,5 @@
 package esmj3d.j3d.trees;
 
-import javax.vecmath.Vector3f;
-
 import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.GeometryArray;
@@ -17,6 +15,7 @@ import org.jogamp.java3d.SharedGroup;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.TransparencyAttributes;
 import org.jogamp.java3d.TriangleArray;
+import org.jogamp.vecmath.Vector3f;
 
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.LODNif;

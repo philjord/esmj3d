@@ -1,15 +1,14 @@
 package esmj3d.j3d.j3drecords.type;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
-
 import org.jogamp.java3d.BoundingLeaf;
 import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.PointLight;
 import org.jogamp.java3d.SpotLight;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3d;
+import org.jogamp.vecmath.Point3f;
+import org.jogamp.vecmath.Vector3f;
 
 import esmj3d.data.shared.records.CommonLIGH;
 import esmj3d.j3d.BethRenderSettings;

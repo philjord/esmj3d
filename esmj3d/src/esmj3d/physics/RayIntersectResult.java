@@ -1,6 +1,6 @@
 package esmj3d.physics;
 
-import javax.vecmath.Vector3f;
+import org.jogamp.vecmath.Vector3f;
 
 public class RayIntersectResult
 {

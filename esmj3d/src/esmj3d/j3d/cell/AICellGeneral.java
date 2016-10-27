@@ -2,7 +2,7 @@ package esmj3d.j3d.cell;
 
 import java.util.List;
 
-import javax.vecmath.Vector3f;
+import org.jogamp.vecmath.Vector3f;
 
 import esmj3d.ai.AIActor;
 import esmj3d.data.shared.records.InstRECO;

@@ -3,8 +3,6 @@ package esmj3d.j3d.cell;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import javax.vecmath.Color3f;
-
 import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.GLSLShaderProgram;
@@ -21,6 +19,7 @@ import org.jogamp.java3d.SourceCodeShader;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.TransparencyAttributes;
+import org.jogamp.vecmath.Color3f;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;

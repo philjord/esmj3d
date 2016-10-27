@@ -1,11 +1,10 @@
 package esmj3d.j3d;
 
-import javax.vecmath.Color4f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3f;
-
 import org.j3d.geom.GeometryData;
 import org.j3d.geom.InvalidArraySizeException;
+import org.jogamp.vecmath.Color4f;
+import org.jogamp.vecmath.TexCoord2f;
+import org.jogamp.vecmath.Vector3f;
 
 /**
 	 * A generator that takes a set of height values as a grid and turns it into
