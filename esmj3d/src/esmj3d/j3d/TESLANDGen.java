@@ -1,7 +1,7 @@
 package esmj3d.j3d;
 
-import org.j3d.geom.GeometryData;
-import org.j3d.geom.InvalidArraySizeException;
+import org.jogamp.java3d.geom.GeometryData;
+import org.jogamp.java3d.geom.InvalidArraySizeException;
 import org.jogamp.vecmath.Color4f;
 import org.jogamp.vecmath.TexCoord2f;
 import org.jogamp.vecmath.Vector3f;

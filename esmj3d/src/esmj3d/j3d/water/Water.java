@@ -2,12 +2,12 @@ package esmj3d.j3d.water;
 
 import java.util.HashMap;
 
-import org.j3d.geom.GeometryData;
 import org.jogamp.java3d.GeometryArray;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.IndexedTriangleArray;
 import org.jogamp.java3d.J3DBuffer;
 import org.jogamp.java3d.Shape3D;
+import org.jogamp.java3d.geom.GeometryData;
 import org.jogamp.vecmath.Color4f;
 import org.jogamp.vecmath.TexCoord2f;
 import org.jogamp.vecmath.Vector3f;
