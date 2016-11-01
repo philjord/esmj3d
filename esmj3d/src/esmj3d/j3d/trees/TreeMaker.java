@@ -262,8 +262,6 @@ public class TreeMaker
 		}
 
 		Shape3D treeShape = new Shape3D();
-		treeShape.setPickable(false);
-		treeShape.setCollidable(false);
 		treeShape.setGeometry(geom);
 		treeShape.setAppearance(app);
 
