@@ -15,6 +15,7 @@ import org.jogamp.java3d.SharedGroup;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.TransparencyAttributes;
 import org.jogamp.java3d.TriangleArray;
+import org.jogamp.java3d.utils.shader.SimpleShaderAppearance;
 import org.jogamp.vecmath.Vector3f;
 
 import esmj3d.data.shared.records.InstRECO;
@@ -23,7 +24,6 @@ import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
 import esmj3d.j3d.j3drecords.type.J3dRECOTypeStatic;
 import nif.j3d.J3dNiAVObject;
 import tools.WeakValueHashMap;
-import tools3d.utils.SimpleShaderAppearance;
 import tools3d.utils.Utils3D;
 import utils.ESConfig;
 import utils.source.MediaSources;

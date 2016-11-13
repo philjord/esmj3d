@@ -19,6 +19,7 @@ import org.jogamp.java3d.SourceCodeShader;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.TransparencyAttributes;
+import org.jogamp.java3d.utils.shader.SimpleShaderAppearance;
 import org.jogamp.vecmath.Color3f;
 
 import esmj3d.j3d.BethRenderSettings;
@@ -26,7 +27,6 @@ import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import javaawt.Point;
 import javaawt.Rectangle;
 import tools3d.utils.ShaderSourceIO;
-import tools3d.utils.SimpleShaderAppearance;
 
 /**
  * Used by Oblivion only, the morph land system
