@@ -354,7 +354,7 @@ public class TreeMaker
 
 	private static Appearance createAppearance(TextureUnitState tus0)
 	{
-		Appearance app = new SimpleShaderAppearance(true);
+		Appearance app = new SimpleShaderAppearance();
 		app.setTextureUnitState(new TextureUnitState[] { tus0 });
 		app.setMaterial(getMaterial());
 		return app;

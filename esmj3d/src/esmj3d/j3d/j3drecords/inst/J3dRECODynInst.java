@@ -7,6 +7,7 @@ import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Node;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
 
@@ -14,7 +15,6 @@ import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOType;
 import tools3d.utils.Utils3D;
-import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
 import utils.ESConfig;
 

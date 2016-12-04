@@ -3,13 +3,13 @@ package esmj3d.j3d.j3drecords.type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.vecmath.Color3f;
 
 import esmj3d.data.shared.records.RECO;
 import esmj3d.j3d.BethRenderSettings;
 import nif.character.NifCharacter;
 import tools3d.utils.PhysAppearance;
-import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.Fadable;
 
 public class J3dRECOTypeCha extends J3dRECOType implements Fadable
