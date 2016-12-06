@@ -1,6 +1,6 @@
 package esmj3d.j3d.water;
 
-import java.util.Enumeration;
+import java.util.Iterator;
 
 import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.Behavior;
@@ -20,6 +20,7 @@ import org.jogamp.java3d.SourceCodeShader;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.TransparencyAttributes;
+import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedTime;
 import org.jogamp.vecmath.Point2f;
 
@@ -142,12 +143,14 @@ public class WaterApp extends BranchGroup
 
 				Shader[] shaders = new Shader[2];
 				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+					@Override
 					public String toString()
 					{
 						return "vertexProgram";
 					}
 				};
 				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+					@Override
 					public String toString()
 					{
 						return "fragmentProgram";
@@ -158,6 +161,7 @@ public class WaterApp extends BranchGroup
 						"direction", "time" };
 
 				shaderProgram = new GLSLShaderProgram() {
+					@Override
 					public String toString()
 					{
 						return "Water Shader Program";
@@ -271,13 +275,14 @@ public class WaterApp extends BranchGroup
 			wakeUp = new WakeupOnElapsedTime(50);
 		}
 
+		@Override
 		public void initialize()
 		{
 			wakeupOn(wakeUp);
 		}
 
-		@SuppressWarnings({ "rawtypes" })
-		public void processStimulus(Enumeration critiria)
+		@Override
+		public void processStimulus(Iterator<WakeupCriterion> critiria)
 		{
 			idx++;
 			idx = ((idx >= textures.length) ? 0 : idx);
