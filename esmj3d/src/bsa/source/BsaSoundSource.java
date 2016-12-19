@@ -60,47 +60,49 @@ public class BsaSoundSource implements SoundSource
 		// do we have the key system?
 		if (soundKeyToName != null)
 			soundFile = soundKeyToName.getFileName(mediaName);
-
-		for (ArchiveFile archiveFile : bsas)
+		if (soundFile != null)
 		{
-
-			ArchiveEntry archiveEntry = archiveFile.getEntry(soundFile);
-			if (archiveEntry != null)
+			for (ArchiveFile archiveFile : bsas)
 			{
-				MediaContainer mediaContainer = null;
-				InputStream inputStream = null;
 
-				try
+				ArchiveEntry archiveEntry = archiveFile.getEntry(soundFile);
+				if (archiveEntry != null)
 				{
-					inputStream = archiveFile.getInputStream(archiveEntry);
-					//String fileName = archiveEntry.getName();
+					MediaContainer mediaContainer = null;
+					InputStream inputStream = null;
 
-					mediaContainer = new MediaContainer(inputStream);
-				}
-				catch (SoundException e)
-				{
-					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
-							+ e.getStackTrace()[0]);
-				}
-				catch (IOException e)
-				{
-					System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
-							+ e.getStackTrace()[0]);
+					try
+					{
+						inputStream = archiveFile.getInputStream(archiveEntry);
+						//String fileName = archiveEntry.getName();
+
+						mediaContainer = new MediaContainer(inputStream);
+					}
+					catch (SoundException e)
+					{
+						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+								+ e.getStackTrace()[0]);
+					}
+					catch (IOException e)
+					{
+						System.out.println("BsaSoundSource Error get sound key: " + mediaName + " file: " + soundFile + " " + e + " "
+								+ e.getStackTrace()[0]);
+					}
+
+					if (mediaContainer != null)
+					{
+						return mediaContainer;
+					}
 				}
 
-				if (mediaContainer != null)
-				{
-					return mediaContainer;
-				}
 			}
 
-		}
-
-		if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
-		{
-			MediaContainer mc = fileSoundSource.getMediaContainer(mediaName);
-			if (mc != null)
-				return mc;
+			if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+			{
+				MediaContainer mc = fileSoundSource.getMediaContainer(mediaName);
+				if (mc != null)
+					return mc;
+			}
 		}
 
 		System.out.println("BsaSoundSource Error getting sound from bsas key: " + mediaName + " file: " + soundFile);
