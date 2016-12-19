@@ -12,10 +12,14 @@ import archive.ArchiveFile.Folder;
 import nif.NifFile;
 import nif.NifFileReader;
 import utils.source.MeshSource;
+import utils.source.file.FileMeshSource;
 
 public class BsaMeshSource implements MeshSource
 {
+
+	public static boolean FALLBACK_TO_FILE_SOURCE = false;
 	private List<ArchiveFile> bsas;
+	private FileMeshSource fileMeshSource = null;
 
 	public BsaMeshSource(List<ArchiveFile> allBsas)
 	{
@@ -28,7 +32,7 @@ public class BsaMeshSource implements MeshSource
 			}
 		}
 
-		if (bsas.size() == 0)
+		if (bsas.size() == 0 && !FALLBACK_TO_FILE_SOURCE)
 		{
 			System.out.print("No hasNifOrKf archive files found in:");
 			for (ArchiveFile archiveFile : allBsas)
@@ -36,6 +40,11 @@ public class BsaMeshSource implements MeshSource
 				System.out.print(" Looked in Archive:" + archiveFile.getName());
 			}
 			System.out.println("");
+		}
+
+		if (FALLBACK_TO_FILE_SOURCE)
+		{
+			fileMeshSource = new FileMeshSource();
 		}
 	}
 
@@ -54,6 +63,11 @@ public class BsaMeshSource implements MeshSource
 			{
 				return true;
 			}
+		}
+
+		if (FALLBACK_TO_FILE_SOURCE)
+		{
+			return fileMeshSource.nifFileExists(nifName);
 		}
 		return false;
 	}
@@ -99,6 +113,13 @@ public class BsaMeshSource implements MeshSource
 					}
 
 				}
+			}
+
+			if (FALLBACK_TO_FILE_SOURCE)
+			{
+				NifFile nf = fileMeshSource.getNifFile(nifName);
+				if (nf != null)
+					return nf;
 			}
 
 			System.out.print("getNifFile nif " + nifName + " not found in archive bsas");
@@ -154,6 +175,13 @@ public class BsaMeshSource implements MeshSource
 				}
 			}
 
+			if (FALLBACK_TO_FILE_SOURCE)
+			{
+				InputStream is = fileMeshSource.getInputStreamForFile(fileName);
+				if (is != null)
+					return is;
+			}
+			
 			System.out.print("getInputStreamForFile nif " + fileName + " not found in archive bsas");
 			for (ArchiveFile archiveFile : bsas)
 			{
@@ -186,6 +214,13 @@ public class BsaMeshSource implements MeshSource
 				}
 			}
 
+			if (FALLBACK_TO_FILE_SOURCE)
+			{
+				ByteBuffer bb = fileMeshSource.getByteBuffer(fileName);
+				if (bb != null)
+					return bb;
+			}
+			
 			System.out.print("getByteBuffer nif " + fileName + " not found in archive bsas");
 			for (ArchiveFile archiveFile : bsas)
 			{

@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jogamp.java3d.MediaContainer;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.TextureUnitState;
 
@@ -17,11 +18,14 @@ import tools.compressedtexture.astc.ASTCTextureLoader;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.compressedtexture.ktx.KTXTextureLoader;
 import utils.source.TextureSource;
+import utils.source.file.FileTextureSource;
 
 public class BsaTextureSource implements TextureSource
 {
 	private List<ArchiveFile> bsas;
-
+	
+	private FileTextureSource fileTextureSource = null;
+	
 	public BsaTextureSource(List<ArchiveFile> allBsas)
 	{
 		this.bsas = new ArrayList<ArchiveFile>();
@@ -40,6 +44,11 @@ public class BsaTextureSource implements TextureSource
 				System.out.print(" Looked in Archive:" + archiveFile.getName());
 			}
 			System.out.println("");
+		}
+		
+		if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+		{
+			fileTextureSource = new FileTextureSource();
 		}
 	}
 
@@ -88,7 +97,12 @@ public class BsaTextureSource implements TextureSource
 				}
 			}
 		}
-
+		
+		if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+		{
+			return fileTextureSource.textureFileExists(texName);
+		}
+		
 		return false;
 	}
 
@@ -170,6 +184,13 @@ public class BsaTextureSource implements TextureSource
 					}
 				}
 
+			}
+			
+			if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+			{
+				Texture mc = fileTextureSource.getTexture(texName);
+				if (mc != null)
+					return mc;
 			}
 		}
 		System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
@@ -256,6 +277,13 @@ public class BsaTextureSource implements TextureSource
 				}
 
 			}
+			
+			if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+			{
+				TextureUnitState mc = fileTextureSource.getTextureUnitState(texName);
+				if (mc != null)
+					return mc;
+			}
 		}
 
 		//No many times this will fall through here, if texture doesn't exist for example
@@ -321,6 +349,9 @@ public class BsaTextureSource implements TextureSource
 
 				}
 			}
+			
+			
+			 
 		}
 		System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
 		new Throwable().printStackTrace();

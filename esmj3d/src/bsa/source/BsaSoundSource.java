@@ -13,12 +13,15 @@ import archive.ArchiveFile;
 import archive.ArchiveFile.Folder;
 import tools.SoundKeyToName;
 import utils.source.SoundSource;
+import utils.source.file.FileSoundSource;
 
 public class BsaSoundSource implements SoundSource
 {
 	private List<ArchiveFile> bsas;
 
 	private SoundKeyToName soundKeyToName;
+
+	private FileSoundSource fileSoundSource = null;
 
 	public BsaSoundSource(List<ArchiveFile> allBsas, SoundKeyToName soundKeyToName)
 	{
@@ -33,7 +36,7 @@ public class BsaSoundSource implements SoundSource
 
 		this.soundKeyToName = soundKeyToName;
 
-		if (bsas.size() == 0)
+		if (bsas.size() == 0 && !BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
 		{
 			System.out.print("No hasSounds archive files found in:");
 			for (ArchiveFile archiveFile : allBsas)
@@ -41,6 +44,11 @@ public class BsaSoundSource implements SoundSource
 				System.out.print(" Looked in Archive:" + archiveFile.getName());
 			}
 			System.out.println("");
+		}
+
+		if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+		{
+			fileSoundSource = new FileSoundSource();
 		}
 	}
 
@@ -86,6 +94,13 @@ public class BsaSoundSource implements SoundSource
 				}
 			}
 
+		}
+
+		if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+		{
+			MediaContainer mc = fileSoundSource.getMediaContainer(mediaName);
+			if (mc != null)
+				return mc;
 		}
 
 		System.out.println("BsaSoundSource Error getting sound from bsas key: " + mediaName + " file: " + soundFile);
@@ -134,7 +149,12 @@ public class BsaSoundSource implements SoundSource
 			}
 
 		}
-
+		if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE)
+		{
+			InputStream mc = fileSoundSource.getInputStream(mediaName);
+			if (mc != null)
+				return mc;
+		}
 		System.out.println("BsaSoundSource Error getting sound from bsas key: " + mediaName + " file: " + soundFile);
 		return null;
 	}
