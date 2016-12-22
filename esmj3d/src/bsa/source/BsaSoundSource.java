@@ -28,7 +28,7 @@ public class BsaSoundSource implements SoundSource
 		this.bsas = new ArrayList<ArchiveFile>();
 		for (ArchiveFile archiveFile : allBsas)
 		{
-			if (archiveFile.hasSounds())
+			if (archiveFile != null && archiveFile.hasSounds())
 			{
 				bsas.add(archiveFile);
 			}

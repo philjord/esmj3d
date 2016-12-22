@@ -26,7 +26,7 @@ public class BsaMeshSource implements MeshSource
 		this.bsas = new ArrayList<ArchiveFile>();
 		for (ArchiveFile archiveFile : allBsas)
 		{
-			if (archiveFile.hasNifOrKf())
+			if (archiveFile != null && archiveFile.hasNifOrKf())
 			{
 				bsas.add(archiveFile);
 			}
