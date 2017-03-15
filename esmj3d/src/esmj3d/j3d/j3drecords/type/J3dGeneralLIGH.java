@@ -1,12 +1,15 @@
 package esmj3d.j3d.j3drecords.type;
 
+import java.util.Iterator;
+
+import org.jogamp.java3d.Behavior;
 import org.jogamp.java3d.BoundingLeaf;
 import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.PointLight;
 import org.jogamp.java3d.SpotLight;
-import org.jogamp.java3d.utils.shader.Cube;
-import org.jogamp.java3d.utils.shader.SimpleShaderAppearance;
+import org.jogamp.java3d.WakeupCriterion;
+import org.jogamp.java3d.WakeupOnElapsedTime;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
@@ -21,6 +24,7 @@ import nif.j3d.NiToJ3dData;
 import nif.niobject.NiAVObject;
 import nif.niobject.NiNode;
 import nif.niobject.NiObject;
+import tools3d.utils.Utils3D;
 import utils.ESConfig;
 import utils.source.MediaSources;
 
@@ -29,6 +33,8 @@ public class J3dGeneralLIGH extends J3dRECOType
 	private Light light = null;
 
 	private BoundingLeaf bl = new BoundingLeaf();
+	
+	private LightFlickerBehavior lightFlickerBehavior;
 
 	public J3dGeneralLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources)
 	{
@@ -84,6 +90,7 @@ public class J3dGeneralLIGH extends J3dRECOType
 				light = new SpotLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent), new Vector3f(0, 0, -1), ligh.fieldOfView, 0);
 			}
 			light.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+			light.setCapability(Light.ALLOW_COLOR_WRITE);
 			bl.setRegion(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), ligh.radius * ESConfig.ES_TO_METERS_SCALE));
 			light.setInfluencingBoundingLeaf(bl);
 			addChild(bl);
@@ -93,6 +100,13 @@ public class J3dGeneralLIGH extends J3dRECOType
 			//Cube c =  new Cube(ligh.radius * ESConfig.ES_TO_METERS_SCALE );
 			//c.setAppearance(new SimpleShaderAppearance(color));			
 			//addChild(c);
+			
+			
+			//TODO: add the flickering effect in with a behaviour (just up and down intensity of each color randomly a bit)
+			lightFlickerBehavior = new LightFlickerBehavior(light);
+			lightFlickerBehavior.setEnable(true);
+			lightFlickerBehavior.setSchedulingBounds(Utils3D.defaultBounds);
+			addChild(lightFlickerBehavior);
 		}
 
 	}
@@ -146,6 +160,46 @@ public class J3dGeneralLIGH extends J3dRECOType
 			{
 				light.setInfluencingBoundingLeaf(null);
 			}
+		}
+	}
+	
+	
+	private class LightFlickerBehavior extends Behavior
+	{
+		private Light lightToFlicker;
+		private Color3f originalColor = new Color3f();
+		private Color3f updateColor = new Color3f();
+
+		private WakeupOnElapsedTime wakeUp;
+
+		public LightFlickerBehavior(Light lightToFlicker)
+		{
+			this.lightToFlicker = lightToFlicker;		
+			lightToFlicker.getColor(originalColor);
+			wakeUp = new WakeupOnElapsedTime(50);
+		}
+
+		 
+
+		@Override
+		public void initialize()
+		{
+			wakeupOn(wakeUp);
+		}
+
+		@Override
+		public void processStimulus(Iterator<WakeupCriterion> critiria)
+		{
+			float dr = (float) ((Math.random() * 0.2) - 0.1);
+			float dg = (float) ((Math.random() * 0.2) - 0.1);
+			float db = (float) ((Math.random() * 0.2) - 0.1);
+			updateColor.x = originalColor.x * (1f+dr);
+			updateColor.y = originalColor.y * (1f+dg);
+			updateColor.z = originalColor.z * (1f+db);
+			lightToFlicker.setColor(updateColor);
+			
+			//reset the wakeup
+			wakeupOn(wakeUp);
 		}
 	}
 }
