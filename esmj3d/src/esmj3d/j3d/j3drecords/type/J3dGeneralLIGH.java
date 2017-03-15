@@ -5,6 +5,8 @@ import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.PointLight;
 import org.jogamp.java3d.SpotLight;
+import org.jogamp.java3d.utils.shader.Cube;
+import org.jogamp.java3d.utils.shader.SimpleShaderAppearance;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
@@ -86,6 +88,11 @@ public class J3dGeneralLIGH extends J3dRECOType
 			light.setInfluencingBoundingLeaf(bl);
 			addChild(bl);
 			addChild(light);
+			
+			// for debug visualizing the radius and color (badly)
+			//Cube c =  new Cube(ligh.radius * ESConfig.ES_TO_METERS_SCALE );
+			//c.setAppearance(new SimpleShaderAppearance(color));			
+			//addChild(c);
 		}
 
 	}
