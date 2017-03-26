@@ -1,5 +1,6 @@
 package esmj3d.j3d.j3drecords.type;
 
+import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.vecmath.Color3f;
 
 import esmj3d.data.shared.records.GenericDOOR;
@@ -44,8 +45,11 @@ public class J3dDOOR extends J3dRECOType implements Doorable
 					((Fadable) j3dNiAVObject).setOutline(null);
 			}
 
+			addChild(j3dNiAVObject);
 			fireIdle();
 		}
+		
+	 
 
 	}
 
