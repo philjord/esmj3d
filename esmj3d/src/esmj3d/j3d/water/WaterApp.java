@@ -157,7 +157,8 @@ public class WaterApp extends BranchGroup
 					}
 				};
 
-				final String[] shaderAttrNames = { "isCubeMap", "envMap", "tex", "numWaves", "amplitude", "wavelength", "speed",
+				final String[] shaderAttrNames = { //"isCubeMap",
+						"envMap", "tex", "numWaves", "amplitude", "wavelength", "speed",
 						"direction", "time" };
 
 				shaderProgram = new GLSLShaderProgram() {
@@ -171,9 +172,11 @@ public class WaterApp extends BranchGroup
 				shaderProgram.setShaderAttrNames(shaderAttrNames);
 
 				int isCubeMap = 0;
-				ShaderAttribute shaderAttribute = new ShaderAttributeValue("isCubeMap", new Integer(isCubeMap));
-				shaderAttributeSet.put(shaderAttribute);
+				ShaderAttribute shaderAttribute;
+				//ShaderAttribute shaderAttribute = new ShaderAttributeValue("isCubeMap", new Integer(isCubeMap));
+				//shaderAttributeSet.put(shaderAttribute);
 
+				// NOTE this code has been removed form the shader, do not set to 1 without recoding the shader!
 				if (isCubeMap == 1)
 				{
 					shaderAttribute = new ShaderAttributeValue("envMap", new Integer(0));
