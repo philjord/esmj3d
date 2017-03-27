@@ -33,7 +33,7 @@ public class J3dGeneralLIGH extends J3dRECOType
 	private Light light = null;
 
 	private BoundingLeaf bl = new BoundingLeaf();
-	
+
 	private LightFlickerBehavior lightFlickerBehavior;
 
 	public J3dGeneralLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources)
@@ -63,7 +63,7 @@ public class J3dGeneralLIGH extends J3dRECOType
 					Vector3f attachNode = findAttachLight(j3dNiAVObject.getNiAVObject(), vr.getNiToJ3dData());
 					if (attachNode != null)
 						lightPosition = new Point3f(attachNode);
-					
+
 				}
 			}
 
@@ -87,21 +87,21 @@ public class J3dGeneralLIGH extends J3dRECOType
 			}
 			else
 			{
-				light = new SpotLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent), new Vector3f(0, 0, -1), ligh.fieldOfView, 0);
+				light = new SpotLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent), new Vector3f(0, 0, -1),
+						ligh.fieldOfView, 0);
 			}
-			light.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+			light.setCapability(Light.ALLOW_STATE_WRITE);
 			light.setCapability(Light.ALLOW_COLOR_WRITE);
 			bl.setRegion(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), ligh.radius * ESConfig.ES_TO_METERS_SCALE));
 			light.setInfluencingBoundingLeaf(bl);
 			addChild(bl);
 			addChild(light);
-			
+
 			// for debug visualizing the radius and color (badly)
 			//Cube c =  new Cube(ligh.radius * ESConfig.ES_TO_METERS_SCALE );
 			//c.setAppearance(new SimpleShaderAppearance(color));			
 			//addChild(c);
-			
-			
+
 			//TODO: add the flickering effect in with a behaviour (just up and down intensity of each color randomly a bit)
 			lightFlickerBehavior = new LightFlickerBehavior(light);
 			lightFlickerBehavior.setEnable(true);
@@ -122,8 +122,8 @@ public class J3dGeneralLIGH extends J3dRECOType
 		//TODO: this should be the classic multiply up the chain gear
 		if (niAVObject.name.equals("AttachLight"))
 		{
-			return new Vector3f(niAVObject.translation.x * ESConfig.ES_TO_METERS_SCALE, niAVObject.translation.z * ESConfig.ES_TO_METERS_SCALE,
-					-niAVObject.translation.y * ESConfig.ES_TO_METERS_SCALE);
+			return new Vector3f(niAVObject.translation.x * ESConfig.ES_TO_METERS_SCALE,
+					niAVObject.translation.z * ESConfig.ES_TO_METERS_SCALE, -niAVObject.translation.y * ESConfig.ES_TO_METERS_SCALE);
 		}
 
 		if (niAVObject instanceof NiNode)
@@ -152,18 +152,11 @@ public class J3dGeneralLIGH extends J3dRECOType
 		super.renderSettingsUpdated();
 		if (light != null)
 		{
-			if (BethRenderSettings.isEnablePlacedLights())
-			{
-				light.setInfluencingBoundingLeaf(bl);
-			}
-			else
-			{
-				light.setInfluencingBoundingLeaf(null);
-			}
+			light.setEnable(BethRenderSettings.isEnablePlacedLights());
+			lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
 		}
 	}
-	
-	
+
 	private class LightFlickerBehavior extends Behavior
 	{
 		private Light lightToFlicker;
@@ -174,12 +167,10 @@ public class J3dGeneralLIGH extends J3dRECOType
 
 		public LightFlickerBehavior(Light lightToFlicker)
 		{
-			this.lightToFlicker = lightToFlicker;		
+			this.lightToFlicker = lightToFlicker;
 			lightToFlicker.getColor(originalColor);
 			wakeUp = new WakeupOnElapsedTime(50);
 		}
-
-		 
 
 		@Override
 		public void initialize()
@@ -193,11 +184,11 @@ public class J3dGeneralLIGH extends J3dRECOType
 			float dr = (float) ((Math.random() * 0.2) - 0.1);
 			float dg = (float) ((Math.random() * 0.2) - 0.1);
 			float db = (float) ((Math.random() * 0.2) - 0.1);
-			updateColor.x = originalColor.x * (1f+dr);
-			updateColor.y = originalColor.y * (1f+dg);
-			updateColor.z = originalColor.z * (1f+db);
+			updateColor.x = originalColor.x * (1f + dr);
+			updateColor.y = originalColor.y * (1f + dg);
+			updateColor.z = originalColor.z * (1f + db);
 			lightToFlicker.setColor(updateColor);
-			
+
 			//reset the wakeup
 			wakeupOn(wakeUp);
 		}
