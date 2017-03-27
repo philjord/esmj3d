@@ -52,6 +52,8 @@ public class BethRenderSettings
 
 	private static boolean isTes3 = false;
 
+	private static boolean outlineLights = false;
+	
 	private static boolean outlineChars = false;
 
 	private static boolean outlineDoors = false;
@@ -274,6 +276,17 @@ public class BethRenderSettings
 	public static boolean isEnablePlacedLights()
 	{
 		return enablePlacedLights;
+	}
+	
+	public static boolean isOutlineLights()
+	{
+		return outlineLights;
+	}
+
+	public static void setOutlineLights(boolean outlineLights)
+	{
+		BethRenderSettings.outlineLights = outlineLights;
+		fireUpdate();
 	}
 
 	public static void setEnablePlacedLights(boolean enablePlacedLights)

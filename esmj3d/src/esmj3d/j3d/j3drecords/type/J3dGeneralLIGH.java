@@ -5,11 +5,15 @@ import java.util.Iterator;
 import org.jogamp.java3d.Behavior;
 import org.jogamp.java3d.BoundingLeaf;
 import org.jogamp.java3d.BoundingSphere;
+import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.PointLight;
 import org.jogamp.java3d.SpotLight;
 import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedTime;
+import org.jogamp.java3d.utils.geometry.Sphere;
+import org.jogamp.java3d.utils.shader.Cube;
+import org.jogamp.java3d.utils.shader.SimpleShaderAppearance;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
@@ -30,15 +34,25 @@ import utils.source.MediaSources;
 
 public class J3dGeneralLIGH extends J3dRECOType
 {
+	private static final boolean showDebug = true;
+
 	private Light light = null;
 
 	private BoundingLeaf bl = new BoundingLeaf();
 
 	private LightFlickerBehavior lightFlickerBehavior;
 
+	private Color3f color;
+
+	private float radius;
+
+	private BranchGroup obg;
+
 	public J3dGeneralLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources)
 	{
 		super(ligh, ligh.MODL == null ? "" : ligh.MODL.model.str);
+		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
 
 		Point3f lightPosition = new Point3f(0, 0, 0);
 		if (ligh.MODL != null)
@@ -75,9 +89,10 @@ public class J3dGeneralLIGH extends J3dRECOType
 
 		}
 
-		if (!makePhys && BethRenderSettings.isEnablePlacedLights())
+		if (!makePhys)
 		{
-			Color3f color = new Color3f(ligh.color.x / 255f, ligh.color.y / 255f, ligh.color.z / 255f);
+			color = new Color3f(ligh.color.x / 255f, ligh.color.y / 255f, ligh.color.z / 255f);
+			radius = ligh.radius * ESConfig.ES_TO_METERS_SCALE;
 			//System.out.println("new light " + color);
 			//System.out.println("falls fade " + ligh.fade + " falloffExponent " + ligh.falloffExponent + " fieldOfView " + ligh.fieldOfView);
 			//System.out.println("ligh.radius " + ligh.radius + " " + (ligh.radius * ESConfig.ES_TO_METERS_SCALE));
@@ -92,21 +107,19 @@ public class J3dGeneralLIGH extends J3dRECOType
 			}
 			light.setCapability(Light.ALLOW_STATE_WRITE);
 			light.setCapability(Light.ALLOW_COLOR_WRITE);
-			bl.setRegion(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), ligh.radius * ESConfig.ES_TO_METERS_SCALE));
+			bl.setRegion(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), radius));
 			light.setInfluencingBoundingLeaf(bl);
 			addChild(bl);
 			addChild(light);
 
-			// for debug visualizing the radius and color (badly)
-			//Cube c =  new Cube(ligh.radius * ESConfig.ES_TO_METERS_SCALE );
-			//c.setAppearance(new SimpleShaderAppearance(color));			
-			//addChild(c);
-
-			//TODO: add the flickering effect in with a behaviour (just up and down intensity of each color randomly a bit)
+			// add the flickering effect in with a behaviour (just up and down intensity of each color randomly a bit)
 			lightFlickerBehavior = new LightFlickerBehavior(light);
-			lightFlickerBehavior.setEnable(true);
 			lightFlickerBehavior.setSchedulingBounds(Utils3D.defaultBounds);
 			addChild(lightFlickerBehavior);
+
+			light.setEnable(BethRenderSettings.isEnablePlacedLights());
+			lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
+
 		}
 
 	}
@@ -154,7 +167,46 @@ public class J3dGeneralLIGH extends J3dRECOType
 		{
 			light.setEnable(BethRenderSettings.isEnablePlacedLights());
 			lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
+			setOutlineLights(BethRenderSettings.isOutlineLights());
 		}
+	}
+
+	private void setOutlineLights(boolean outline)
+	{
+		if (!outline)
+		{
+			if (obg != null)
+			{
+				obg.detach();
+			}
+		}
+		else
+		{
+			if (obg == null)
+			{
+				obg = new BranchGroup();
+				obg.setCapability(BranchGroup.ALLOW_DETACH);
+				//OK first issue, light bounds are interesecting with transparent tree leaves and 
+				// morphable characters because those guys have a real starange bounds
+				// that bounds should not be so strange, not sure how to do it fast
+				// attanuation will in fact fix that issue
+				// but a debug system of bounds sphere display would help a lot
+				// need a simple primitive or sphere
+
+				// for debug visualizing the radius and color 
+
+				Sphere s = new Sphere(radius, new SimpleShaderAppearance(color));
+				obg.addChild(s);
+				Cube c = new Cube(0.1);
+				c.setAppearance(new SimpleShaderAppearance(color));
+				obg.addChild(c);
+				Cube c2 = new Cube(0.05);
+				c2.setAppearance(new SimpleShaderAppearance(color));
+				obg.addChild(c2);
+			}
+			addChild(obg);
+		}
+
 	}
 
 	private class LightFlickerBehavior extends Behavior
