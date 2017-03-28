@@ -6,6 +6,7 @@ import org.jogamp.java3d.Behavior;
 import org.jogamp.java3d.BoundingLeaf;
 import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.PointLight;
 import org.jogamp.java3d.SpotLight;
@@ -119,7 +120,7 @@ public class J3dGeneralLIGH extends J3dRECOType
 
 			light.setEnable(BethRenderSettings.isEnablePlacedLights());
 			lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
-
+			setOutlineLights(BethRenderSettings.isOutlineLights());
 		}
 
 	}
@@ -186,6 +187,7 @@ public class J3dGeneralLIGH extends J3dRECOType
 			{
 				obg = new BranchGroup();
 				obg.setCapability(BranchGroup.ALLOW_DETACH);
+				obg.setCapability(Group.ALLOW_PARENT_READ);
 				//OK first issue, light bounds are interesecting with transparent tree leaves and 
 				// morphable characters because those guys have a real starange bounds
 				// that bounds should not be so strange, not sure how to do it fast
@@ -204,7 +206,10 @@ public class J3dGeneralLIGH extends J3dRECOType
 				c2.setAppearance(new SimpleShaderAppearance(color));
 				obg.addChild(c2);
 			}
-			addChild(obg);
+			
+			
+			if(obg.getParent() == null)
+				addChild(obg);
 		}
 
 	}
