@@ -1,8 +1,8 @@
 package esmj3d.j3d.j3drecords.type;
 
+import esmio.common.data.record.IRecordStore;
 import esmj3d.data.shared.records.GenericSOUN;
 import esmj3d.data.shared.records.RECO;
-import esmmanager.common.data.record.IRecordStore;
 import nif.compound.NifKey;
 import nif.niobject.NiTextKeyExtraData;
 import utils.source.MediaSources;

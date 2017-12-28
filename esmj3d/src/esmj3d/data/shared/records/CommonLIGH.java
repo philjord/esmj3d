@@ -2,8 +2,8 @@ package esmj3d.data.shared.records;
 
 import org.jogamp.vecmath.Color3f;
 
+import esmio.common.data.record.Record;
 import esmj3d.data.shared.subrecords.MODL;
-import esmmanager.common.data.record.Record;
 
 public abstract class CommonLIGH extends RECO
 {

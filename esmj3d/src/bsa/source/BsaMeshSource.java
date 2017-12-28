@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import archive.ArchiveEntry;
-import archive.ArchiveFile;
-import archive.ArchiveFile.Folder;
+import bsaio.ArchiveEntry;
+import bsaio.ArchiveFile;
+import bsaio.ArchiveFile.Folder;
 import nif.NifFile;
 import nif.NifFileReader;
 import utils.source.MeshSource;

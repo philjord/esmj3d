@@ -10,12 +10,12 @@ import org.jogamp.java3d.Group;
 
 import com.frostwire.util.SparseArray;
 
+import esmio.common.data.record.Record;
+import esmio.common.data.record.Subrecord;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
-import esmmanager.common.data.record.Record;
-import esmmanager.common.data.record.Subrecord;
 import javaawt.Point;
 import javaawt.Rectangle;
 import utils.ESConfig;

@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import esmio.common.data.record.Record;
+import esmio.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.FormID;
-import esmmanager.common.data.record.Record;
-import esmmanager.common.data.record.Subrecord;
 import tools.io.ESMByteConvert;
 
 /**

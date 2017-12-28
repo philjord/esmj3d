@@ -8,9 +8,9 @@ import java.util.List;
 import org.jogamp.java3d.MediaContainer;
 import org.jogamp.java3d.SoundException;
 
-import archive.ArchiveEntry;
-import archive.ArchiveFile;
-import archive.ArchiveFile.Folder;
+import bsaio.ArchiveEntry;
+import bsaio.ArchiveFile;
+import bsaio.ArchiveFile.Folder;
 import tools.SoundKeyToName;
 import utils.source.SoundSource;
 import utils.source.file.FileSoundSource;

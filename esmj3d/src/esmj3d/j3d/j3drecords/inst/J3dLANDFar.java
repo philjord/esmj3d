@@ -24,10 +24,10 @@ import org.jogamp.vecmath.Vector3f;
 
 import com.frostwire.util.SparseArray;
 
+import esmio.common.data.record.IRecordStore;
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.BTXT;
 import esmj3d.j3d.TESLANDGen;
-import esmmanager.common.data.record.IRecordStore;
 import tools.io.ESMByteConvert;
 import tools3d.utils.ShaderSourceIO;
 import utils.source.TextureSource;

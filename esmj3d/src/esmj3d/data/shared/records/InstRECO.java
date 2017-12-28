@@ -2,9 +2,9 @@ package esmj3d.data.shared.records;
 
 import org.jogamp.vecmath.Vector3f;
 
+import esmio.common.data.record.IRecordStore;
+import esmio.common.data.record.Record;
 import esmj3d.data.shared.subrecords.XESP;
-import esmmanager.common.data.record.IRecordStore;
-import esmmanager.common.data.record.Record;
 import tools.io.ESMByteConvert;
 
 public abstract class InstRECO extends RECO

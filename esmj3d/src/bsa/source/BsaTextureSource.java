@@ -8,14 +8,11 @@ import java.util.List;
 
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.TextureUnitState;
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
-import archive.ArchiveEntry;
-import archive.ArchiveFile;
-import archive.ArchiveFile.Folder;
-import tools.compressedtexture.CompressedTextureLoader;
-import tools.compressedtexture.astc.ASTCTextureLoader;
-import tools.compressedtexture.dds.DDSTextureLoader;
-import tools.compressedtexture.ktx.KTXTextureLoader;
+import bsaio.ArchiveEntry;
+import bsaio.ArchiveFile;
+import bsaio.ArchiveFile.Folder;
 import utils.source.TextureSource;
 import utils.source.file.FileTextureSource;
 
@@ -176,15 +173,15 @@ public class BsaTextureSource implements TextureSource
 
 							if (texNameForArchive.endsWith(".dds"))
 							{
-								tex = DDSTextureLoader.getTexture(texNameForArchive, in);
+								tex = CompressedTextureLoader.DDS.getTexture(texNameForArchive, in);
 							}
 							else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc"))
 							{
-								tex = ASTCTextureLoader.getTexture(texNameForArchive, in);
+								tex = CompressedTextureLoader.ASTC.getTexture(texNameForArchive, in);
 							}
 							else if (texNameForArchive.endsWith(".ktx"))
 							{
-								tex = KTXTextureLoader.getTexture(texNameForArchive, in);
+								tex = CompressedTextureLoader.KTX.getTexture(texNameForArchive, in);
 							}
 							else
 							{
@@ -274,15 +271,15 @@ public class BsaTextureSource implements TextureSource
 
 							if (texNameForArchive.endsWith(".dds"))
 							{
-								tex = DDSTextureLoader.getTextureUnitState(texNameForArchive, in);
+								tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in);
 							}
 							else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc"))
 							{
-								tex = ASTCTextureLoader.getTextureUnitState(texNameForArchive, in);
+								tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in);
 							}
 							else if (texNameForArchive.endsWith(".ktx"))
 							{
-								tex = KTXTextureLoader.getTextureUnitState(texNameForArchive, in);
+								tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in);
 							}
 							else
 							{

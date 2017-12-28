@@ -8,17 +8,17 @@ import org.jogamp.java3d.BranchGroup;
 
 import com.frostwire.util.SparseArray;
 
-import esmmanager.common.PluginException;
-import esmmanager.common.data.plugin.PluginGroup;
-import esmmanager.common.data.plugin.PluginRecord;
-import esmmanager.common.data.record.Record;
-import esmmanager.loader.CELLDIALPointer;
-import esmmanager.loader.ESMManager;
-import esmmanager.loader.IESMManager;
-import esmmanager.loader.InteriorCELLTopGroup;
-import esmmanager.loader.WRLDChildren;
-import esmmanager.loader.WRLDTopGroup;
-import esmmanager.tes3.IRecordStoreTes3;
+import esmio.common.PluginException;
+import esmio.common.data.plugin.PluginGroup;
+import esmio.common.data.plugin.PluginRecord;
+import esmio.common.data.record.Record;
+import esmio.loader.CELLDIALPointer;
+import esmio.loader.ESMManager;
+import esmio.loader.IESMManager;
+import esmio.loader.InteriorCELLTopGroup;
+import esmio.loader.WRLDChildren;
+import esmio.loader.WRLDTopGroup;
+import esmio.tes3.IRecordStoreTes3;
 import utils.source.MediaSources;
 
 //NOTE it will only be TEs3 style if the ESMMAnger given in is

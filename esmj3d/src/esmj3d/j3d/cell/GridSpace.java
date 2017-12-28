@@ -6,12 +6,12 @@ import org.jogamp.java3d.Node;
 
 import com.frostwire.util.SparseArray;
 
+import esmio.common.data.record.Record;
+import esmio.common.data.record.Subrecord;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.BethRenderSettings.UpdateListener;
 import esmj3d.j3d.j3drecords.inst.J3dRECODynInst;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
-import esmmanager.common.data.record.Record;
-import esmmanager.common.data.record.Subrecord;
 import javaawt.Point;
 import tools.io.ESMByteConvert;
 

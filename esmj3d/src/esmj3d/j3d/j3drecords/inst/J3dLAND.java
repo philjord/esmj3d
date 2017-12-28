@@ -30,6 +30,9 @@ import org.jogamp.vecmath.Vector3f;
 
 import com.frostwire.util.SparseArray;
 
+import esmio.common.data.record.IRecordStore;
+import esmio.common.data.record.Record;
+import esmio.tes3.IRecordStoreTes3;
 import esmj3d.data.shared.records.LAND;
 import esmj3d.data.shared.records.LAND.ATXT;
 import esmj3d.data.shared.records.LAND.BTXT;
@@ -37,9 +40,6 @@ import esmj3d.data.shared.records.LAND.VTXT;
 import esmj3d.data.shared.records.LTEX;
 import esmj3d.data.shared.records.TXST;
 import esmj3d.j3d.TESLANDGen;
-import esmmanager.common.data.record.IRecordStore;
-import esmmanager.common.data.record.Record;
-import esmmanager.tes3.IRecordStoreTes3;
 import nif.BgsmSource;
 import nif.j3d.J3dNiGeometry;
 import nif.j3d.J3dNiTriBasedGeom;
