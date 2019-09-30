@@ -11,5 +11,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core-and"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/vecmath"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java3d-utils-and"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
