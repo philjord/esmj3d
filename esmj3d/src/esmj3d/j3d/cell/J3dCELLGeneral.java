@@ -18,11 +18,14 @@ import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 import esmj3d.j3d.water.Water;
 import esmj3d.j3d.water.WaterApp;
+import tools.WeakListenerList;
 import utils.ESConfig;
 import utils.source.MediaSources;
 
 public abstract class J3dCELLGeneral extends BranchGroup
 {
+	private WeakListenerList<J3dCELLGeneral> memoryUseList = new WeakListenerList<J3dCELLGeneral>();
+	
 	protected IRecordStore master;
 
 	protected List<Record> children;
@@ -50,8 +53,11 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+		
+		memoryUseList.add(this);
 	}
 
+	
 	public abstract Node makeJ3dRECOFar(Record record);
 
 	public abstract J3dRECOInst makeJ3dRECO(Record record);
@@ -122,4 +128,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		return null;
 	}
 
+	public WeakListenerList<J3dCELLGeneral> getMemoryUseList() {
+		return memoryUseList;
+	}
 }
