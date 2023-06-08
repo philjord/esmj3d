@@ -31,140 +31,129 @@ import tools3d.utils.Utils3D;
 import utils.PerFrameUpdateBehavior;
 import utils.source.TextureSource;
 
-public class WaterApp extends BranchGroup
-{
-	private Appearance app;
+public class WaterApp extends BranchGroup {
+	private Appearance				app;
 
-	private ShaderAttributeValue timeShaderAttribute = null;
+	private ShaderAttributeValue	timeShaderAttribute	= null;
 
-	private long start = System.currentTimeMillis();
+	private long					start				= System.currentTimeMillis();
 
-	private WaterTexBehavior waterTexBehavior;
+	private WaterTexBehavior		waterTexBehavior;
 
-	private boolean USE_SHADERS = NifToJ3d.USE_SHADERS;
+	private boolean					USE_SHADERS			= NifToJ3d.USE_SHADERS;
 
-	public WaterApp(String defaultTexture, TextureSource textureSource)
-	{
-		this(new String[] { defaultTexture }, textureSource);
+	public WaterApp(String defaultTexture, TextureSource textureSource) {
+		this(new String[] {defaultTexture}, textureSource);
 	}
 
-	public WaterApp(String[] textureStrings, TextureSource textureSource)
-	{
+	public WaterApp(String[] textureStrings, TextureSource textureSource) {
 		USE_SHADERS = true;
 
 		setCapability(BranchGroup.ALLOW_DETACH);
 
-		app = createAppearance(textureSource.getTextureUnitState(textureStrings[0]));
-		if (textureStrings.length > 1)
-		{
-			// we need a flip controller type thing now
-			Texture[] textures = new Texture[textureStrings.length];
+		//might be null if the wrong sort of textures are in the files
+		TextureUnitState baseTex = textureSource.getTextureUnitState(textureStrings [0]);
 
-			for (int t = 0; t < textureStrings.length; t++)
-			{
-				textures[t] = J3dNiGeometry.loadTexture(textureStrings[t], textureSource);
-			}
+		if (baseTex != null) {
+			app = createAppearance(baseTex);
+			if (textureStrings.length > 1) {
+				// we need a flip controller type thing now
+				Texture[] textures = new Texture[textureStrings.length];
 
-			if (app.getTextureUnitCount() > 0)
-			{
-				app.getTextureUnitState(0).setCapability(TextureUnitState.ALLOW_STATE_WRITE);
-			}
-			else
-			{
-				app.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
-			}
-
-			waterTexBehavior = new WaterTexBehavior(app, textures);
-			waterTexBehavior.setEnable(true);
-			waterTexBehavior.setSchedulingBounds(Utils3D.defaultBounds);
-			addChild(waterTexBehavior);
-		}
-
-		PolygonAttributes pa = new PolygonAttributes();
-		pa.setCullFace(PolygonAttributes.CULL_NONE);
-		app.setPolygonAttributes(pa);
-
-		//TODO: if the texture is not transparent we need to use the vertex color transparency
-		TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.3f);
-		app.setTransparencyAttributes(trans);
-
-		Material mat = new Material();
-		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
-		mat.setShininess(20.0f);
-		mat.setDiffuseColor(0.4f, 0.4f, 0.45f);
-		mat.setSpecularColor(0.8f, 0.8f, 0.9f);
-		app.setMaterial(mat);
-
-		if (USE_SHADERS)
-		{
-			PerFrameUpdateBehavior pfub = new PerFrameUpdateBehavior(new PerFrameUpdateBehavior.CallBack() {
-				@Override
-				public void update()
-				{
-					if (timeShaderAttribute != null)
-					{
-						//in seconds for maths in shader
-						timeShaderAttribute.setValue(new Float((System.currentTimeMillis() - start) / 1000f));
-					}
+				for (int t = 0; t < textureStrings.length; t++) {
+					textures [t] = J3dNiGeometry.loadTexture(textureStrings [t], textureSource);
 				}
-			});
-			pfub.setSchedulingBounds(Utils3D.defaultBounds);
-			pfub.setEnable(true);
-			addChild(pfub);
+
+				if (app.getTextureUnitCount() > 0) {
+					app.getTextureUnitState(0).setCapability(TextureUnitState.ALLOW_STATE_WRITE);
+				} else {
+					app.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
+				}
+
+				waterTexBehavior = new WaterTexBehavior(app, textures);
+				waterTexBehavior.setEnable(true);
+				waterTexBehavior.setSchedulingBounds(Utils3D.defaultBounds);
+				addChild(waterTexBehavior);
+			}
+
+			PolygonAttributes pa = new PolygonAttributes();
+			pa.setCullFace(PolygonAttributes.CULL_NONE);
+			app.setPolygonAttributes(pa);
+
+			//TODO: if the texture is not transparent we need to use the vertex color transparency
+			TransparencyAttributes trans = new TransparencyAttributes(TransparencyAttributes.NICEST, 0.3f);
+			app.setTransparencyAttributes(trans);
+
+			Material mat = new Material();
+			mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
+			mat.setShininess(20.0f);
+			mat.setDiffuseColor(0.4f, 0.4f, 0.45f);
+			mat.setSpecularColor(0.8f, 0.8f, 0.9f);
+			app.setMaterial(mat);
+
+			if (USE_SHADERS) {
+				PerFrameUpdateBehavior pfub = new PerFrameUpdateBehavior(new PerFrameUpdateBehavior.CallBack() {
+					@Override
+					public void update() {
+						if (timeShaderAttribute != null) {
+							//in seconds for maths in shader
+							timeShaderAttribute.setValue(new Float((System.currentTimeMillis() - start) / 1000f));
+						}
+					}
+				});
+				pfub.setSchedulingBounds(Utils3D.defaultBounds);
+				pfub.setEnable(true);
+				addChild(pfub);
+			}
+		} else {
+			System.out.println("Water texure missing " + textureStrings [0]);
 		}
+
 	}
 
-	public Appearance getApp()
-	{
+	public Appearance getApp() {
 		return app;
 	}
 
 	private static ShaderProgram shaderProgram = null;
 
-	protected Appearance createAppearance(TextureUnitState tus)
-	{
+	protected Appearance createAppearance(TextureUnitState tus) {
 		app = null;
-		if (!USE_SHADERS)
-		{
+		if (!USE_SHADERS) {
 			app = new Appearance();
-		}
-		else
-		{
+		} else {
 			// Create the shader attribute set
 			ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
 
 			app = new ShaderAppearance();
- 
-			if (shaderProgram == null)
-			{
+
+			if (shaderProgram == null) {
 
 				String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/water.vert");
 				String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/water.frag");
 
 				Shader[] shaders = new Shader[2];
-				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+				shaders [0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX,
+						vertexProgram) {
 					@Override
-					public String toString()
-					{
+					public String toString() {
 						return "vertexProgram";
 					}
 				};
-				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+				shaders [1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT,
+						fragmentProgram) {
 					@Override
-					public String toString()
-					{
+					public String toString() {
 						return "fragmentProgram";
 					}
 				};
 
 				final String[] shaderAttrNames = { //"isCubeMap",
-						"envMap", "tex", "numWaves", "amplitude", "wavelength", "speed",
-						"direction", "time" };
+					"envMap", "tex", "numWaves", "amplitude", "wavelength", "speed", "direction", "time"};
 
 				shaderProgram = new GLSLShaderProgram() {
 					@Override
-					public String toString()
-					{
+					public String toString() {
 						return "Water Shader Program";
 					}
 				};
@@ -177,13 +166,10 @@ public class WaterApp extends BranchGroup
 				//shaderAttributeSet.put(shaderAttribute);
 
 				// NOTE this code has been removed form the shader, do not set to 1 without recoding the shader!
-				if (isCubeMap == 1)
-				{
+				if (isCubeMap == 1) {
 					shaderAttribute = new ShaderAttributeValue("envMap", new Integer(0));
 					shaderAttributeSet.put(shaderAttribute);
-				}
-				else
-				{
+				} else {
 					shaderAttribute = new ShaderAttributeValue("tex", new Integer(0));
 					shaderAttributeSet.put(shaderAttribute);
 				}
@@ -196,13 +182,12 @@ public class WaterApp extends BranchGroup
 				Float[] wavelength = new Float[numWaves];
 				Float[] speed = new Float[numWaves];
 				Point2f[] direction = new Point2f[numWaves];
-				for (int i = 0; i < numWaves; ++i)
-				{
-					amplitude[i] = 0.2f / (i + 1);
-					wavelength[i] = (float) (8 * Math.PI / (i + 1));
-					speed[i] = 1.0f + 2 * i;
+				for (int i = 0; i < numWaves; ++i) {
+					amplitude [i] = 0.2f / (i + 1);
+					wavelength [i] = (float)(8 * Math.PI / (i + 1));
+					speed [i] = 1.0f + 2 * i;
 					float angle = uniformRandomInRange(-Math.PI / 3, Math.PI / 3);
-					direction[i] = new Point2f((float) Math.cos(angle), (float) Math.sin(angle));
+					direction [i] = new Point2f((float)Math.cos(angle), (float)Math.sin(angle));
 				}
 
 				ShaderAttributeArray amplitudes = new ShaderAttributeArray("amplitude", amplitude);
@@ -220,11 +205,11 @@ public class WaterApp extends BranchGroup
 			timeShaderAttribute.setCapability(ShaderAttributeObject.ALLOW_VALUE_WRITE);
 			shaderAttributeSet.put(timeShaderAttribute);
 
-			((ShaderAppearance) app).setShaderProgram(shaderProgram);
-			((ShaderAppearance) app).setShaderAttributeSet(shaderAttributeSet);
+			((ShaderAppearance)app).setShaderProgram(shaderProgram);
+			((ShaderAppearance)app).setShaderAttributeSet(shaderAttributeSet);
 		}
 
-		app.setTextureUnitState(new TextureUnitState[] { tus });
+		app.setTextureUnitState(new TextureUnitState[] {tus});
 
 		app.setMaterial(getLandMaterial());
 
@@ -233,8 +218,7 @@ public class WaterApp extends BranchGroup
 		return app;
 	}
 
-	public Material getLandMaterial()
-	{
+	public Material getLandMaterial() {
 
 		Material landMaterial = new Material();
 
@@ -246,31 +230,25 @@ public class WaterApp extends BranchGroup
 		return landMaterial;
 	}
 
-	private static float uniformRandomInRange(double d, double e)
-	{
-		return (float) (d + (Math.random() * (e - d)));
+	private static float uniformRandomInRange(double d, double e) {
+		return (float)(d + (Math.random() * (e - d)));
 	}
 
-	private class WaterTexBehavior extends Behavior
-	{
-		private Appearance app2;
+	private class WaterTexBehavior extends Behavior {
+		private Appearance			app2;
 
-		private Texture[] textures;
+		private Texture[]			textures;
 
-		private WakeupOnElapsedTime wakeUp;
+		private WakeupOnElapsedTime	wakeUp;
 
-		private int idx = 0;
+		private int					idx	= 0;
 
-		public WaterTexBehavior(Appearance app, Texture[] textures)
-		{
+		public WaterTexBehavior(Appearance app, Texture[] textures) {
 			this.app2 = app;
-			if (app2.getTextureUnitCount() > 0)
-			{
+			if (app2.getTextureUnitCount() > 0) {
 				app2.setCapability(Appearance.ALLOW_TEXTURE_UNIT_STATE_READ);
 				app2.getTextureUnitState(0).setCapability(Appearance.ALLOW_TEXTURE_WRITE);
-			}
-			else
-			{
+			} else {
 				app2.setCapability(Appearance.ALLOW_TEXTURE_WRITE);
 			}
 			this.textures = textures;
@@ -279,23 +257,18 @@ public class WaterApp extends BranchGroup
 		}
 
 		@Override
-		public void initialize()
-		{
+		public void initialize() {
 			wakeupOn(wakeUp);
 		}
 
 		@Override
-		public void processStimulus(Iterator<WakeupCriterion> critiria)
-		{
+		public void processStimulus(Iterator<WakeupCriterion> critiria) {
 			idx++;
 			idx = ((idx >= textures.length) ? 0 : idx);
-			if (app2.getTextureUnitCount() > 0)
-			{
-				app2.getTextureUnitState(0).setTexture(textures[idx]);
-			}
-			else
-			{
-				app2.setTexture(textures[idx]);
+			if (app2.getTextureUnitCount() > 0) {
+				app2.getTextureUnitState(0).setTexture(textures [idx]);
+			} else {
+				app2.setTexture(textures [idx]);
 			}
 			//reset the wakeup
 			wakeupOn(wakeUp);
