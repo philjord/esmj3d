@@ -155,6 +155,12 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 		}
 	}
 
+	
+	public PluginGroup getPersistentChildrenOfCell(int formId)
+	{
+		return persistentChildrenGroupByFormId.get(formId);
+	}
+	
 	public int getCellIdOfPersistentTarget(int formId)
 	{
 		return persistentCellIdByFormId.get(formId).intValue();

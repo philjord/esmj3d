@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Group;
@@ -169,5 +170,16 @@ public class GridSpaces extends BranchGroup
 			return null;
 		}
 	}
+	
+	public SparseArray<J3dRECOInst> getJ3dRECOs()
+	{
+		SparseArray<J3dRECOInst> ret = new SparseArray<J3dRECOInst>();
+		for (GridSpace gs : allGridSpaces.values()) {
+			ret.putAll(gs.getJ3dRECOsById());
+		}
+		 
+		return ret;
+	}
+
 
 }
