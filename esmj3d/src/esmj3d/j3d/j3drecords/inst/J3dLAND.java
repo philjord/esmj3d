@@ -44,9 +44,9 @@ import nif.BgsmSource;
 import nif.j3d.J3dNiGeometry;
 import nif.j3d.J3dNiTriBasedGeom;
 import nif.niobject.bgsm.BSMaterial;
+import nif.shader.ShaderSourceIO;
 import tools.io.ESMByteConvert;
 import tools3d.utils.PhysAppearance;
-import tools3d.utils.ShaderSourceIO;
 import tools3d.utils.Utils3D;
 import utils.ESConfig;
 import utils.source.TextureSource;
@@ -852,12 +852,14 @@ public class J3dLAND extends J3dRECOStatInst
 
 				Shader[] shaders = new Shader[2];
 				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+					@Override
 					public String toString()
 					{
 						return "vertexProgram";
 					}
 				};
 				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+					@Override
 					public String toString()
 					{
 						return "fragmentProgram";
@@ -865,6 +867,7 @@ public class J3dLAND extends J3dRECOStatInst
 				};
 
 				shaderProgram = new GLSLShaderProgram() {
+					@Override
 					public String toString()
 					{
 						return "Land Shader Program";
@@ -1053,12 +1056,14 @@ public class J3dLAND extends J3dRECOStatInst
 
 				Shader[] shaders = new Shader[2];
 				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+					@Override
 					public String toString()
 					{
 						return "Tes3 land vertex Program";
 					}
 				};
 				shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+					@Override
 					public String toString()
 					{
 						return "Tes3 land fragment Program";
@@ -1066,6 +1071,7 @@ public class J3dLAND extends J3dRECOStatInst
 				};
 
 				shaderProgram = new GLSLShaderProgram() {
+					@Override
 					public String toString()
 					{
 						return "Land Shader Program";

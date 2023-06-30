@@ -26,7 +26,7 @@ import org.jogamp.vecmath.Point2f;
 
 import nif.NifToJ3d;
 import nif.j3d.J3dNiGeometry;
-import tools3d.utils.ShaderSourceIO;
+import nif.shader.ShaderSourceIO;
 import tools3d.utils.Utils3D;
 import utils.PerFrameUpdateBehavior;
 import utils.source.TextureSource;

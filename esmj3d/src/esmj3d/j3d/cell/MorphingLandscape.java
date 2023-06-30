@@ -26,7 +26,7 @@ import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import javaawt.Point;
 import javaawt.Rectangle;
-import tools3d.utils.ShaderSourceIO;
+import nif.shader.ShaderSourceIO;
 
 /**
  * Used by Oblivion only, the morph land system
@@ -90,6 +90,7 @@ public class MorphingLandscape extends BranchGroup
 					final Rectangle bounds = new Rectangle(lowX, lowY, absBounds.width + 1, absBounds.height + 1);
 
 					baseItsa.updateData(new GeometryUpdater() {
+						@Override
 						public void updateData(Geometry geometry)
 						{
 							FloatBuffer coordRefFloat = (FloatBuffer) baseItsa.getCoordRefBuffer().getBuffer();
@@ -163,12 +164,14 @@ public class MorphingLandscape extends BranchGroup
 
 			Shader[] shaders = new Shader[2];
 			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
+				@Override
 				public String toString()
 				{
 					return "vertexProgram";
 				}
 			};
 			shaders[1] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_FRAGMENT, fragmentProgram) {
+				@Override
 				public String toString()
 				{
 					return "fragmentProgram";
@@ -176,6 +179,7 @@ public class MorphingLandscape extends BranchGroup
 			};
 
 			shaderProgram = new GLSLShaderProgram() {
+				@Override
 				public String toString()
 				{
 					return "Land (lod) Shader Program";
