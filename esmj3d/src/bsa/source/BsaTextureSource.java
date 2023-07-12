@@ -19,13 +19,14 @@ import utils.source.file.FileTextureSource;
 public class BsaTextureSource implements TextureSource
 {
 
+	//DDS will be in .dds and are S3TC compress, KTX are .ktx and ETC2 compressed, ASTC will be .astc
 	public enum AllowedTextureFormats
 	{
 		ALL, DDS, KTX, ASTC
 	};
 
 	public static AllowedTextureFormats allowedTextureFormats = AllowedTextureFormats.ALL;
-
+	
 	private List<ArchiveFile> bsas;
 
 	private FileTextureSource fileTextureSource = null;
