@@ -30,7 +30,7 @@ public class BsaTextureSource implements TextureSource {
 	private List<ArchiveFile>			bsas;
 
 	private FileTextureSource			fileTextureSource		= null;
-
+	
 	public BsaTextureSource(List<ArchiveFile> allBsas) {		
 		this.bsas = new ArrayList<ArchiveFile>();		
 		
@@ -61,6 +61,29 @@ public class BsaTextureSource implements TextureSource {
 		}
 	}
 
+	
+	public boolean hasDDS() {
+		for (ArchiveFile archiveFile : bsas) {
+			if (archiveFile.hasDDS())
+				return true;
+		}
+		return false;
+	}
+	public boolean hasKTX() {
+		for (ArchiveFile archiveFile : bsas) {
+			if (archiveFile.hasKTX())
+				return true;
+		}
+		return false;
+	}
+	public boolean hasASTC() {
+		for (ArchiveFile archiveFile : bsas) {
+			if (archiveFile.hasASTC())
+				return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public boolean textureFileExists(String texName) {
 		if (texName != null && texName.length() > 0) {
