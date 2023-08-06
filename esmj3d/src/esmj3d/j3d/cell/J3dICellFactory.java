@@ -12,7 +12,7 @@ import esmio.common.PluginException;
 import esmio.common.data.plugin.PluginGroup;
 import esmio.common.data.plugin.PluginRecord;
 import esmio.common.data.record.Record;
-import esmio.loader.CELLDIALPointer;
+import esmio.loader.FormToFilePointer;
 import esmio.loader.ESMManager;
 import esmio.loader.IESMManager;
 import esmio.loader.InteriorCELLTopGroup;
@@ -87,19 +87,21 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 
 						// it looks like no temps in wrld cell so no saving by making a special call
 						WRLDChildren children = esmManager.getWRLDChildren(wrldPR.getFormID());
-						PluginGroup cellChildGroups = children.getCellChildren();
-						if (cellChildGroups != null && cellChildGroups.getRecordList() != null)
-						{
-							for (Record pgr : cellChildGroups.getRecordList())
+						if(children != null) {
+							PluginGroup cellChildGroups = children.getCellChildren();
+							if (cellChildGroups != null && cellChildGroups.getRecordList() != null)
 							{
-								PluginGroup pg = (PluginGroup) pgr;
-								if (pg.getGroupType() == PluginGroup.CELL_PERSISTENT)
+								for (Record pgr : cellChildGroups.getRecordList())
 								{
-									cachePersistentChildren(pg, wrldPR.getFormID());
+									PluginGroup pg = (PluginGroup) pgr;
+									if (pg.getGroupType() == PluginGroup.CELL_PERSISTENT)
+									{
+										cachePersistentChildren(pg, wrldPR.getFormID());
+									}
 								}
 							}
+							wrldCount++;
 						}
-						wrldCount++;
 					}
 				}
 
@@ -108,7 +110,7 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 				List<InteriorCELLTopGroup> interiorCELLTopGroups = ((ESMManager) esmManager).getInteriorCELLTopGroups();
 				for (InteriorCELLTopGroup interiorCELLTopGroup : interiorCELLTopGroups)
 				{
-					for (CELLDIALPointer cp : interiorCELLTopGroup.getAllInteriorCELLFormIds())
+					for (FormToFilePointer cp : interiorCELLTopGroup.getAllInteriorCELLFormIds())
 					{
 						try
 						{
@@ -116,16 +118,9 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 							cachePersistentChildren(cellChildGroups, cp.formId);
 							cellCount++;
 						}
-						catch (DataFormatException e)
+						catch (Exception e)
 						{
-							e.printStackTrace();
-						}
-						catch (IOException e)
-						{
-							e.printStackTrace();
-						}
-						catch (PluginException e)
-						{
+							System.out.println("Exception loading interior CELL " + cp.formId);
 							e.printStackTrace();
 						}
 					}
@@ -163,7 +158,8 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 	
 	public int getCellIdOfPersistentTarget(int formId)
 	{
-		return persistentCellIdByFormId.get(formId).intValue();
+		Integer ret = persistentCellIdByFormId.get(formId);
+		return ret == null ? -1 : ret.intValue();
 	}
 
 	@Override

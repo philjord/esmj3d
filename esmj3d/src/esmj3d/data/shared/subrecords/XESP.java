@@ -19,7 +19,7 @@ public class XESP
 
 	public XESP(byte[] bytes)
 	{
-		parentId = ESMByteConvert.extractInt(bytes, 0);
+		parentId = ESMByteConvert.extractInt3(bytes, 0);
 		flags = ESMByteConvert.extractInt(bytes, 4);
 	}
 }

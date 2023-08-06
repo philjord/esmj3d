@@ -32,7 +32,7 @@ public class XTEL
 		}
 		else
 		{
-			doorFormId = ESMByteConvert.extractInt(bytes, 0);
+			doorFormId = ESMByteConvert.extractInt3(bytes, 0);
 			x = ESMByteConvert.extractFloat(bytes, 4);
 			y = ESMByteConvert.extractFloat(bytes, 8);
 			z = ESMByteConvert.extractFloat(bytes, 12);

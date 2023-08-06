@@ -10,7 +10,7 @@ public class CNTO
 
 	public CNTO(byte[] bytes)
 	{
-		itemFormId = ESMByteConvert.extractInt(bytes, 0);
+		itemFormId = ESMByteConvert.extractInt3(bytes, 0);
 		count = ESMByteConvert.extractInt(bytes, 4);
 
 	}
