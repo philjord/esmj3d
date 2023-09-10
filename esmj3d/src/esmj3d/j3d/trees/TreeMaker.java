@@ -254,8 +254,10 @@ public class TreeMaker
 
 			app.setTransparencyAttributes(transparencyAttributes);
 
+			// Distant tree are miles away form any light source apart from possibly sunlight directional
+			// so for now just disable the lighting on them
 			Material m = new Material();
-			m.setLightingEnable(false);//TODO: why false lighting enable? speed appears to be unaffected?
+			m.setLightingEnable(false); 
 			app.setMaterial(m);
 
 			loadedApps.put(keyString, app);
@@ -356,7 +358,8 @@ public class TreeMaker
 	{
 		Appearance app = new SimpleShaderAppearance();
 		app.setTextureUnitState(new TextureUnitState[] { tus0 });
-		app.setMaterial(getMaterial());
+		app.setMaterial(getMaterial());			
+		
 		return app;
 	}
 
