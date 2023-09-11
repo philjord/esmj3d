@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Group;
@@ -79,7 +78,8 @@ public class GridSpaces extends BranchGroup
 	///TODO: for now the near system is used to load gridspaces to make it predictable (skyrim loads too many
 	public void update(float charX, float charY, BethLodManager bethLodManager)
 	{
-		Rectangle bounds = bethLodManager.getGridBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
+		bethLodManager.setNearGridLoadCount(BethRenderSettings.getNearLoadGridCount());
+		Rectangle bounds = bethLodManager.getGridBounds(charX, charY);
 
 		List<GridSpace> gridsToRemove = getGridSpacesToRemove(bounds);
 		for (GridSpace gridSpace : gridsToRemove)

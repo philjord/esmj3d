@@ -104,7 +104,7 @@ public class Beth32LodManager extends BethLodManager
 					removeChild(oblivLODLandscape);
 			}
 		}
-
+						
 		if ((System.currentTimeMillis() - start) > 50)
 			System.out.println("Beth32LodManager.updateGross in " + (System.currentTimeMillis() - start) + "ms");
 	}
@@ -114,19 +114,10 @@ public class Beth32LodManager extends BethLodManager
 	 * @return
 	 */
 	@Override
-	public Rectangle getGridBounds(float charX, float charY, int loadGridCount)
+	public Rectangle getGridBounds(float charX, float charY)
 	{
-		return getBounds(charX, charY, loadGridCount);
+		return getBounds(charX, charY, this.nearGridLoadCount);
 	}
 
-	public static Rectangle getBounds(float charX, float charY, int loadGridCount)
-	{
-		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
-		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
-
-		int lowX = (charLodX - loadGridCount);
-		int lowY = (charLodY - loadGridCount);
-
-		return new Rectangle(lowX, lowY, (loadGridCount * 2), (loadGridCount * 2));
-	}
+	
 }

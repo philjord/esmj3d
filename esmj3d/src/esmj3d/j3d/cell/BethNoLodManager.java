@@ -31,8 +31,8 @@ public class BethNoLodManager extends BethLodManager
 	}
 
 	@Override
-	public Rectangle getGridBounds(float charX, float charY, int nearLoadGridCount)
+	public Rectangle getGridBounds(float charX, float charY)
 	{
-		return Beth32LodManager.getBounds(charX, charY, nearLoadGridCount);
+		return getBounds(charX, charY, this.nearGridLoadCount);
 	}
 }

@@ -14,6 +14,8 @@ import org.jogamp.java3d.PolygonAttributes;
 import org.jogamp.java3d.RenderingAttributes;
 import org.jogamp.java3d.Shader;
 import org.jogamp.java3d.ShaderAppearance;
+import org.jogamp.java3d.ShaderAttributeSet;
+import org.jogamp.java3d.ShaderAttributeValue;
 import org.jogamp.java3d.ShaderProgram;
 import org.jogamp.java3d.SourceCodeShader;
 import org.jogamp.java3d.Texture;
@@ -48,6 +50,8 @@ public class MorphingLandscape extends BranchGroup
 	private Rectangle prevBounds = new Rectangle();
 
 	private ArrayList<GeometryArray> baseItsas = new ArrayList<GeometryArray>();
+	
+	public static ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
 
 	public MorphingLandscape(int lodX, int lodY, int scale)
 	{
@@ -130,6 +134,8 @@ public class MorphingLandscape extends BranchGroup
 	protected static Appearance createAppearance(Texture tex)
 	{
 		ShaderAppearance app = new ShaderAppearance();
+		//app.setTransparencyAttributes(new TransparencyAttributes(TransparencyAttributes.NICEST,1));
+		
 		Material mat = new Material();
 		mat.setColorTarget(Material.AMBIENT_AND_DIFFUSE);
 		mat.setShininess(1.0f);
@@ -149,7 +155,9 @@ public class MorphingLandscape extends BranchGroup
 		TextureUnitState tus0 = new TextureUnitState();
 		tus0.setTexture(tex);
 		tus[0] = tus0;
-		app.setTextureUnitState(tus);
+		app.setTextureUnitState(tus);		
+		 
+		app.setShaderAttributeSet(shaderAttributeSet);
 
 		return app;
 	}
@@ -159,8 +167,8 @@ public class MorphingLandscape extends BranchGroup
 		if (shaderProgram == null)
 		{
 
-			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landfar.vert");
-			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landfar.frag");
+			String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landlod.vert");
+			String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landlod.frag");
 
 			Shader[] shaders = new Shader[2];
 			shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX, vertexProgram) {
@@ -186,8 +194,12 @@ public class MorphingLandscape extends BranchGroup
 				}
 			};
 			shaderProgram.setShaders(shaders);
-			shaderProgram.setShaderAttrNames(new String[] { "baseMap" });
-
+			shaderProgram.setShaderAttrNames(new String[] { "baseMap" });			 
+			
+			
+			shaderAttributeSet.setCapability(ShaderAttributeSet.ALLOW_ATTRIBUTES_READ);
+			ShaderAttributeValue sav0 = new ShaderAttributeValue("baseMap", new Integer(0));
+			shaderAttributeSet.put(sav0);
 		}
 	}
 
