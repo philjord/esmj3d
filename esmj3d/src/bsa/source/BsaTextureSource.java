@@ -120,13 +120,14 @@ public class BsaTextureSource implements TextureSource {
 					|| (archiveFile.hasDDS() && allowedTextureFormats == AllowedTextureFormats.DDS)
 					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
 					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
+					String texNameForArchive = texName;
 					if (archiveFile.hasKTX()) {
-						texName = texName.replace(".dds", ".ktx");
+						texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
 					} else if (archiveFile.hasASTC()) {
-						texName = texName.replace(".dds", ".tga.astc");
+						texNameForArchive = texNameForArchive.replace(".dds", ".tga.astc");
 					}
 
-					ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
+					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
 					if (archiveEntry != null) {
 						return true;
 					}
