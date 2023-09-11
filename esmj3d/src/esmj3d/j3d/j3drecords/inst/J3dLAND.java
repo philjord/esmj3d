@@ -57,7 +57,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static final float TERRIAN_SQUARE_SIZE = 128 * ESConfig.ES_TO_METERS_SCALE;// = 1.6256m
 
-	static final boolean OUTPUT_BINDINGS = false;
+	protected static final boolean OUTPUT_BINDINGS = false;
 
 	public static float TEX_REPEAT = 0.5f;// suggests how many times to repeat the texture over a grid square
 
@@ -144,6 +144,11 @@ public class J3dLAND extends J3dRECOStatInst
 
 	private LAND land;
 
+	// just for subclass LANDFar to use
+	public J3dLAND(LAND land, boolean enableSimpleFade, boolean makePhys)
+	{
+		super(land, enableSimpleFade, makePhys);
+	}
 	/**
 	 * Makes the physics version of land
 	 */

@@ -112,30 +112,38 @@ public abstract class InstRECO extends RECO
 
 				// flip opp flag if required
 				opp = ((xesp.flags & XESP.ENABLE_OPPOSITE_FLAG) != 0) ? !opp : opp;
-
-				CommonREFR p1REFR = new CommonREFR(master.getRecord(xesp.parentId));
-
-				//isOblivionEnable is just equal to the highest/last parent
-				isParentEnable = p1REFR.isFlagSet(RECO.InitiallyDisabled_Flag);
-
-				//	System.out.println("" + level + "refr " + p1REFR);
-				//	System.out.println("" + level + "flags " + p1REFR.flags1 + " " + Integer.toBinaryString(p1REFR.flags1));
-
-				/*		Record baseRecord2 = master.getRecord(p1REFR.NAME.formId);
 				
-						if (baseRecord2.getRecordType().equals("STAT"))
-						{
-							System.out.println("STAT of " + new STAT(baseRecord2).MODL.model.str);
-						}
-						else if (baseRecord2.getRecordType().equals("DOOR"))
-						{
-							System.out.println("DOOR of " + new DOOR(baseRecord2).MODL.model.str);
-						}
-						else
-							System.out.println("" + level + "refer type " + baseRecord2);
-				
-						level++;*/
-				xesp = p1REFR.xesp;
+				 
+				Record rec = master.getRecord(xesp.parentId);
+				if(rec != null) {
+					CommonREFR p1REFR = new CommonREFR(master.getRecord(xesp.parentId));
+	
+					//isOblivionEnable is just equal to the highest/last parent
+					isParentEnable = p1REFR.isFlagSet(RECO.InitiallyDisabled_Flag);
+	
+					//	System.out.println("" + level + "refr " + p1REFR);
+					//	System.out.println("" + level + "flags " + p1REFR.flags1 + " " + Integer.toBinaryString(p1REFR.flags1));
+	
+					/*		Record baseRecord2 = master.getRecord(p1REFR.NAME.formId);
+					
+							if (baseRecord2.getRecordType().equals("STAT"))
+							{
+								System.out.println("STAT of " + new STAT(baseRecord2).MODL.model.str);
+							}
+							else if (baseRecord2.getRecordType().equals("DOOR"))
+							{
+								System.out.println("DOOR of " + new DOOR(baseRecord2).MODL.model.str);
+							}
+							else
+								System.out.println("" + level + "refer type " + baseRecord2);
+					
+							level++;*/
+					xesp = p1REFR.xesp;
+				} else {
+					// what what?
+					//System.out.println("xesp.parentId " +xesp.parentId);				
+					xesp = null; // break out of while loop
+				}
 			}
 
 		}
