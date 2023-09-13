@@ -3,7 +3,6 @@ package esmj3d.j3d.cell;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Group;
@@ -89,24 +88,6 @@ public class Beth32_4LodManager extends BethLodManager
 				handleLodAtScale(charX, charY, 8, 16, loadedGrosses8);
 				handleLodAtScale(charX, charY, 16, 32, loadedGrosses16);
 				handleLodAtScale(charX, charY, 32, LOD_SCOPE_EXTREMES, loadedGrosses32);
-	
-				
-				// this is old code, now all 4 are loaded and the shader simply removes stuff thats too near
-				// now to tell each 4 that's loaded to update themselves
-	/*			Point charPoint = convertCharToLodXY(charX, charY);
-				Iterator<Point> keys = loadedGrosses4.keySet().iterator();
-				while (keys.hasNext())
-				{
-					Point key = keys.next();
-					if (key.distance(charPoint) <= 64)
-					{
-						MorphingLandscape oblivLODLandscape = (MorphingLandscape) loadedGrosses4.get(key);
-						oblivLODLandscape.updateVisibility(charX, charY);
-					}
-				}*/
-	
-				
-				
 				
 				// now tell the shaders about the fade dist away from the camera
 				//0.4 is the central always loaded near cell, but not all of it so the edge is a bit feathered
@@ -138,15 +119,15 @@ public class Beth32_4LodManager extends BethLodManager
 
 	int prevYmax = 0;
 
-	private void handleLodAtScale(float charX, float charY, int scale, int nextScale, HashMap<Point, BranchGroup> store)
-	{
+	private void handleLodAtScale(float charX, float charY, int scale, int nextScale, HashMap<Point, BranchGroup> store) {
 		
 		Point charLodXY = convertCharToLodXY(charX, charY);
-		System.out.println("Scale " + scale + "  next " + nextScale);
-		System.out.println("charLodXY " + charLodXY);
+		//System.out.println("Scale " + scale + "  next " + nextScale);
+		//System.out.println("charLodXY " + charLodXY);
 		
 		int nearLods = BethRenderSettings.getNearLoadGridCount();
 		if (scale == 1)	{
+			// For scale 1 just give enough room to fit the nears and exit (note it a bit less than enough room)
 			prevXmin = charLodXY.x - nearLods;
 			prevYmin = charLodXY.y - nearLods;
 			prevXmax = charLodXY.x + nearLods;
@@ -157,51 +138,40 @@ public class Beth32_4LodManager extends BethLodManager
 			prevYmax = prevYmax - (prevYmax%nextScale);
 			return;
 		}
-				
-		
-
+			
 
 		ArrayList<Integer> toAttachX = new ArrayList<Integer>();
 		ArrayList<Integer> toAttachY = new ArrayList<Integer>();
 
 		//for X then for Y
 		//get lower from previous
-		int newXmin = doAxisDown(prevXmin, scale, nextScale, toAttachX);
-		int newYmin = doAxisDown(prevYmin, scale, nextScale, toAttachY);
+		int newXmin = doAxis(prevXmin, -scale, nextScale, toAttachX);
+		int newYmin = doAxis(prevYmin, -scale, nextScale, toAttachY);
 
 		//get upper from previous
-		int newXmax = doAxisUp(prevXmax, scale, nextScale, toAttachX);
-		int newYmax = doAxisUp(prevYmax, scale, nextScale, toAttachY);
+		int newXmax = doAxis(prevXmax, scale, nextScale, toAttachX);
+		int newYmax = doAxis(prevYmax, scale, nextScale, toAttachY);
+				
+		//System.out.println("prevXYmin " +prevXmin+" "+ prevYmin);
+		//System.out.println("prevXYmax " +prevXmax+" "+ prevYmax);
 		
-		
-		System.out.println("prevXYmin " +prevXmin+" "+ prevYmin);
-		System.out.println("prevXYmax " +prevXmax+" "+ prevYmax);
-		
-		System.out.println("newXYmin " +newXmin+" "+ newYmin);
-		System.out.println("newXYmax " +newXmax+" "+ newYmax);	
+		//System.out.println("newXYmin " +newXmin+" "+ newYmin);
+		//System.out.println("newXYmax " +newXmax+" "+ newYmax);	
 		
 
-
-		if (store != null)
-		{
+		if (store != null) {
 			
-			HashSet<Point> pointsToAttach = new HashSet<Point>();
-			
+			HashSet<Point> pointsToAttach = new HashSet<Point>();			
 			
 			for (int x = newXmin; x <= newXmax; x += scale) {
 				for (int y = newYmin; y <= newYmax; y += scale) {
-					
-					if ((x>=prevXmin&&y>=prevYmin&&x<=prevXmax&&y<=prevYmax)) 
-						System.out.println("would have skipped " + x + " " + y);
 						
-					if (!(x>=prevXmin&&y>=prevYmin&&x<prevXmax&&y<prevYmax)) 
-					{
+					if (!(x>=prevXmin&&y>=prevYmin&&x<prevXmax&&y<prevYmax)){
 						Point key = new Point(x, y);
 
 						if (Math.abs(key.x - charLodXY.x) < BethRenderSettings.getLOD_LOAD_DIST_MAX()
 								&& Math.abs(key.y - charLodXY.y) < BethRenderSettings.getLOD_LOAD_DIST_MAX()) {
 							pointsToAttach.add(key);
-							System.out.println("pointsToAttach " + key);
 						}
 					}
 				}
@@ -235,17 +205,14 @@ public class Beth32_4LodManager extends BethLodManager
 				}
 			}
 		}
-		
-		
+				
 		prevXmin = newXmin;
 		prevYmin = newYmin;
 		prevXmax = newXmax;
 		prevYmax = newYmax;
-		
-
 	}
-
-	private static int doAxisDown(int startValue, int scale, int nextScale, ArrayList<Integer> toAttach)
+	
+	private static int doAxis(int startValue, int scale, int nextScale, ArrayList<Integer> toAttach)
 	{
 		//sub1 (scale)
 		//add it
@@ -256,29 +223,8 @@ public class Beth32_4LodManager extends BethLodManager
 		int val = startValue;
 		while (true)
 		{
-			val = val - scale;
-			toAttach.add(val);
-			if (val % nextScale == 0)
-				return val;
-		}
-	}
-
-	private static int doAxisUp(int startValue, int scale, int nextScale, ArrayList<Integer> toAttach)
-	{
-		//add1 (scale)
-		//add it
-		//no border check
-		//add1 (scale)
-		//is that border
-		//yes stop
-		//no then repeat
-		//mark for next scale up
-		int val = startValue;
-
-		while (true)
-		{
-			toAttach.add(val);
 			val = val + scale;
+			toAttach.add(val);
 			if (val % nextScale == 0)
 				return val;
 		}
