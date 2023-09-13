@@ -9,7 +9,9 @@ import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.LinearFog;
 import org.jogamp.java3d.Node;
+import org.jogamp.java3d.ShaderAttributeValue;
 import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Vector2f;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
@@ -36,6 +38,7 @@ public class Beth32_4LodManager extends BethLodManager
 	private String lodWorldName = "";
 
 	private J3dICellFactory j3dCellFactory;
+
 
 	public Beth32_4LodManager(J3dICellFactory j3dCellFactory)
 	{
@@ -71,34 +74,59 @@ public class Beth32_4LodManager extends BethLodManager
 		}
 	}
 
+	private Point prevCharLodPoint = new Point (-999,-999);
 	@Override
 	public void updateGross(float charX, float charY)
 	{
 		if (LOD_SCOPE_EXTREMES != 0)
-		{
-			long start = System.currentTimeMillis();
-
-			handleLodAtScale(charX, charY, 1, 4, null);
-			handleLodAtScale(charX, charY, 4, 8, loadedGrosses4);
-			handleLodAtScale(charX, charY, 8, 16, loadedGrosses8);
-			handleLodAtScale(charX, charY, 16, 32, loadedGrosses16);
-			handleLodAtScale(charX, charY, 32, LOD_SCOPE_EXTREMES, loadedGrosses32);
-
-			// now to tell each 4 that's loaded to update themselves
-			Point charPoint = convertCharToLodXY(charX, charY);
-			Iterator<Point> keys = loadedGrosses4.keySet().iterator();
-			while (keys.hasNext())
-			{
-				Point key = keys.next();
-				if (key.distance(charPoint) <= 64)
+		{						
+			Point charLodPoint = new Point((int) Math.floor(charX / J3dLAND.LAND_SIZE), (int) Math.floor(charY / J3dLAND.LAND_SIZE));
+			
+			if(!prevCharLodPoint.equals(charLodPoint)) {
+				long start = System.currentTimeMillis();
+				handleLodAtScale(charX, charY, 1, 4, null);
+				handleLodAtScale(charX, charY, 4, 8, loadedGrosses4);
+				handleLodAtScale(charX, charY, 8, 16, loadedGrosses8);
+				handleLodAtScale(charX, charY, 16, 32, loadedGrosses16);
+				handleLodAtScale(charX, charY, 32, LOD_SCOPE_EXTREMES, loadedGrosses32);
+	
+				
+				// this is old code, now all 4 are loaded and the shader simply removes stuff thats too near
+				// now to tell each 4 that's loaded to update themselves
+	/*			Point charPoint = convertCharToLodXY(charX, charY);
+				Iterator<Point> keys = loadedGrosses4.keySet().iterator();
+				while (keys.hasNext())
 				{
-					MorphingLandscape oblivLODLandscape = (MorphingLandscape) loadedGrosses4.get(key);
-					oblivLODLandscape.updateVisibility(charX, charY);
-				}
+					Point key = keys.next();
+					if (key.distance(charPoint) <= 64)
+					{
+						MorphingLandscape oblivLODLandscape = (MorphingLandscape) loadedGrosses4.get(key);
+						oblivLODLandscape.updateVisibility(charX, charY);
+					}
+				}*/
+	
+				
+				
+				
+				// now tell the shaders about the fade dist away from the camera
+				//0.4 is the central always loaded near cell, but not all of it so the edge is a bit feathered
+				float nearSize = (BethRenderSettings.getNearLoadGridCount()+0.4f)*J3dLAND.LAND_SIZE;
+				float cx = (charLodPoint.x+0.5f)*J3dLAND.LAND_SIZE;//note push to center of cell
+				float cy = (charLodPoint.y+0.5f)*J3dLAND.LAND_SIZE;
+				Vector2f minXYRemoval = new Vector2f(cx-nearSize,(cy-nearSize));
+				Vector2f maxXYRemoval = new Vector2f(cx+nearSize,(cy+nearSize));
+				 
+	//			System.out.println("minXYRemoval " + minXYRemoval);
+	//			System.out.println("maxXYRemoval " + maxXYRemoval);
+				((ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("minXYRemoval")).setValue(minXYRemoval);
+				((ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("maxXYRemoval")).setValue(maxXYRemoval);
+				
+				
+				prevCharLodPoint = charLodPoint;
+				
+				if ((System.currentTimeMillis() - start) > 50)
+					System.out.println("Beth32_4LodManager.updateGross in " + (System.currentTimeMillis() - start) + "ms");
 			}
-
-			if ((System.currentTimeMillis() - start) > 50)
-				System.out.println("Beth32_4LodManager.updateGross in " + (System.currentTimeMillis() - start) + "ms");
 		}
 	}
 
@@ -112,105 +140,108 @@ public class Beth32_4LodManager extends BethLodManager
 
 	private void handleLodAtScale(float charX, float charY, int scale, int nextScale, HashMap<Point, BranchGroup> store)
 	{
+		
 		Point charLodXY = convertCharToLodXY(charX, charY);
-		//	System.out.println("Scale " + scale);
-		//	System.out.println("charLodXY " + charLodXY);
-
-		if (scale == 1)
-		{
-			//TODO: this nearLoad is important, basically near load min
-			int nearLoad = 0;//2;
-			prevXmin = charLodXY.x - nearLoad;
-			prevYmin = charLodXY.y - nearLoad;
-			prevXmax = charLodXY.x + nearLoad;
-			prevYmax = charLodXY.y + nearLoad;
+		System.out.println("Scale " + scale + "  next " + nextScale);
+		System.out.println("charLodXY " + charLodXY);
+		
+		int nearLods = BethRenderSettings.getNearLoadGridCount();
+		if (scale == 1)	{
+			prevXmin = charLodXY.x - nearLods;
+			prevYmin = charLodXY.y - nearLods;
+			prevXmax = charLodXY.x + nearLods;
+			prevYmax = charLodXY.y + nearLods;
+			prevXmin = prevXmin - (prevXmin%nextScale) + nextScale;
+			prevYmin = prevYmin - (prevYmin%nextScale) + nextScale;
+			prevXmax = prevXmax - (prevXmax%nextScale);
+			prevYmax = prevYmax - (prevYmax%nextScale);
+			return;
 		}
+				
+		
+
 
 		ArrayList<Integer> toAttachX = new ArrayList<Integer>();
 		ArrayList<Integer> toAttachY = new ArrayList<Integer>();
 
 		//for X then for Y
 		//get lower from previous
-		prevXmin = doAxisDown(prevXmin, scale, nextScale, toAttachX);
-		prevYmin = doAxisDown(prevYmin, scale, nextScale, toAttachY);
+		int newXmin = doAxisDown(prevXmin, scale, nextScale, toAttachX);
+		int newYmin = doAxisDown(prevYmin, scale, nextScale, toAttachY);
 
 		//get upper from previous
-		prevXmax = doAxisUp(prevXmax, scale, nextScale, toAttachX);
-		prevYmax = doAxisUp(prevYmax, scale, nextScale, toAttachY);
+		int newXmax = doAxisUp(prevXmax, scale, nextScale, toAttachX);
+		int newYmax = doAxisUp(prevYmax, scale, nextScale, toAttachY);
+		
+		
+		System.out.println("prevXYmin " +prevXmin+" "+ prevYmin);
+		System.out.println("prevXYmax " +prevXmax+" "+ prevYmax);
+		
+		System.out.println("newXYmin " +newXmin+" "+ newYmin);
+		System.out.println("newXYmax " +newXmax+" "+ newYmax);	
+		
 
-		//TODO: debug a like? should do actual nears too?
+
 		if (store != null)
 		{
+			
 			HashSet<Point> pointsToAttach = new HashSet<Point>();
-
-			//  2 x's and 2 y's will only result in 4 points
-			// but in fact it should be the entire square's edge tiles
-			int minX = 999;
-			int maxX = -999;
-			for (Integer x : toAttachX)
-			{
-				minX = x < minX ? x : minX;
-				maxX = x > maxX ? x : maxX;
-			}
-			int minY = 999;
-			int maxY = -999;
-			for (Integer y : toAttachY)
-			{
-
-				minY = y < minY ? y : minY;
-				maxY = y > maxY ? y : maxY;
-			}
-
-			for (int x = minX; x <= maxX; x += scale)
-			{
-				for (int y = minY; y <= maxY; y += scale)
-				{
-					if (toAttachX.contains(x) || toAttachY.contains(y))
+			
+			
+			for (int x = newXmin; x <= newXmax; x += scale) {
+				for (int y = newYmin; y <= newYmax; y += scale) {
+					
+					if ((x>=prevXmin&&y>=prevYmin&&x<=prevXmax&&y<=prevYmax)) 
+						System.out.println("would have skipped " + x + " " + y);
+						
+					if (!(x>=prevXmin&&y>=prevYmin&&x<prevXmax&&y<prevYmax)) 
 					{
 						Point key = new Point(x, y);
 
 						if (Math.abs(key.x - charLodXY.x) < BethRenderSettings.getLOD_LOAD_DIST_MAX()
-								&& Math.abs(key.y - charLodXY.y) < BethRenderSettings.getLOD_LOAD_DIST_MAX())
-						{
+								&& Math.abs(key.y - charLodXY.y) < BethRenderSettings.getLOD_LOAD_DIST_MAX()) {
 							pointsToAttach.add(key);
+							System.out.println("pointsToAttach " + key);
 						}
 					}
 				}
 			}
 
 			//detach those now not in
-			for (Point key : store.keySet())
-			{
-				if (!pointsToAttach.contains(key))
-				{
+			for (Point key : store.keySet()) {
+				if (!pointsToAttach.contains(key)) {
 					BranchGroup lod = store.get(key);
-					if (lod != null && lod.getParent() != null)
-					{
+					if (lod != null && lod.getParent() != null) {
 						//System.out.println("Removed lod level" + scale + " at " + key);
 						lod.detach();
 					}
 				}
 			}
 			// and attach all the others
-			for (Point key : pointsToAttach)
-			{
+			for (Point key : pointsToAttach) {
 				BranchGroup lod = store.get(key);
-				if (lod == null)
-				{
+				if (lod == null) {
 					lod = j3dCellFactory.makeLODLandscape(key.x, key.y, scale, lodWorldName);
 					lod.setCapability(Node.ALLOW_PARENT_READ);
 					store.put(key, lod);
 				}
 
 				//attach if not yet attached
-				if (lod.getParent() == null)
-				{
+				if (lod.getParent() == null) {
 					//System.out.println("Added lod level" + scale + " at " + key);
 					lod.compile();// better to be done not on the j3d thread?
+					
 					addChild(lod);
 				}
 			}
 		}
+		
+		
+		prevXmin = newXmin;
+		prevYmin = newYmin;
+		prevXmax = newXmax;
+		prevYmax = newYmax;
+		
 
 	}
 
@@ -261,30 +292,15 @@ public class Beth32_4LodManager extends BethLodManager
 	}
 
 	@Override
-	public Rectangle getGridBounds(float charX, float charY, int nearLoadGridCount)
+	public Rectangle getGridBounds(float charX, float charY)
 	{
-		// the 4x4 limit removed, morph like oblivion
-
 		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
-		charLodX -= nearLoadGridCount;
-		//		while (charLodX % 4 != 0)
-		//			charLodX--;
+		charLodX -= nearGridLoadCount;
 		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
-		charLodY -= nearLoadGridCount;
-		//		while (charLodY % 4 != 0)
-		//			charLodY--;
-		int w = (nearLoadGridCount * 2) + 1;
-		//		while (w % 4 != 0)
-		//			w++;
-		int h = (nearLoadGridCount * 2) + 1;
-		//		while (h % 4 != 0)
-		//			h++;
+		charLodY -= nearGridLoadCount;
+		int w = (nearGridLoadCount * 2) + 1;
+		int h = (nearGridLoadCount * 2) + 1;
 
-		//System.out.println("near is "+ new Rectangle(charLodX, charLodY, w - 1, h - 1));
-
-		//because teh mod check allow for getting to the mod value and we wnat one less
-		//	return new Rectangle(charLodX, charLodY, w - 1, h - 1);
 		return new Rectangle(charLodX, charLodY, w, h);
-	}
-
+	}	 
 }

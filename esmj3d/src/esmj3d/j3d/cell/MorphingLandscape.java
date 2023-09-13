@@ -1,19 +1,17 @@
 package esmj3d.j3d.cell;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.GLSLShaderProgram;
-import org.jogamp.java3d.Geometry;
 import org.jogamp.java3d.GeometryArray;
-import org.jogamp.java3d.GeometryUpdater;
 import org.jogamp.java3d.Material;
 import org.jogamp.java3d.PolygonAttributes;
 import org.jogamp.java3d.RenderingAttributes;
 import org.jogamp.java3d.Shader;
 import org.jogamp.java3d.ShaderAppearance;
+import org.jogamp.java3d.ShaderAttributeObject;
 import org.jogamp.java3d.ShaderAttributeSet;
 import org.jogamp.java3d.ShaderAttributeValue;
 import org.jogamp.java3d.ShaderProgram;
@@ -23,11 +21,8 @@ import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.TransparencyAttributes;
 import org.jogamp.java3d.utils.shader.SimpleShaderAppearance;
 import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Vector2f;
 
-import esmj3d.j3d.BethRenderSettings;
-import esmj3d.j3d.j3drecords.inst.J3dLAND;
-import javaawt.Point;
-import javaawt.Rectangle;
 import nif.shader.ShaderSourceIO;
 
 /**
@@ -39,16 +34,6 @@ public class MorphingLandscape extends BranchGroup
 {
 	private static ShaderProgram shaderProgram = null;
 
-	private int lodX = 0;
-
-	private int lodY = 0;
-
-	private int scale = 0;
-
-	private Rectangle prevAbsBounds = new Rectangle();
-
-	private Rectangle prevBounds = new Rectangle();
-
 	private ArrayList<GeometryArray> baseItsas = new ArrayList<GeometryArray>();
 	
 	public static ShaderAttributeSet shaderAttributeSet = new ShaderAttributeSet();
@@ -56,10 +41,6 @@ public class MorphingLandscape extends BranchGroup
 	public MorphingLandscape(int lodX, int lodY, int scale)
 	{
 		this.setCapability(BranchGroup.ALLOW_DETACH);
-
-		this.lodX = lodX;
-		this.lodY = lodY;
-		this.scale = scale;
 	}
 
 	protected void addGeometryArray(GeometryArray baseItsa)
@@ -67,68 +48,6 @@ public class MorphingLandscape extends BranchGroup
 		baseItsa.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
 		baseItsa.setCapability(GeometryArray.ALLOW_REF_DATA_WRITE);
 		baseItsas.add(baseItsa);
-	}
-
-	/**
-	 * these params are in lod coords already
-	 * @param charX
-	 * @param charY
-	 */
-	public void updateVisibility(float charX, float charY)
-	{
-		for (final GeometryArray baseItsa : baseItsas)
-		{
-			Rectangle absBounds = Beth32LodManager.getBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
-
-			//has anything happen much?
-			if (!prevAbsBounds.equals(absBounds))
-			{
-				//adjust to this landscale x,y
-				final int lowX = absBounds.x - lodX;
-				final int highX = (absBounds.x + absBounds.width) - lodX;
-				final int lowY = absBounds.y - lodY;
-				final int highY = (absBounds.y + absBounds.height) - lodY;
-
-				if ((highX > 0 && lowX < scale) || (highY > 0 && lowY < scale))
-				{
-					final Rectangle bounds = new Rectangle(lowX, lowY, absBounds.width + 1, absBounds.height + 1);
-
-					baseItsa.updateData(new GeometryUpdater() {
-						@Override
-						public void updateData(Geometry geometry)
-						{
-							FloatBuffer coordRefFloat = (FloatBuffer) baseItsa.getCoordRefBuffer().getBuffer();
-
-							Point p = new Point();
-							for (int i = 0; i < coordRefFloat.limit() / 3; i++)
-							{
-								float x = coordRefFloat.get((i * 3) + 0);
-								//float y = coordRefFloat[(i * 3) + 1];
-								float z = coordRefFloat.get((i * 3) + 2);
-
-								int xSpaceIdx = (int) (x / J3dLAND.LAND_SIZE);
-								int zSpaceIdx = -(int) (z / J3dLAND.LAND_SIZE);
-
-								p.setLocation(xSpaceIdx, zSpaceIdx);
-
-								if (bounds.contains(p) && !prevBounds.contains(p))
-								{
-									coordRefFloat.put((i * 3) + 1, coordRefFloat.get((i * 3) + 1) - 40);
-								}
-								else if (!bounds.contains(p) && prevBounds.contains(p))
-								{
-									coordRefFloat.put((i * 3) + 1, coordRefFloat.get((i * 3) + 1) + 40);
-								}
-							}
-
-						}
-					});
-					prevBounds = bounds;
-				}
-
-				prevAbsBounds = absBounds;
-			}
-		}
 	}
 
 	protected static Appearance createAppearance(Texture tex)
@@ -194,12 +113,23 @@ public class MorphingLandscape extends BranchGroup
 				}
 			};
 			shaderProgram.setShaders(shaders);
-			shaderProgram.setShaderAttrNames(new String[] { "baseMap" });			 
+			shaderProgram.setShaderAttrNames(new String[] { "baseMap", "minXYRemoval", "maxXYRemoval" });			 
 			
 			
 			shaderAttributeSet.setCapability(ShaderAttributeSet.ALLOW_ATTRIBUTES_READ);
 			ShaderAttributeValue sav0 = new ShaderAttributeValue("baseMap", new Integer(0));
+			
+			
+			// this moves the uodateVisibility code into the shader
+			Vector2f minXYRemoval = new Vector2f(0,0);
+			Vector2f maxXYRemoval = new Vector2f(0,0);
+			ShaderAttributeValue sav1 = new ShaderAttributeValue("minXYRemoval", minXYRemoval);
+			ShaderAttributeValue sav2 = new ShaderAttributeValue("maxXYRemoval", maxXYRemoval);
+			sav1.setCapability(ShaderAttributeObject.ALLOW_VALUE_WRITE);
+			sav2.setCapability(ShaderAttributeObject.ALLOW_VALUE_WRITE);
 			shaderAttributeSet.put(sav0);
+			shaderAttributeSet.put(sav1);
+			shaderAttributeSet.put(sav2);
 		}
 	}
 

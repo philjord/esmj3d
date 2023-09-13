@@ -6,7 +6,9 @@ import java.util.Iterator;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.LinearFog;
 import org.jogamp.java3d.Node;
+import org.jogamp.java3d.ShaderAttributeValue;
 import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Vector2f;
 
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
@@ -92,11 +94,6 @@ public class Beth32LodManager extends BethLodManager
 			{
 				if (oblivLODLandscape.getParent() == null)
 					addChild(oblivLODLandscape);
-
-				if (key.distance(charPoint) <= 64)
-				{
-					oblivLODLandscape.updateVisibility(charX, charY);
-				}
 			}
 			else
 			{
@@ -105,6 +102,20 @@ public class Beth32LodManager extends BethLodManager
 			}
 		}
 						
+		
+		// now tell the shaders about the fade dist away from the camera
+		//0.4 is the central always loaded near cell, but not all of it so the edge is a bit feathered
+		float nearSize = (BethRenderSettings.getNearLoadGridCount()+0.4f)*J3dLAND.LAND_SIZE;
+		float cx = (charPoint.x+0.5f)*J3dLAND.LAND_SIZE;//note push to center of cell
+		float cy = (charPoint.y+0.5f)*J3dLAND.LAND_SIZE;
+		Vector2f minXYRemoval = new Vector2f(cx-nearSize,(cy-nearSize));
+		Vector2f maxXYRemoval = new Vector2f(cx+nearSize,(cy+nearSize));
+		 
+		//System.out.println("minXYRemoval " + minXYRemoval);
+		//System.out.println("maxXYRemoval " + maxXYRemoval);
+		((ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("minXYRemoval")).setValue(minXYRemoval);
+		((ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("maxXYRemoval")).setValue(maxXYRemoval);
+
 		if ((System.currentTimeMillis() - start) > 50)
 			System.out.println("Beth32LodManager.updateGross in " + (System.currentTimeMillis() - start) + "ms");
 	}

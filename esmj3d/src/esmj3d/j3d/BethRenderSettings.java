@@ -17,6 +17,10 @@ public class BethRenderSettings
 	public static final int ITEM_FADE_DEFAULT = 200;
 
 	public static final int OBJECT_FADE_DEFAULT = 200;
+	
+	public static final int FOG_DIST_MIN = 100;
+	
+	public static final int FOG_DIST_DEFAULT = 500;
 
 	public static final float GLOBAL_AMB_LIGHT_LEVEL_DEFAULT = 0.5f;
 
@@ -33,6 +37,8 @@ public class BethRenderSettings
 	private static int itemFade = ITEM_FADE_DEFAULT;//in meters
 
 	private static int objectFade = OBJECT_FADE_DEFAULT;//in meters
+	
+	private static int fogDist = FOG_DIST_DEFAULT;//in meters
 
 	private static float globalAmbLightLevel = GLOBAL_AMB_LIGHT_LEVEL_DEFAULT;
 
@@ -152,6 +158,11 @@ public class BethRenderSettings
 		fireUpdate();
 	}
 
+	public static void setFogDist(int fogDist) {
+		BethRenderSettings.fogDist = fogDist;
+		fireUpdate();
+	}
+	
 	public static boolean isShowPhysic()
 	{
 		return showPhysics;
@@ -200,6 +211,10 @@ public class BethRenderSettings
 	public static int getObjectFade()
 	{
 		return objectFade;
+	}
+	
+	public static int getFogDist() {
+		return fogDist;
 	}
 
 	public static boolean isTes3()
