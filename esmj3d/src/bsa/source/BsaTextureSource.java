@@ -51,7 +51,7 @@ public class BsaTextureSource implements TextureSource {
 		this.bsas = new ArrayList<ArchiveFile>();
 
 		for (ArchiveFile archiveFile : allBsas) {
-			if (archiveFile != null && (archiveFile.hasDDS() || archiveFile.hasKTX() || archiveFile.hasASTC())) {
+			if (archiveFile != null && (archiveFile.hasTextureFiles() || archiveFile.hasKTX() || archiveFile.hasASTC())) {
 				bsas.add(archiveFile);
 			}
 		}
@@ -70,7 +70,7 @@ public class BsaTextureSource implements TextureSource {
 
 	public boolean hasDDS() {
 		for (ArchiveFile archiveFile : bsas) {
-			if (archiveFile.hasDDS())
+			if (archiveFile.hasTextureFiles())
 				return true;
 		}
 		return false;
@@ -117,7 +117,7 @@ public class BsaTextureSource implements TextureSource {
 			for (ArchiveFile archiveFile : bsas) {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasDDS() && allowedTextureFormats == AllowedTextureFormats.DDS)
+					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
 					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
 					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
 					String texNameForArchive = texName;
@@ -168,7 +168,7 @@ public class BsaTextureSource implements TextureSource {
 			for (ArchiveFile archiveFile : bsas) {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasDDS() && allowedTextureFormats == AllowedTextureFormats.DDS)
+					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
 					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
 					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
 					String texNameForArchive = texName;
@@ -247,7 +247,7 @@ public class BsaTextureSource implements TextureSource {
 			for (ArchiveFile archiveFile : bsas) {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasDDS() && allowedTextureFormats == AllowedTextureFormats.DDS)
+					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
 					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
 					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
 					String texNameForArchive = texName;
@@ -336,7 +336,7 @@ public class BsaTextureSource implements TextureSource {
 			for (ArchiveFile archiveFile : bsas) {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasDDS() && allowedTextureFormats == AllowedTextureFormats.DDS)
+					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
 					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
 					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
 					ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
