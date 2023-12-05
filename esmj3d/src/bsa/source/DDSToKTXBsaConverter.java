@@ -406,6 +406,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			int newProgress = (++fileIndex * 100) / fileCount;
 			if (newProgress >= currentProgress + 5) {
 				currentProgress = newProgress;
+				System.out.println("Conversion Progress " + currentProgress);
 			}
 
 		}
