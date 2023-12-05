@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	private static final boolean CONVERT_DDS_to_KTX = true;
 
-	private java.io.File			outputArchiveFile;
+	private FileChannel			outputArchiveFile;
 
 	private ArchiveFile				inputArchive;
 
@@ -52,7 +53,7 @@ public class DDSToKTXBsaConverter extends Thread {
 	private ArrayList<Folder>		folders;
 
 	//TODO: in fact accept a file channel here please
-	public DDSToKTXBsaConverter(java.io.File outputArchiveFile, ArchiveFile inputArchive) {
+	public DDSToKTXBsaConverter(FileChannel outputArchiveFile, ArchiveFile inputArchive) {
 		completed = false;
 		this.outputArchiveFile = outputArchiveFile;
 		this.inputArchive = inputArchive;
@@ -76,10 +77,9 @@ public class DDSToKTXBsaConverter extends Thread {
 				insertEntry(entry);				
 			}
 
-			if (fileCount != 0) {
-				if (outputArchiveFile.exists() && !outputArchiveFile.delete())
-					throw new IOException("Unable to delete '" + outputArchiveFile.getPath() + "'");
-				out = new FileChannelRAF(new java.io.RandomAccessFile(outputArchiveFile, "rw"), "rw");
+			if (fileCount != 0) {				
+				//file channel had better be empty file by now!
+				out = new FileChannelRAF(outputArchiveFile);
 				writeArchive(out);
 				out.close();
 				out = null;
@@ -100,8 +100,6 @@ public class DDSToKTXBsaConverter extends Thread {
 			try {
 				out.close();
 				out = null;
-				if (outputArchiveFile.exists())
-					outputArchiveFile.delete();
 			} catch (IOException exc) {
 				System.out.println("I/O error while cleaning up");
 				exc.printStackTrace();
