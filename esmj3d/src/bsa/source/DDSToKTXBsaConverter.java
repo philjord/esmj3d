@@ -415,11 +415,16 @@ public class DDSToKTXBsaConverter extends Thread {
 		out.seek(fileOffset2);
 		int entryIndex = 0;
 		for (Folder folder : folders) {
-			int length = out.readByte() & 0xff;
-			out.skipBytes(length);
+			
+			// this read was used, however it seems to just be the folder name prefixed with length, better to do no reads
+			//int length = out.readByte() & 0xff;
+			//out.skipBytes(length);// account for length on the front string
+
+			out.skipBytes(1+folder.name.getBytes().length + 1);// account for length on the front string and... null on the back?
 
 			for (int i = 0; i < folder.getFileCount(); i++) {
 				ArchiveEntry entry = entries.get(entryIndex++);
+				
 				int count;
 				if ((archiveFlags & 0x100) != 0) {
 					count = entry.getFileName().getBytes().length + 1;
@@ -432,7 +437,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				} else {
 					count += entry.getFileLength();
 				}
-
+				
 				setInteger(count, buffer, 0);
 				fileOffset2 = entry.getFileOffset();
 				if (fileOffset2 > 0x7fffffffL) {
