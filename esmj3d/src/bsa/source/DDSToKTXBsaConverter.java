@@ -401,7 +401,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 //FIXME: this after each multi run, but fine			
 			int newProgress = (++fileIndex * 100) / fileCount;
-			if (newProgress >= currentProgress + 5) {
+			if (newProgress >= currentProgress + 1) {
 				currentProgress = newProgress;
 				System.out.println("Conversion Progress " + currentProgress);
 				if (statusDialog != null)
