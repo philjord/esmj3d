@@ -525,9 +525,6 @@ public class BsaTextureSource implements TextureSource {
 				try {
 					//ETCPack ep = new ETCPack();
 					QuickETC ep = new QuickETC();
-					if(filename.contains("b_n_Breton_m_ankle")) {
-						System.out.println("hidy ho");
-					}
 					ktxBB = ep.compressImageToByteBuffer(img, imgalpha, ddsImage.getWidth(), ddsImage.getHeight(), format,
 							true);
 					
