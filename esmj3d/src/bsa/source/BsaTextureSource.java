@@ -30,6 +30,7 @@ import compressedtexture.KTXImage;
 import compressedtexture.dktxtools.ktx.KTXFormatException;
 import etcpack.ETCPack;
 import etcpack.ETCPack.FORMAT;
+import etcpack.QuickETC;
 import javaawt.image.BufferedImage;
 import utils.source.TextureSource;
 import utils.source.file.FileTextureSource;
@@ -168,7 +169,8 @@ public class BsaTextureSource implements TextureSource {
 			for (ArchiveFile archiveFile : bsas) {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
+					|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS 
+						|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
 					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
 					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
 					String texNameForArchive = texName;
@@ -247,7 +249,8 @@ public class BsaTextureSource implements TextureSource {
 			for (ArchiveFile archiveFile : bsas) {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
+					|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS 
+						|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
 					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
 					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
 					String texNameForArchive = texName;
@@ -520,8 +523,9 @@ public class BsaTextureSource implements TextureSource {
 				KTXImage ktxImage = null;
 				ByteBuffer ktxBB = null;
 				try {
-					ETCPack ep = new ETCPack();
-					if(filename.contains("neoclassicalmaintile03")) {
+					//ETCPack ep = new ETCPack();
+					QuickETC ep = new QuickETC();
+					if(filename.contains("b_n_Breton_m_ankle")) {
 						System.out.println("hidy ho");
 					}
 					ktxBB = ep.compressImageToByteBuffer(img, imgalpha, ddsImage.getWidth(), ddsImage.getHeight(), format,

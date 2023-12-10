@@ -26,13 +26,18 @@ import etcpack.ETCPack.FORMAT;
 import etcpack.QuickETC;
 import tools.io.FileChannelRAF;
 
+/**
+ * This is prmarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
+ */
 public class DDSToKTXBsaConverter extends Thread {
 
 	private static final boolean CONVERT_DDS_to_KTX = true;
 
-	private FileChannel			outputArchiveFile;
+	private FileChannel				outputArchiveFile;
 
 	private ArchiveFile				inputArchive;
+
+	private StatusUpdateListener	statusDialog;
 
 	private boolean					completed;
 
@@ -52,11 +57,11 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	private ArrayList<Folder>		folders;
 
-	//TODO: in fact accept a file channel here please
-	public DDSToKTXBsaConverter(FileChannel outputArchiveFile, ArchiveFile inputArchive) {
+	public DDSToKTXBsaConverter(FileChannel outputArchiveFile, ArchiveFile inputArchive, StatusUpdateListener statusDialog) {
 		completed = false;
 		this.outputArchiveFile = outputArchiveFile;
 		this.inputArchive = inputArchive;
+		this.statusDialog = statusDialog;
 	}
 
 	@Override
@@ -80,7 +85,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			if (fileCount != 0) {				
 				//file channel had better be empty file by now!
 				out = new FileChannelRAF(outputArchiveFile);
-				writeArchive(out);
+				writeArchive(out);				
 				out.close();
 				out = null;
 			}
@@ -252,7 +257,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			//TES3 == 256
 			header = new byte[12];
 			setInteger(256, header, 0);
-			//tODO: need to write these 2 styles and the rest as well
+			//TODO: need to write these 2 styles and the rest as well
 			//int hashtableOffset = getInteger(header, 4);
 			//fileCount = getInteger(header, 8);
 			
@@ -309,10 +314,10 @@ public class DDSToKTXBsaConverter extends Thread {
 
 		int currentProgress = 0;
 		fileIndex = 0;
-
+		Deflater deflater = new Deflater(6);
 		for (ArchiveEntry entry : entries) {
 			InputStream in = null;
-			Deflater deflater = null;
+
 
 			try {
 				// notice we required the loader to have keep the displayable version which holds the folder name per entry
@@ -323,7 +328,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				entry.setFileLength(residualLength);
 				in = new FileInputStream(file);*/
 				
-				
+//FIXME: can I have multiple inputstream from the archive for multithreading?	 yes.			
 				in = inputArchive.getInputStream(entry);
 				
 				// convert to etc2 if needed
@@ -341,6 +346,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				
 				//NOTICE entry now configured for output only, input permanently broken
 				entry.setFileOffset(out.getFilePointer());
+//FIXME: If I write the data below to a fat buffer then use the pointer to find the location again and write it all at once I can get multi?
 
 				if ((archiveFlags & 0x100) != 0) {
 					byte nameBuffer2[] = entry.getFileName().getBytes();
@@ -354,7 +360,7 @@ public class DDSToKTXBsaConverter extends Thread {
 					out.write(buffer, 0, 4);
 					int compressedLength = 4;
 					if (residualLength > 0) {
-						deflater = new Deflater(6);
+
 						while (!deflater.finished()) {
 							int count;
 							if (deflater.needsInput() && residualLength > 0) {
@@ -393,24 +399,33 @@ public class DDSToKTXBsaConverter extends Thread {
 				if (in != null)
 					in.close();
 				if (deflater != null)
-					deflater.end();
+					deflater.reset();
 			} catch (IOException e) {
 				System.out.println("IOException "+ ((DisplayableArchiveEntry) entry).getName());
 				if (in != null)
 					in.close();
 				if (deflater != null)
-					deflater.end();			
+					deflater.reset();			
 				e.printStackTrace();
 			}
 
+//FIXME: this after each multi run, but fine			
 			int newProgress = (++fileIndex * 100) / fileCount;
 			if (newProgress >= currentProgress + 5) {
 				currentProgress = newProgress;
 				System.out.println("Conversion Progress " + currentProgress);
+				if(statusDialog != null)
+					statusDialog.updateProgress(currentProgress);
 			}
 
 		}
+		
+		if (deflater != null)
+			deflater.end();	
+		
+		// Note the files above don't need a pos reset as the nex section finds itself
 
+		
 		long fileOffset2 = header.length + folderCount * 16;
 		out.seek(fileOffset2);
 		int entryIndex = 0;
@@ -613,14 +628,16 @@ public class DDSToKTXBsaConverter extends Thread {
 	        this.buf = buf;
 	    }
 
-	    public int read() throws IOException {
+	    @Override
+		public int read() throws IOException {
 	        if (!buf.hasRemaining()) {
 	            return -1;
 	        }
 	        return buf.get() & 0xFF;
 	    }
 
-	    public int read(byte[] bytes, int off, int len)
+	    @Override
+		public int read(byte[] bytes, int off, int len)
 	            throws IOException {
 	        if (!buf.hasRemaining()) {
 	            return -1;
@@ -630,5 +647,9 @@ public class DDSToKTXBsaConverter extends Thread {
 	        buf.get(bytes, off, len);
 	        return len;
 	    }
+	}
+	
+	public interface StatusUpdateListener {
+		public void updateProgress(int currentProgress);		
 	}
 }
