@@ -3,7 +3,6 @@ package bsa.source;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -11,27 +10,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import org.jogamp.java3d.NioImageBuffer;
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
-import org.jogamp.java3d.compressedtexture.dktxtools.dds.DDSDecompressor;
-
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.ArchiveFile.SIG;
 import bsaio.DBException;
 import bsaio.HashCode;
 import bsaio.displayables.DisplayableArchiveEntry;
-import compressedtexture.DDSImage;
-import etcpack.ETCPack.FORMAT;
-import etcpack.QuickETC;
+import texture.DDSToKTXConverter;
 import tools.io.FileChannelRAF;
 
 /**
- * This is prmarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
+ * This is primarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
  */
 public class DDSToKTXBsaConverter extends Thread {
 
-	private static final boolean CONVERT_DDS_to_KTX = true;
+	private static final boolean	CONVERT_DDS_to_KTX	= true;
 
 	private FileChannel				outputArchiveFile;
 
@@ -57,7 +50,14 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	private ArrayList<Folder>		folders;
 
-	public DDSToKTXBsaConverter(FileChannel outputArchiveFile, ArchiveFile inputArchive, StatusUpdateListener statusDialog) {
+	/**
+	 * 
+	 * @param outputArchiveFile should have  been truncated or deleted before we start
+	 * @param inputArchive this MUST have been loaded as displayable=true so we have the names on entries
+	 * @param statusDialog
+	 */
+	public DDSToKTXBsaConverter(FileChannel outputArchiveFile, ArchiveFile inputArchive,
+								StatusUpdateListener statusDialog) {
 		completed = false;
 		this.outputArchiveFile = outputArchiveFile;
 		this.inputArchive = inputArchive;
@@ -71,21 +71,21 @@ public class DDSToKTXBsaConverter extends Thread {
 			entries = new ArrayList<ArchiveEntry>(256);
 			folders = new ArrayList<Folder>(256);
 			archiveFlags = 3; // this is  2  and 1 being folders and filenames :  4 is compressed, (0x100==256) is required for names to be written
-			
-			if(inputArchive.getSig() != SIG.TES3)//tes3 no compression
+
+			if (inputArchive.getSig() != SIG.TES3)//tes3 no compression
 				archiveFlags |= 4;
 			fileFlags = 0;
-			
-			List<ArchiveEntry> inEntries = inputArchive.getEntries(); 
+
+			List<ArchiveEntry> inEntries = inputArchive.getEntries();
 			// notice we require the loader to have keep the displayable version which holds the folder name per entry
-			for (ArchiveEntry entry : inEntries) {				
-				insertEntry(entry);				
+			for (ArchiveEntry entry : inEntries) {
+				insertEntry(entry);
 			}
 
-			if (fileCount != 0) {				
+			if (fileCount != 0) {
 				//file channel had better be empty file by now!
 				out = new FileChannelRAF(outputArchiveFile);
-				writeArchive(out);				
+				writeArchive(out);
 				out.close();
 				out = null;
 			}
@@ -110,25 +110,22 @@ public class DDSToKTXBsaConverter extends Thread {
 				exc.printStackTrace();
 			}
 		}
-	
+
 	}
-  
 
 	private void insertEntry(ArchiveEntry entry) throws DBException {
-		String folderName = ((DisplayableArchiveEntry) entry).getFolderName();
-		//String baseName = "";// no base as we are coming from a BSA file
+		String folderName = ((DisplayableArchiveEntry)entry).getFolderName();
 
 		//folderName = folderName.substring(baseName.length() + 1);
 		if (folderName.length() > 254) {
 			throw new DBException("Maximum folder path length is 254 characters");
 		}
 
-		
-		if(CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".dds")) {
-			entry.setFileName(entry.getFileName().replace(".dds",".ktx"));
+		if (CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".dds")) {
+			entry.setFileName(entry.getFileName().replace(".dds", ".ktx"));
 		}
-		
-		String fileName = ((DisplayableArchiveEntry) entry).getName();
+
+		String fileName = ((DisplayableArchiveEntry)entry).getName();
 		if (fileName.length() > 254) {
 			throw new DBException("Maximum file name length is 254 characters");
 		}
@@ -142,7 +139,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			int diff = entry.compareTo(listEntry);
 			if (diff == 0) {
 				throw new DBException("Hash collision: '"	+ ((DisplayableArchiveEntry)entry).getName() + "' and '"
-						+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
+										+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
 			}
 			if (diff < 0) {
 				insert = false;
@@ -175,11 +172,11 @@ public class DDSToKTXBsaConverter extends Thread {
 			} else if (ext.equals(".mp3")) {
 				fileFlags |= 0x10;
 				archiveFlags |= 0x10;
-				if(inputArchive.getSig() != SIG.TES3)//tes3 all sorts in the file
+				if (inputArchive.getSig() != SIG.TES3)//tes3 all sorts in the file
 					archiveFlags &= -5;
 			} else if (ext.equals(".ogg")) {
 				fileFlags |= 0x10;
-				if(inputArchive.getSig() != SIG.TES3)//tes3 all sorts in the file
+				if (inputArchive.getSig() != SIG.TES3)//tes3 all sorts in the file
 					archiveFlags &= -5;
 			} else if (ext.equals(".xml")) {
 				fileFlags |= 0x100;
@@ -234,16 +231,15 @@ public class DDSToKTXBsaConverter extends Thread {
 		byte[] buffer = new byte[256];
 		byte[] dataBuffer = new byte[32000];
 		byte[] compressedBuffer = new byte[8000];
-		
 
 		byte[] header;
 		//TES3 header is different
-		if(inputArchive.getSig() != SIG.TES3 || true) {		
+		if (inputArchive.getSig() != SIG.TES3 || true) {
 			header = new byte[36];
 			//this is the word "BSA\0" compare with BTDX
-			header [0] = 66;//(byte)"B".toCharArray()[0]; perhaps?
-			header [1] = 83;
-			header [2] = 65;
+			header[0] = 66;//(byte)"B".toCharArray()[0]; perhaps?
+			header[1] = 83;
+			header[2] = 65;
 			setInteger(104, header, 4);// 104 is FO3 and TES5, 103 is TES4
 			setInteger(36, header, 8);
 			setInteger(archiveFlags, header, 12);
@@ -252,7 +248,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			setInteger(folderNamesLength, header, 24);
 			setInteger(fileNamesLength, header, 28);
 			setInteger(fileFlags, header, 32);
-			
+
 		} else {
 			//TES3 == 256
 			header = new byte[12];
@@ -260,10 +256,10 @@ public class DDSToKTXBsaConverter extends Thread {
 			//TODO: need to write these 2 styles and the rest as well
 			//int hashtableOffset = getInteger(header, 4);
 			//fileCount = getInteger(header, 8);
-			
+
 		}
 		out.write(header);
- 
+
 		long fileOffset = header.length + folderCount * 16 + fileNamesLength;
 		if (fileOffset > 0x7fffffffL) {
 			throw new DBException("File offset exceeds 2GB");
@@ -287,9 +283,9 @@ public class DDSToKTXBsaConverter extends Thread {
 			if (nameBuffer.length != folderName.length()) {
 				throw new DBException("Encoded folder name is longer than character name");
 			}
-			buffer [0] = (byte)(nameBuffer.length + 1);
+			buffer[0] = (byte)(nameBuffer.length + 1);
 			System.arraycopy(nameBuffer, 0, buffer, 1, nameBuffer.length);
-			buffer [nameBuffer.length + 1] = 0;
+			buffer[nameBuffer.length + 1] = 0;
 			out.write(buffer, 0, nameBuffer.length + 2);
 
 			for (int i = 0; i < folder.getFileCount(); i++) {
@@ -308,7 +304,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				throw new DBException("Encoded file name is longer than character name");
 			}
 			System.arraycopy(nameBuffer, 0, buffer, 0, nameBuffer.length);
-			buffer [nameBuffer.length] = 0;
+			buffer[nameBuffer.length] = 0;
 			out.write(buffer, 0, nameBuffer.length + 1);
 		}
 
@@ -318,39 +314,33 @@ public class DDSToKTXBsaConverter extends Thread {
 		for (ArchiveEntry entry : entries) {
 			InputStream in = null;
 
-
 			try {
-				// notice we required the loader to have keep the displayable version which holds the folder name per entry
-				//((DisplayableArchiveEntry) entry).getFolderName();
-				/*File file = new File(inputArchive.getPath() + "\\" + entry.getFileName()); 
-				int residualLength = (int)file.length();
-				entry.setFileOffset(out.getFilePointer());
-				entry.setFileLength(residualLength);
-				in = new FileInputStream(file);*/
-				
+				// notice we required the loader to have kept the displayable version which holds the folder name per entry
+
 //FIXME: can I have multiple inputstream from the archive for multithreading?	 yes.			
 				in = inputArchive.getInputStream(entry);
-				
+
 				// convert to etc2 if needed
-				if(CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".ktx")) {
-					ByteBuffer bbKtx = convertDDStoKTX(in);
-					if(bbKtx != null) {
-						in = new ByteBufferBackedInputStream(bbKtx);					
+				if (CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".ktx")) {
+					ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in,
+							((DisplayableArchiveEntry)entry).getName());
+					if (bbKtx != null) {
+						in = new ByteBufferBackedInputStream(bbKtx);
 						entry.setFileLength(bbKtx.limit());
 					} else {
-						System.out.println("Conversion failed for "+ ((DisplayableArchiveEntry) entry).getName());
+						System.out.println("Conversion failed for " + ((DisplayableArchiveEntry)entry).getName());
 					}
 				}
-				
+
 				int residualLength = entry.getFileLength();
-				
+
 				//NOTICE entry now configured for output only, input permanently broken
 				entry.setFileOffset(out.getFilePointer());
 //FIXME: If I write the data below to a fat buffer then use the pointer to find the location again and write it all at once I can get multi?
 
 				if ((archiveFlags & 0x100) != 0) {
 					byte nameBuffer2[] = entry.getFileName().getBytes();
-					buffer [0] = (byte)nameBuffer2.length;
+					buffer[0] = (byte)nameBuffer2.length;
 					out.write(buffer, 0, 1);
 					out.write(nameBuffer2);
 				}
@@ -401,11 +391,11 @@ public class DDSToKTXBsaConverter extends Thread {
 				if (deflater != null)
 					deflater.reset();
 			} catch (IOException e) {
-				System.out.println("IOException "+ ((DisplayableArchiveEntry) entry).getName());
+				System.out.println("IOException " + ((DisplayableArchiveEntry)entry).getName());
 				if (in != null)
 					in.close();
 				if (deflater != null)
-					deflater.reset();			
+					deflater.reset();
 				e.printStackTrace();
 			}
 
@@ -414,32 +404,31 @@ public class DDSToKTXBsaConverter extends Thread {
 			if (newProgress >= currentProgress + 5) {
 				currentProgress = newProgress;
 				System.out.println("Conversion Progress " + currentProgress);
-				if(statusDialog != null)
+				if (statusDialog != null)
 					statusDialog.updateProgress(currentProgress);
 			}
 
 		}
-		
-		if (deflater != null)
-			deflater.end();	
-		
-		// Note the files above don't need a pos reset as the nex section finds itself
 
-		
+		if (deflater != null)
+			deflater.end();
+
+		// Note the files above don't need a pos reset as the next section finds itself
+
 		long fileOffset2 = header.length + folderCount * 16;
 		out.seek(fileOffset2);
 		int entryIndex = 0;
 		for (Folder folder : folders) {
-			
+
 			// this read was used, however it seems to just be the folder name prefixed with length, better to do no reads
 			//int length = out.readByte() & 0xff;
 			//out.skipBytes(length);// account for length on the front string
 
-			out.skipBytes(1+folder.name.getBytes().length + 1);// account for length on the front string and... null on the back?
+			out.skipBytes(1 + folder.name.getBytes().length + 1);// account for length on the front string and... null on the back?
 
 			for (int i = 0; i < folder.getFileCount(); i++) {
 				ArchiveEntry entry = entries.get(entryIndex++);
-				
+
 				int count;
 				if ((archiveFlags & 0x100) != 0) {
 					count = entry.getFileName().getBytes().length + 1;
@@ -452,7 +441,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				} else {
 					count += entry.getFileLength();
 				}
-				
+
 				setInteger(count, buffer, 0);
 				fileOffset2 = entry.getFileOffset();
 				if (fileOffset2 > 0x7fffffffL) {
@@ -466,21 +455,21 @@ public class DDSToKTXBsaConverter extends Thread {
 	}
 
 	private static void setInteger(int number, byte buffer[], int offset) {
-		buffer [offset] = (byte)number;
-		buffer [offset + 1] = (byte)(number >>> 8);
-		buffer [offset + 2] = (byte)(number >>> 16);
-		buffer [offset + 3] = (byte)(number >>> 24);
+		buffer[offset] = (byte)number;
+		buffer[offset + 1] = (byte)(number >>> 8);
+		buffer[offset + 2] = (byte)(number >>> 16);
+		buffer[offset + 3] = (byte)(number >>> 24);
 	}
 
 	private static void setLong(long number, byte buffer[], int offset) {
-		buffer [offset] = (byte)(int)number;
-		buffer [offset + 1] = (byte)(int)(number >>> 8);
-		buffer [offset + 2] = (byte)(int)(number >>> 16);
-		buffer [offset + 3] = (byte)(int)(number >>> 24);
-		buffer [offset + 4] = (byte)(int)(number >>> 32);
-		buffer [offset + 5] = (byte)(int)(number >>> 40);
-		buffer [offset + 6] = (byte)(int)(number >>> 48);
-		buffer [offset + 7] = (byte)(int)(number >>> 56);
+		buffer[offset] = (byte)(int)number;
+		buffer[offset + 1] = (byte)(int)(number >>> 8);
+		buffer[offset + 2] = (byte)(int)(number >>> 16);
+		buffer[offset + 3] = (byte)(int)(number >>> 24);
+		buffer[offset + 4] = (byte)(int)(number >>> 32);
+		buffer[offset + 5] = (byte)(int)(number >>> 40);
+		buffer[offset + 6] = (byte)(int)(number >>> 48);
+		buffer[offset + 7] = (byte)(int)(number >>> 56);
 	}
 
 	private static class Folder {
@@ -517,139 +506,36 @@ public class DDSToKTXBsaConverter extends Thread {
 		}
 
 	}
-	
-	/**
-	 * Take an input stream in and returns a bytebuffer back out in ktx format
-	 * @param inputStream
-	 * @return
-	 */
-	public static ByteBuffer convertDDStoKTX(InputStream inputStream) throws IOException {
 
-		DDSImage ddsImage = DDSImage.read(CompressedTextureLoader.toByteBuffer(inputStream));
-
-		if (ddsImage != null) {
-			DDSDecompressor decomp = new DDSDecompressor(ddsImage, 0, null);
-			NioImageBuffer decompressedImage = decomp.convertImageNio();
-			if(decompressedImage != null) { 
-				Buffer b = decompressedImage.getDataBuffer();
-				if (b instanceof ByteBuffer) {
-					//ok so now find the RGB or RGBA byte buffers
-					ByteBuffer bb = (ByteBuffer)decompressedImage.getDataBuffer();
-					byte[] img = null;
-					byte[] imgalpha = null;
-					if (decompressedImage.getImageType() == NioImageBuffer.ImageType.TYPE_3BYTE_RGB) {
-						// just put the RGB data straight into the img byte array 
-						img = new byte[bb.capacity()];
-						bb.get(img, 0, bb.capacity());
-					} else if (decompressedImage.getImageType() == NioImageBuffer.ImageType.TYPE_4BYTE_RGBA) {
-						// copy RGB 3 sets out then 1 sets of alpha 
-						img = new byte[(bb.capacity() / 4) * 3];
-						imgalpha = new byte[(bb.capacity() / 4)];
-						for (int i = 0; i < img.length / 3; i++) {
-							img[i * 3 + 0] = bb.get();
-							img[i * 3 + 1] = bb.get();
-							img[i * 3 + 2] = bb.get();
-							imgalpha[i] = bb.get();
-						}
-					} else if (decompressedImage.getImageType() == NioImageBuffer.ImageType.TYPE_BYTE_GRAY) {
-						// copy RGB from the 1 byte of L8 data and use RGB (FORMAT.ETC2PACKAGE_R is odd 16 bit thing)
-						img = new byte[bb.capacity() * 3];
-						for (int i = 0; i < img.length / 3; i++) {
-							byte byt = bb.get();
-							img[i * 3 + 0] = byt;
-							img[i * 3 + 1] = byt;
-							img[i * 3 + 2] = byt;
-						}
-					} else {
-						System.err.println("Bad Image Type " + decompressedImage.getImageType());
-						return null;
-					}
-	
-					int fmt = ddsImage.getPixelFormat();
-					FORMAT format = null;
-	
-					 if (fmt == DDSImage.D3DFMT_DXT1) {
-						if (!decomp.decompressedIsOpaque()) {
-							format = FORMAT.ETC2PACKAGE_RGBA1;
-						} else {
-							format = FORMAT.ETC2PACKAGE_RGB;
-						}
-					} else if (fmt == DDSImage.D3DFMT_DXT2	|| fmt == DDSImage.D3DFMT_DXT3 || fmt == DDSImage.D3DFMT_DXT4
-								|| fmt == DDSImage.D3DFMT_DXT5) {
-						if (!decomp.decompressedIsOpaque()) {
-							format = FORMAT.ETC2PACKAGE_RGBA;
-						} else {
-							format = FORMAT.ETC2PACKAGE_RGB;
-						}
-					}
-					//uncompressed options 
-					else if (fmt == DDSImage.D3DFMT_R8G8B8 || fmt == DDSImage.D3DFMT_R5G6B5) {
-						format = FORMAT.ETC2PACKAGE_RGB;
-					} else if (fmt == DDSImage.D3DFMT_L8) {
-						format = FORMAT.ETC2PACKAGE_RGB;
-					} else if (fmt == DDSImage.D3DFMT_A8R8G8B8	|| fmt == DDSImage.D3DFMT_A4R4G4B4
-								|| fmt == DDSImage.D3DFMT_X8R8G8B8) {
-						format = FORMAT.ETC2PACKAGE_RGBA;
-					} else if (fmt == DDSImage.D3DFMT_A8L8) {
-						format = FORMAT.ETC2PACKAGE_RGBA;
-					}
-					 
-					// perhaps normal maps (_n) should be forcibly set to RGB ( not sRGBA)??
-					//if(filename.indexOf("_n.dds") > 0)
-					//	format = FORMAT.ETC2PACKAGE_RGB;
-	
-					if (format != null) {
-						QuickETC ep = new QuickETC();
-						//Note mipmaps on to use on a GPU!
-						ByteBuffer ktxBB = ep.compressImageToByteBuffer(img, imgalpha, ddsImage.getWidth(),
-								ddsImage.getHeight(), format, true);
-
-						return ktxBB;
-					} else {
-						System.out.println("format != null not worked out properly! fmt= " + fmt);
-					}
-				} else {
-					System.out.println("decompressedImage.getDataBuffer() not a ByteBuffer");
-				}
-			} else {
-				System.out.println("decompressedImage  == null ");
-			}
-		} else { 
-			System.out.println("ddsImage == null");
-		}
-
-		return null;
-	}
 	public class ByteBufferBackedInputStream extends InputStream {
 
-	    ByteBuffer buf;
+		ByteBuffer buf;
 
-	    public ByteBufferBackedInputStream(ByteBuffer buf) {
-	        this.buf = buf;
-	    }
+		public ByteBufferBackedInputStream(ByteBuffer buf) {
+			this.buf = buf;
+		}
 
-	    @Override
+		@Override
 		public int read() throws IOException {
-	        if (!buf.hasRemaining()) {
-	            return -1;
-	        }
-	        return buf.get() & 0xFF;
-	    }
+			if (!buf.hasRemaining()) {
+				return -1;
+			}
+			return buf.get() & 0xFF;
+		}
 
-	    @Override
-		public int read(byte[] bytes, int off, int len)
-	            throws IOException {
-	        if (!buf.hasRemaining()) {
-	            return -1;
-	        }
+		@Override
+		public int read(byte[] bytes, int off, int len) throws IOException {
+			if (!buf.hasRemaining()) {
+				return -1;
+			}
 
-	        len = Math.min(len, buf.remaining());
-	        buf.get(bytes, off, len);
-	        return len;
-	    }
+			len = Math.min(len, buf.remaining());
+			buf.get(bytes, off, len);
+			return len;
+		}
 	}
-	
+
 	public interface StatusUpdateListener {
-		public void updateProgress(int currentProgress);		
+		public void updateProgress(int currentProgress);
 	}
 }
