@@ -4,8 +4,10 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -25,12 +27,90 @@ import tools.io.FileChannelRAF;
 
 /**
  * This is primarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
+ * 
+ * BSA fallout file format is as follows
+ * 
+ * https://en.uesp.net/wiki/Skyrim_Mod:Archive_File_Format
+ * 
+ * header = new byte[36];
+			//this is the word "BSA\0" compare with BTDX
+			header[0] = 66;//(byte)"B".toCharArray()[0]; perhaps?
+			header[1] = 83;
+			header[2] = 65;
+			setInteger(104, header, 4);// 104 is FO3 and TES5, 103 is TES4
+			setInteger(header.length, header, 8); // this is a pointer to folder index, which is 36 or straight after the header
+			setInteger(archiveFlags, header, 12);
+			setInteger(folderCount, header, 16);
+			setInteger(fileCount, header, 20);
+			setInteger(folderNamesLength, header, 24); //Total length of all folder names, including \0's but not including the prefixed length byte.
+			setInteger(fileNamesLength, header, 28);
+			setInteger(fileFlags, header, 32);
+			
+			
+			--Folder Index
+			filePosition is (header.length)
+			section length is (folderCount * 16)
+			
+			for each folder
+  				setLong(folder.getHashCode().getHash(), buffer, 0);
+				setInteger(folder.getFileCount(), buffer, 8);
+				setInteger((int)fileOffset, buffer, 12);		//Offset to file records for this folder. (Subtract totalFileNameLength to get the actual offset within the file.)		
+				
+			//fileOffset is the end of the folder, past the file name section section and into the folder heap section below,
+			//meaning every folder name len must be kept track of as it's written out		 
+			
+			
+					
+			--Folder Heap
+			filePosition is (offset = header.length + (folderCount * 16));					
+			section length is ((folderCount + folderNamesLength) + (fileCount * 16)) long  -- folderNamesLength doesn't include the  len byte at the front, so add folderCount on to it
+			
+			for each folder
+				String folderName = plus a 0 plus an empty char (length + 2)//TODO: what?
+				 
+				this section is folder.getFileCount() * 16 long
+				for (int i = 0; i < folder.getFileCount(); i++) {
+					ArchiveEntry entry = entries.get(fileIndex++);
+					setLong(entry.getFileHashCode().getHash(), buffer, 0); //crazy fileNamesLength added on as that's taken off at load time (some sort of history cock up)
+					setInteger(0, buffer, 8); // int of size 
+					setInteger(0, buffer, 12); // int location within file heap  		 
+				}
+			}
+			
+			--File Names
+			filePosition is (offset = header.length + (folderCount * 16) + (folderCount + folderNamesLength) + (fileCount * 16));
+			section length is fileNamesLength 
+						
+			// file names, but oddly just in order with no len to start each one! parsed by looking for nulls
+			for (ArchiveEntry entry : entries) {
+				byte[] nameBuffer = entry.getFileName().getBytes();
+				buffer[nameBuffer.length] = 0;
+				out.write(buffer, 0, nameBuffer.length + 1);
+			}
+			
+			
+			-- File Heap
+			filePosition is (offset = header.length + (folderCount * 16) + (folderCount + folderNamesLength) + (fileCount * 16) + fileNamesLength) 
+			section length is really huge, might have the name repeated
+			
+			 
+			for (ArchiveEntry entry : entries) {
+			     if ((archiveFlags & 0x100) != 0)
+					nameLen 1byte then name bytes[]   
+				size int given above in the folders file locations
+				content bytes[]
+ * 
+ * 
  */
 public class DDSToKTXBsaConverter extends Thread {
 
 	private static final boolean	CONVERT_DDS_to_KTX	= true;
+	
+	private static final int		PARTIAL_FILE		= 12341234;
 
 	private FileChannel				outputArchiveFile;
+	
+	private FileChannel				outputArchiveFileReader;
 
 	private ArchiveFile				inputArchive;
 
@@ -54,19 +134,26 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	private ArrayList<Folder>		folders;
 	
+	
+	// to support restarts
+	private HashMap<ArchiveEntry, ArchiveEntryExtras> extraInfo;
+	
 	int currentProgress = 0;
 	int entriesWritten = 0;
 
 	/**
 	 * 
-	 * @param outputArchiveFile should have  been truncated or deleted before we start
+	 * @param outputArchiveFile this is the writable interface, if this is not a partially written file it must have been deleted or truncated
+	 * @param outputArchiveFileReader this is the readable interface, this will be used to determine if the file has been partially written 
+	 * and if so conversion will continue from that point
 	 * @param inputArchive this MUST have been loaded as displayable=true so we have the names on entries
 	 * @param statusDialog
 	 */
-	public DDSToKTXBsaConverter(FileChannel outputArchiveFile, ArchiveFile inputArchive,
+	public DDSToKTXBsaConverter(FileChannel outputArchiveFile, FileChannel outputArchiveFileReader, ArchiveFile inputArchive,
 								StatusUpdateListener statusDialog) {
 		completed = false;
 		this.outputArchiveFile = outputArchiveFile;
+		this.outputArchiveFileReader = outputArchiveFileReader;
 		this.inputArchive = inputArchive;
 		this.statusDialog = statusDialog;
 	}
@@ -77,7 +164,9 @@ public class DDSToKTXBsaConverter extends Thread {
 		try {
 			entries = new ArrayList<ArchiveEntry>(256);
 			folders = new ArrayList<Folder>(256);
-			archiveFlags = 3; // this is  2  and 1 being folders and filenames :  4 is compressed, (0x100==256) is required for names to be written
+			extraInfo = new HashMap<ArchiveEntry, ArchiveEntryExtras>();
+			
+			archiveFlags = 3; // this is  2  and 1 being folders and filenames :  4 is compressed, (0x100==256) is required for names to be written with the file entry
 
 			if (inputArchive.getSig() != SIG.TES3)//tes3 no compression
 				archiveFlags |= 4;
@@ -90,9 +179,9 @@ public class DDSToKTXBsaConverter extends Thread {
 			}
 
 			if (fileCount != 0) {
-				//file channel had better be empty file by now!
+				//if not empty then this output File must have a current progress written into the start of it (by this class)
 				out = new FileChannelRAF(outputArchiveFile);
-				writeArchive(out);
+				writeArchive(out, outputArchiveFileReader);
 				out.close();
 				out = null;
 			}
@@ -120,19 +209,19 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	}
 
-	private void insertEntry(ArchiveEntry entry) throws DBException {
-		String folderName = ((DisplayableArchiveEntry)entry).getFolderName();
+	private void insertEntry(ArchiveEntry inEntry) throws DBException {
+		String folderName = ((DisplayableArchiveEntry)inEntry).getFolderName();
 
 		//folderName = folderName.substring(baseName.length() + 1);
 		if (folderName.length() > 254) {
 			throw new DBException("Maximum folder path length is 254 characters");
 		}
 
-		if (CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".dds")) {
-			entry.setFileName(entry.getFileName().replace(".dds", ".ktx"));
+		if (CONVERT_DDS_to_KTX && inEntry.getFileName().endsWith(".dds")) {
+			inEntry.setFileName(inEntry.getFileName().replace(".dds", ".ktx"));
 		}
 
-		String fileName = ((DisplayableArchiveEntry)entry).getName();
+		String fileName = ((DisplayableArchiveEntry)inEntry).getName();
 		if (fileName.length() > 254) {
 			throw new DBException("Maximum file name length is 254 characters");
 		}
@@ -143,21 +232,21 @@ public class DDSToKTXBsaConverter extends Thread {
 		int i = 0;
 		while (i < count) {
 			ArchiveEntry listEntry = entries.get(i);
-			int diff = entry.compareTo(listEntry);
+			int diff = inEntry.compareTo(listEntry);
 			if (diff == 0) {
-				throw new DBException("Hash collision: '"	+ ((DisplayableArchiveEntry)entry).getName() + "' and '"
+				throw new DBException("Hash collision: '"	+ ((DisplayableArchiveEntry)inEntry).getName() + "' and '"
 										+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
 			}
 			if (diff < 0) {
 				insert = false;
-				entries.add(i, entry);
+				entries.add(i, inEntry);
 				break;
 			}
 			i++;
 		}
 
 		if (insert) {
-			entries.add(entry);
+			entries.add(inEntry);
 		}
 
 		int sep = fileName.lastIndexOf('.');
@@ -227,6 +316,9 @@ public class DDSToKTXBsaConverter extends Thread {
 		fileNamesLength += fileName.length() + 1;
 		fileCount++;
 	}
+	
+	
+	
 
 	/**
 	 * Note this writes out a ArchiveFileBsa version fo archive files, not Btdx or starfields one
@@ -234,89 +326,174 @@ public class DDSToKTXBsaConverter extends Thread {
 	 * @throws DBException
 	 * @throws IOException
 	 */
-	private void writeArchive(FileChannelRAF out) throws DBException, IOException {
+	private void writeArchive(FileChannelRAF out, FileChannel outReader) throws DBException, IOException {
+		
+		// First things first, let's see if the outputs readable channel has a marker for partial completeion and if start from that point		
+		// partial writes are indicated by an int at 4 and a counted int at 8 (which are completed by setting to 104 and 36, respectively)
+		
+		ByteBuffer byteBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);// 2 ints worth
+		int bytesCount = outReader.read(byteBuffer, 4);// from the 4th byte
+		int peekInComplete = byteBuffer.getInt(0);
+		int lastGoodEntryWritten = byteBuffer.getInt(4); // might be the sub version number if not partial file 		
+		
 		byte[] buffer = new byte[256];
 		byte[] dataBuffer = new byte[32000];
 		byte[] compressedBuffer = new byte[8000];
 
-		byte[] header;
-		//TES3 header is different
-		if (inputArchive.getSig() != SIG.TES3 || true) {
-			header = new byte[36];
-			//this is the word "BSA\0" compare with BTDX
-			header[0] = 66;//(byte)"B".toCharArray()[0]; perhaps?
-			header[1] = 83;
-			header[2] = 65;
-			setInteger(104, header, 4);// 104 is FO3 and TES5, 103 is TES4
-			setInteger(36, header, 8);
-			setInteger(archiveFlags, header, 12);
-			setInteger(folderCount, header, 16);
-			setInteger(fileCount, header, 20);
-			setInteger(folderNamesLength, header, 24);
-			setInteger(fileNamesLength, header, 28);
-			setInteger(fileFlags, header, 32);
+		byte[] header = new byte[36];
 
-		} else {
-			//TES3 == 256
-			header = new byte[12];
-			setInteger(256, header, 0);
-			//TODO: need to write these 2 styles and the rest as well
-			//int hashtableOffset = getInteger(header, 4);
-			//fileCount = getInteger(header, 8);
+		if(peekInComplete != PARTIAL_FILE || lastGoodEntryWritten == -1) {		
+			
+			//TES3 header is different, but we don't want to use it anyway
+			if (inputArchive.getSig() != SIG.TES3 || true) {
+				
+				//this is the word "BSA\0" compare with BTDX
+				header[0] = 66;//(byte)"B".toCharArray()[0]; perhaps?
+				header[1] = 83;
+				header[2] = 65;
+				//setInteger(104, header, 4);// 104 is FO3 and TES5, 103 is TES4
+				//setInteger(header.length, header, 8); // this is the folder offset, notice it is the length of the header at 36
+				
+				setInteger(PARTIAL_FILE, header, 4);// mark as incomplete so far, will be completed at the end of this method		
+				setInteger(-1, header, 8); // -1 means put the folders back and start again
+				
+				setInteger(archiveFlags, header, 12);
+				setInteger(folderCount, header, 16);
+				setInteger(fileCount, header, 20);
+				setInteger(folderNamesLength, header, 24);
+				setInteger(fileNamesLength, header, 28);
+				setInteger(fileFlags, header, 32);
 
-		}
-		out.write(header);
+			} else {
+				// this is a bugger of a format best not to bother with it for this purpose
+				//TES3 == 256
+				header = new byte[12];
+				setInteger(256, header, 0);
+				setInteger(header.length, header, 4);
+				//TODO: need to write these 2 styles and the rest as well
+				//int hashtableOffset = getInteger(header, 4);
+				//fileCount = getInteger(header, 8);
 
-		long fileOffset = header.length + folderCount * 16 + fileNamesLength;
-		if (fileOffset > 0x7fffffffL) {
-			throw new DBException("File offset exceeds 2GB");
-		}
-
-		for (Folder folder : folders) {
-			setLong(folder.getHashCode().getHash(), buffer, 0);
-			setInteger(folder.getFileCount(), buffer, 8);
-			setInteger((int)fileOffset, buffer, 12);
-			out.write(buffer, 0, 16);
-			fileOffset += folder.getName().length() + 2 + folder.getFileCount() * 16;
+			}
+			out.write(header);			
+			
+			lastGoodEntryWritten = -1;// clear the value out and ensure we start entry writing at the first entry
+			
+			// keep track as we write so we can record where folder detail live in the folder heap
+			// this offset is now pointing past the folder index, into the folder heap
+			long fileOffset = header.length + folderCount * 16;
 			if (fileOffset > 0x7fffffffL) {
 				throw new DBException("File offset exceeds 2GB");
 			}
-		}
-
-		int fileIndex = 0;
-		for (Folder folder : folders) {
-			String folderName = folder.getName();
-			byte[] nameBuffer = folderName.getBytes();
-			if (nameBuffer.length != folderName.length()) {
-				throw new DBException("Encoded folder name is longer than character name");
-			}
-			buffer[0] = (byte)(nameBuffer.length + 1);
-			System.arraycopy(nameBuffer, 0, buffer, 1, nameBuffer.length);
-			buffer[nameBuffer.length + 1] = 0;
-			out.write(buffer, 0, nameBuffer.length + 2);
-
-			for (int i = 0; i < folder.getFileCount(); i++) {
-				ArchiveEntry entry = entries.get(fileIndex++);
-				setLong(entry.getFileHashCode().getHash(), buffer, 0);
-				setInteger(0, buffer, 8);
-				setInteger(0, buffer, 12);
+	
+			// folder index
+			for (Folder folder : folders) {
+				setLong(folder.getHashCode().getHash(), buffer, 0);
+				setInteger(folder.getFileCount(), buffer, 8);
+				setInteger((int)fileOffset + fileNamesLength, buffer, 12);// notice the crazy oddity of this needing to have fileNamesLength added, loading takes that value off the offset value ahhh!
 				out.write(buffer, 0, 16);
+				// measure the distance into the folder heap for this particular folder, for the next folder to point at 
+				fileOffset += folder.getName().length() + 2 + folder.getFileCount() * 16;
+				if (fileOffset > 0x7fffffffL) {
+					throw new DBException("File offset exceeds 2GB");
+				}
 			}
-		}
+	
+			// folder heap, a variable len name (+2), then for each file (folders fileCount from the index list) 16 bytes of hash, len, and pos 
+			int fileIndex = 0;
+			for (Folder folder : folders) {
+				String folderName = folder.getName();
+				byte[] nameBuffer = folderName.getBytes();
+				if (nameBuffer.length != folderName.length()) {
+					throw new DBException("Encoded folder name is longer than character name");
+				}
+				buffer[0] = (byte)(nameBuffer.length + 1); // 1 byte len
+				System.arraycopy(nameBuffer, 0, buffer, 1, nameBuffer.length);
+				buffer[nameBuffer.length + 1] = 0; // null at end
+				out.write(buffer, 0, nameBuffer.length + 2); // 1byte len to start and null at end
+	
+				for (int i = 0; i < folder.getFileCount(); i++) {
+					ArchiveEntry entry = entries.get(fileIndex++);
+					
+					// In order to easily update these 2 numbers when the new content is written and confirmed good 
+					// we record this file info pointer for use later
+					extraInfo.put(entry, new ArchiveEntryExtras(out.getFilePointer()));					
+					
+					setLong(entry.getFileHashCode().getHash(), buffer, 0);
+					setInteger(0, buffer, 8); // int of size (unknown for now)
+					setInteger(0, buffer, 12); // int location (unknown for now)					
+					out.write(buffer, 0, 16);
+				}
+			}
+	
+			// file names, but oddly just in order with no len to start each one!
+			for (ArchiveEntry entry : entries) {
+				String fileName = entry.getFileName();
+				byte[] nameBuffer = fileName.getBytes();
+				if (nameBuffer.length != fileName.length()) {
+					throw new DBException("Encoded file name is longer than character name");
+				}
+				System.arraycopy(nameBuffer, 0, buffer, 0, nameBuffer.length);
+				buffer[nameBuffer.length] = 0;// put a null at the end, notice no len at start
+				out.write(buffer, 0, nameBuffer.length + 1);
+			}
+			
+			//out is now pointing at the start of the file heap
+			
+		} else {
+			// jump forward with no writes but spot the file header positions on the way			
+			
+			long writeStartPos = 0;
 
-		
-		for (ArchiveEntry entry : entries) {
-			String fileName = entry.getFileName();
-			byte[] nameBuffer = fileName.getBytes();
-			if (nameBuffer.length != fileName.length()) {
-				throw new DBException("Encoded file name is longer than character name");
+			// folders count *  (hash of 8, bytecount of 4, and offset of 4 ) (past the file index section)
+			long fileOffset = header.length + folderCount * 16;
+				
+	
+			int fileIndex = 0;
+			for (Folder folder : folders) {
+				fileOffset += folder.getName().getBytes().length + 2;// 1byte len to start and null at end
+	
+				// must go through to get the extra info updated
+				for (int i = 0; i < folder.getFileCount(); i++) {	
+					ArchiveEntry entry = entries.get(fileIndex);			
+					// In order to easily update these 2 numbers when the new content is written and confirmed good 
+					// we record this file info pointer for use later
+					extraInfo.put(entry, new ArchiveEntryExtras(fileOffset));
+					
+					// is this the last good written file? if so grab the location of the point just after it
+					if(fileIndex == lastGoodEntryWritten) {	
+						byteBuffer.rewind();
+						bytesCount = outReader.read(byteBuffer, fileOffset + 8);// skip hash 8 bytes
+						int fileSize = byteBuffer.getInt(0);
+						int offset = byteBuffer.getInt(4); // might be the sub version number if not partial file 						 
+								 
+						writeStartPos = fileSize + offset;
+					}
+					
+					fileOffset += 16; 	//hash of 8, bytecount of 4, and offset of 4 (into file heap section)	
+					
+					fileIndex++;
+				}
 			}
-			System.arraycopy(nameBuffer, 0, buffer, 0, nameBuffer.length);
-			buffer[nameBuffer.length] = 0;
-			out.write(buffer, 0, nameBuffer.length + 1);
-		}
+			
+			// file names, but oddly just in order with no len to start each one!
+			fileOffset += fileNamesLength;
+			
+			// in case of trouble just start again
+			if(writeStartPos == 0) {
+				// flag away skipping any thing
+				lastGoodEntryWritten = -1;
+				// this is now pointing to the start of the heap
+				out.seek(fileOffset);
+			} else {
+				System.out.println("jumping forward with incomplete set to " + lastGoodEntryWritten + " file pos=" + writeStartPos);
+				out.seek(writeStartPos);
+			}
+					 
+				
+		}			
 		
-		// Mutli-threaded below, very non linear
+		// Multi-threaded below, very non linear
 		int NUM_THREADS = 4;		
 		
 		Deflater deflater = new Deflater(6);
@@ -332,7 +509,9 @@ public class DDSToKTXBsaConverter extends Thread {
 		ArrayList<ArchiveEntryOutput> entriesToWriteNow = new ArrayList<ArchiveEntryOutput>();
 		
 		int writeOrder = 0;
-		for (int entryIdx = 0; entryIdx < entries.size(); entryIdx++) {	
+		//lastGoodEntryWritten will be -1 (if this is not a restart)
+		entriesWritten = lastGoodEntryWritten + 1;
+		for (int entryIdx = entriesWritten; entryIdx < entries.size(); entryIdx++) {	
 			
 			final ArchiveEntry entryToProcess = entries.get(entryIdx);
 			final int order = writeOrder++;
@@ -407,7 +586,8 @@ public class DDSToKTXBsaConverter extends Thread {
 									int residualLength = entry.getFileLength();
 		
 									//NOTICE entry now configured for output only, input permanently broken
-									entry.setFileOffset(out.getFilePointer());
+									//entry.setFileOffset(out.getFilePointer());
+									long fileOffsetStart = out.getFilePointer();
 					
 									if ((archiveFlags & 0x100) != 0) {
 										byte nameBuffer2[] = entry.getFileName().getBytes();
@@ -416,6 +596,7 @@ public class DDSToKTXBsaConverter extends Thread {
 										out.write(nameBuffer2);
 									}
 		
+									//Note either whole archive compressed or not, this is not per entry
 									if ((archiveFlags & 4) != 0) {
 										setInteger(residualLength, buffer, 0);
 										out.write(buffer, 0, 4);
@@ -456,6 +637,38 @@ public class DDSToKTXBsaConverter extends Thread {
 		
 										entry.setCompressed(false);
 									}
+									
+									// now we jump back to teh file index and set the len and pos ints
+									int byteLen;
+									if ((archiveFlags & 0x100) != 0) {
+										byteLen = entry.getFileName().getBytes().length + 1;
+									} else {
+										byteLen = 0;
+									}
+
+									if (entry.isCompressed()) {
+										byteLen += entry.getCompressedLength();
+									} else {
+										byteLen += entry.getFileLength();
+									}
+
+									 // get here
+									long here = out.getFilePointer();
+									// update the file index with the len and pos data we now know
+									setInteger(byteLen, buffer, 0);									 
+									setInteger((int)fileOffsetStart, buffer, 4);									
+									long indexPosition = extraInfo.get(entry).entryHeaderFilePos;
+									System.out.println("byteLen " + byteLen);
+									System.out.println("fileOffsetStart " + fileOffsetStart);										
+									System.out.println("indexPosition " + indexPosition);																		
+									indexPosition += 8; // this is the file hash skipped
+									out.seek(indexPosition);
+									out.write(buffer, 0, 8); // this is int size and int location
+															
+									
+									// return to here
+									out.seek(here);
+								 
 		
 									if (in != null)
 										in.close();
@@ -484,7 +697,27 @@ public class DDSToKTXBsaConverter extends Thread {
 								}
 							}
 						}
-
+						
+			 
+						try {
+							long here = out.getFilePointer();
+						
+							// record at the header how far we've written successfully
+							// index of last good is  1 less than count of good
+							setInteger(entriesWritten - 1, buffer, 0);	
+							System.out.println("Written count into second int " + entriesWritten);
+							out.seek(8);
+							out.write(buffer, 0, 4); 
+							// return to here
+							out.seek(here);
+							
+							
+							if(entriesWritten == 7)
+								System.out.println("stop the train");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						
 						entriesToWriteNow.clear();
 //						System.out.println("entriesToWriteNow.clear()");
 					}}));
@@ -504,9 +737,15 @@ public class DDSToKTXBsaConverter extends Thread {
 		es.shutdown();
 		if (deflater != null)
 			deflater.end();
-
+		
+		
+		setInteger(104, buffer, 0);									 
+		setInteger(header.length, buffer, 4);
+		out.seek(4);
+		out.write(buffer, 0, 8); 
+		
 		// Note the files above don't need a pos reset as the next section finds itself
-
+/*
 		long fileOffset2 = header.length + folderCount * 16;
 		out.seek(fileOffset2);
 		int entryIndex = 0;
@@ -521,29 +760,29 @@ public class DDSToKTXBsaConverter extends Thread {
 			for (int i = 0; i < folder.getFileCount(); i++) {
 				ArchiveEntry entry = entries.get(entryIndex++);
 
-				int count;
+				int byteLen;
 				if ((archiveFlags & 0x100) != 0) {
-					count = entry.getFileName().getBytes().length + 1;
+					byteLen = entry.getFileName().getBytes().length + 1;
 				} else {
-					count = 0;
+					byteLen = 0;
 				}
 
 				if (entry.isCompressed()) {
-					count += entry.getCompressedLength();
+					byteLen += entry.getCompressedLength();
 				} else {
-					count += entry.getFileLength();
+					byteLen += entry.getFileLength();
 				}
 
-				setInteger(count, buffer, 0);
-				fileOffset2 = entry.getFileOffset();
+				setInteger(byteLen, buffer, 0);
+				long entryPosition = entry.getFileOffset();
 				if (fileOffset2 > 0x7fffffffL) {
 					throw new DBException("File offset exceeds 2GB");
 				}
-				setInteger((int)fileOffset2, buffer, 4);
-				out.skipBytes(8);
-				out.write(buffer, 0, 8);
+				setInteger((int)entryPosition, buffer, 4);
+				out.skipBytes(8); // this is the file hash skipped
+				out.write(buffer, 0, 8); // this is int size and int location
 			}
-		}
+		}*/
 	}
 
 	private class ArchiveEntryOutput {
@@ -551,6 +790,8 @@ public class DDSToKTXBsaConverter extends Thread {
 		InputStream in;// this guy gets swapped about during conversion		
 	}
 	
+	
+	// these are just little endian bytes
 	private static void setInteger(int number, byte buffer[], int offset) {
 		buffer[offset] = (byte)number;
 		buffer[offset + 1] = (byte)(number >>> 8);
@@ -634,5 +875,21 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	public interface StatusUpdateListener {
 		public void updateProgress(int currentProgress);
+	}
+	
+	
+	private class ArchiveEntryExtras {
+				
+		// used to point back to the entries index so we can quickly set the byte count and offset position in the file heap
+		public long entryHeaderFilePos = -1;
+		
+		// maybe I want these, count and location in the file heap
+		public long entryHeaderByteLen = -1;
+		public long entryHeaderBytesPos = -1;
+		
+		public ArchiveEntryExtras(long entryHeaderFilePos) {
+			this.entryHeaderFilePos = entryHeaderFilePos; 
+		}
+
 	}
 }
