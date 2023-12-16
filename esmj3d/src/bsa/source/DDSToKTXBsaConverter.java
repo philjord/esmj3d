@@ -27,63 +27,84 @@ import tools.io.FileChannelRAF;
 
 /**
  * This is primarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
- * 
- * BSA fallout file format is as follows
- * 
- * https://en.uesp.net/wiki/Skyrim_Mod:Archive_File_Format
- * 
- * header = new byte[36]; //this is the word "BSA\0" compare with BTDX header[0] = 66;//(byte)"B".toCharArray()[0];
- * perhaps? header[1] = 83; header[2] = 65; setInteger(104, header, 4);// 104 is FO3 and TES5, 103 is TES4
- * setInteger(header.length, header, 8); // this is a pointer to folder index, which is 36 or straight after the header
- * setInteger(archiveFlags, header, 12); setInteger(folderCount, header, 16); setInteger(fileCount, header, 20);
- * setInteger(folderNamesLength, header, 24); //Total length of all folder names, including \0's but not including the
- * prefixed length byte. setInteger(fileNamesLength, header, 28); setInteger(fileFlags, header, 32);
- * 
- * 
- * --Folder Index filePosition is (header.length) section length is (folderCount * 16)
- * 
- * for each folder setLong(folder.getHashCode().getHash(), buffer, 0); setInteger(folder.getFileCount(), buffer, 8);
- * setInteger((int)fileOffset, buffer, 12); //Offset to file records for this folder. (Subtract totalFileNameLength to
- * get the actual offset within the file.)
- * 
- * //fileOffset is the end of the folder, past the file name section section and into the folder heap section below,
- * //meaning every folder name len must be kept track of as it's written out
- * 
- * 
- * 
- * --Folder Heap filePosition is (offset = header.length + (folderCount * 16)); section length is ((folderCount +
- * folderNamesLength) + (fileCount * 16)) long -- folderNamesLength doesn't include the len byte at the front, so add
- * folderCount on to it
- * 
- * for each folder String folderName = plus a 0 plus an empty char (length + 2)//TODO: what?
- * 
- * this section is folder.getFileCount() * 16 long for (int i = 0; i < folder.getFileCount(); i++) { ArchiveEntry entry
- * = entries.get(fileIndex++); setLong(entry.getFileHashCode().getHash(), buffer, 0); //crazy fileNamesLength added on
- * as that's taken off at load time (some sort of history cock up) setInteger(0, buffer, 8); // int of size
- * setInteger(0, buffer, 12); // int location within file heap } }
- * 
- * --File Names filePosition is (offset = header.length + (folderCount * 16) + (folderCount + folderNamesLength) +
- * (fileCount * 16)); section length is fileNamesLength
- * 
- * // file names, but oddly just in order with no len to start each one! parsed by looking for nulls for (ArchiveEntry
- * entry : entries) { byte[] nameBuffer = entry.getFileName().getBytes(); buffer[nameBuffer.length] = 0;
- * out.write(buffer, 0, nameBuffer.length + 1); }
- * 
- * 
- * -- File Heap filePosition is (offset = header.length + (folderCount * 16) + (folderCount + folderNamesLength) +
- * (fileCount * 16) + fileNamesLength) section length is really huge, might have the name repeated
- * 
- * 
- * for (ArchiveEntry entry : entries) { if ((archiveFlags & 0x100) != 0) nameLen 1byte then name bytes[] size int given
- * above in the folders file locations content bytes[]
- * 
- * 
  */
+/* BSA fallout file format is as follows
+ 
+ https://en.uesp.net/wiki/Skyrim_Mod:Archive_File_Format
+ 
+ header = new byte[36]; //this is the word "BSA\0" compare with BTDX 
+ header[0] = 66;  //(byte)"B".toCharArray()[0]; perhaps? 
+ header[1] = 83; 
+ header[2] = 65; 
+ setInteger(104, header, 4); // 104 is FO3 and TES5, 103 is TES4
+ setInteger(header.length, header, 8); // this is a pointer to folder index, which is 36 or straight after the header
+ setInteger(archiveFlags, header, 12); 
+ setInteger(folderCount, header, 16); 
+ setInteger(fileCount, header, 20);
+ setInteger(folderNamesLength, header, 24); //Total length of all folder names, including \0's but not including the prefixed length byte. 
+ setInteger(fileNamesLength, header, 28); 
+ setInteger(fileFlags, header, 32);
+ 
+ 
+ --Folder Index 
+ filePosition is (header.length) 
+ section length is (folderCount * 16)
+ 
+ for each folder 
+ 	setLong(folder.getHashCode().getHash(), buffer, 0); 
+ 	setInteger(folder.getFileCount(), buffer, 8);
+ 	setInteger((int)fileOffset, buffer, 12); //Offset to file records for this folder. (Subtract totalFileNameLength to get the actual offset within the file.)
+ 
+ //fileOffset is the end of the folder, past the file name section section and into the folder heap section below,
+ //meaning every folder name len must be kept track of as it's written out
+ 
+ --Folder Heap 
+ filePosition is (offset = header.length + (folderCount * 16)); 
+ section length is ((folderCount + folderNamesLength) + (fileCount * 16)) long 
+ -- folderNamesLength doesn't include the len byte at the front, so add folderCount on to it
+ 
+ for each folder 
+ 	String folderName = plus a 0 plus an empty char (length + 2)//TODO: what? surely plus a len plus a nul
+ 
+ 	section length is folder.getFileCount() * 16  
+ 	for (int i = 0; i < folder.getFileCount(); i++) { 
+		ArchiveEntry entry = entries.get(fileIndex++); 
+		setLong(entry.getFileHashCode().getHash(), buffer, 0); //crazy fileNamesLength added on as that's taken off at load time (some sort of history cock up) 
+		setInteger(0, buffer, 8); // int of size
+ 		setInteger(0, buffer, 12); // int location within file heap 
+ 	}
+}
+ 
+--File Names 
+filePosition is (offset = header.length + (folderCount * 16) + (folderCount + folderNamesLength) + (fileCount * 16));
+section length is fileNamesLength
+ 
+// file names, but oddly just in order with no len to start each one! parsed by looking for nulls 
+for (ArchiveEntry entry : entries) { 
+	byte[] nameBuffer = entry.getFileName().getBytes(); 
+	buffer[nameBuffer.length] = 0;
+	out.write(buffer, 0, nameBuffer.length + 1); 
+}
+ 
+ 
+ -- File Heap 
+ filePosition is (offset = header.length + (folderCount * 16) + (folderCount + folderNamesLength) + (fileCount * 16) + fileNamesLength) 
+ section length is really huge, might have the name repeated
+ 
+ 
+ for (ArchiveEntry entry : entries) { 
+ 	if ((archiveFlags & 0x100) != 0) 
+ 		nameLen 1byte then name bytes[] 
+ 	size int given	above in the folders file locations 
+ 	content bytes[]
+ 
+ 
+*/
 public class DDSToKTXBsaConverter extends Thread {
 
-	private static final boolean						CONVERT_DDS_to_KTX	= true;
+	public static int									NUM_THREADS			= 4;
 
-	private static final int							PARTIAL_FILE		= 12341234;
+	private static final boolean						CONVERT_DDS_to_KTX	= true;
 
 	private FileChannel									outputArchiveFile;
 
@@ -259,6 +280,7 @@ public class DDSToKTXBsaConverter extends Thread {
 		if ((inputArchive.getSig() != SIG.TES3) && ((fileFlags & 2) != 0 && (fileFlags & -3) != 0)) {
 			throw new DBException("Texture files must be packaged by themselves");
 		}
+		
 		insert = true;
 		Iterator<Folder> i$ = folders.iterator();
 		while (i$.hasNext()) {
@@ -295,14 +317,14 @@ public class DDSToKTXBsaConverter extends Thread {
 	}
 
 	/**
-	 * Note this writes out a ArchiveFileBsa version fo archive files, not Btdx or starfields one
+	 * Note this writes out a ArchiveFileBsa version of archive files, not tes3, Btdx or starfields one
 	 * @param out
 	 * @throws DBException
 	 * @throws IOException
 	 */
 	private void writeArchive(FileChannelRAF out, FileChannel outReader) throws DBException, IOException {
 
-		// First things first, let's see if the outputs readable channel has a marker for partial completeion and if start from that point		
+		// First things first, let's see if the outputs readable channel has a marker for partial completion and if start from that point		
 		// partial writes are indicated by an int at 4 and a counted int at 8 (which are completed by setting to 104 and 36, respectively)
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);// 2 ints worth
@@ -316,8 +338,9 @@ public class DDSToKTXBsaConverter extends Thread {
 
 		byte[] header = new byte[36];
 
-		if (peekInComplete != PARTIAL_FILE || lastGoodEntryWritten == -1) {
-
+		if (peekInComplete != ArchiveFile.PARTIAL_FILE || lastGoodEntryWritten == -1) {
+			lastGoodEntryWritten = -1;// clear the value out and ensure we start entry writing at the first entry
+			
 			//TES3 header is different, but we don't want to use it anyway
 			if (inputArchive.getSig() != SIG.TES3 || true) {
 
@@ -328,7 +351,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				//setInteger(104, header, 4);// 104 is FO3 and TES5, 103 is TES4
 				//setInteger(header.length, header, 8); // this is the folder offset, notice it is the length of the header at 36
 
-				setInteger(PARTIAL_FILE, header, 4);// mark as incomplete so far, will be completed at the end of this method		
+				setInteger(ArchiveFile.PARTIAL_FILE, header, 4);// mark as incomplete so far, will be completed at the end of this method		
 				setInteger(-1, header, 8); // -1 means put the folders back and start again
 
 				setInteger(archiveFlags, header, 12);
@@ -349,10 +372,8 @@ public class DDSToKTXBsaConverter extends Thread {
 				//fileCount = getInteger(header, 8);
 			}
 			out.write(header);
-
-			lastGoodEntryWritten = -1;// clear the value out and ensure we start entry writing at the first entry
-
-			// keep track as we write so we can record where folder detail live in the folder heap
+			
+			// keep track as we write so we can record where folder details live in the folder heap			
 			// this offset is now pointing past the folder index, into the folder heap
 			long fileOffset = header.length + folderCount * 16;
 			if (fileOffset > 0x7fffffffL) {
@@ -365,7 +386,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				setInteger(folder.getFileCount(), buffer, 8);
 				setInteger((int)fileOffset + fileNamesLength, buffer, 12);// notice the crazy oddity of this needing to have fileNamesLength added, loading takes that value off the offset value ahhh!
 				out.write(buffer, 0, 16);
-				// measure the distance into the folder heap for this particular folder, for the next folder to point at 
+				// measure the distance past this folders heap data, for the next folder to point at as its heap start pos
 				fileOffset += folder.getName().length() + 2 + folder.getFileCount() * 16;
 				if (fileOffset > 0x7fffffffL) {
 					throw new DBException("File offset exceeds 2GB");
@@ -388,7 +409,7 @@ public class DDSToKTXBsaConverter extends Thread {
 				for (int i = 0; i < folder.getFileCount(); i++) {
 					ArchiveEntry entry = entries.get(fileIndex++);
 
-					// In order to easily update these 2 numbers when the new content is written and confirmed good 
+					// In order to easily update these 2 numbers when the actual file content is written 
 					// we record this file info pointer for use later
 					extraInfo.put(entry, new ArchiveEntryExtras(out.getFilePointer()));
 
@@ -435,9 +456,9 @@ public class DDSToKTXBsaConverter extends Thread {
 					// is this the last good written file? if so grab the location of the point just after it
 					if (fileIndex == lastGoodEntryWritten) {
 						byteBuffer.rewind();
-						bytesCount = outReader.read(byteBuffer, fileOffset + 8);// skip hash 8 bytes
+						bytesCount = outReader.read(byteBuffer, fileOffset + 8);// absolute read and skip hash 8 bytes
 						int fileSize = byteBuffer.getInt(0);
-						int offset = byteBuffer.getInt(4); // might be the sub version number if not partial file 						 
+						int offset = byteBuffer.getInt(4); 					 
 
 						writeStartPos = fileSize + offset;
 					}
@@ -452,11 +473,10 @@ public class DDSToKTXBsaConverter extends Thread {
 			fileOffset += fileNamesLength;
 
 			// in case of trouble just start again
-			if (writeStartPos == 0) {
+			if (writeStartPos <= 0) {
 				// flag away skipping any thing
-				lastGoodEntryWritten = -1;
-				// this is now pointing to the start of the heap
-				out.seek(fileOffset);
+				lastGoodEntryWritten = -1;				
+				out.seek(fileOffset);// this is now pointing to the start of the heap
 				System.out.println("Couldn't find a good writeStartPos, restarting. lastGoodEntryWritten = "
 									+ lastGoodEntryWritten);
 			} else {
@@ -468,7 +488,6 @@ public class DDSToKTXBsaConverter extends Thread {
 		}
 
 		// Multi-threaded below, very non linear
-		int NUM_THREADS = 4;
 
 		Deflater deflater = new Deflater(6);
 
@@ -489,12 +508,12 @@ public class DDSToKTXBsaConverter extends Thread {
 
 			final ArchiveEntry entryToProcess = entries.get(entryIdx);
 			final int order = writeOrder++;
-			//			System.out.println("entry to process " + entryToProcess.getFileName());			
+			//System.out.println("entry to process " + entryToProcess.getFileName());			
 
 			todo.add(Executors.callable(new Runnable() {
 				@Override
 				public void run() {
-					//					System.out.println("considering " + ((DisplayableArchiveEntry)entryToProcess).getName());
+					//System.out.println("considering " + ((DisplayableArchiveEntry)entryToProcess).getName());
 
 					ArchiveEntryOutput aeo = new ArchiveEntryOutput();
 					InputStream in = null;
@@ -505,7 +524,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 						// convert to etc2 if needed
 						if (CONVERT_DDS_to_KTX && entryToProcess.getFileName().endsWith(".ktx")) {
-							//							System.out.println("converting  " +((DisplayableArchiveEntry)entryToProcess).getName());
+							//System.out.println("converting  " +((DisplayableArchiveEntry)entryToProcess).getName());
 							ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in,
 									((DisplayableArchiveEntry)entryToProcess).getName());
 							if (bbKtx != null) {
@@ -516,7 +535,6 @@ public class DDSToKTXBsaConverter extends Thread {
 										"Conversion failed for " + ((DisplayableArchiveEntry)entryToProcess).getName());
 							}
 						} else {
-							//							System.out.println("leav raw "+ ((DisplayableArchiveEntry)entryToProcess).getName());
 							aeo.in = in;
 						}
 
@@ -525,7 +543,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 						// put it in in order as we are a multi-thread op
 						entriesToWrite.set(order, aeo);
-						//						System.out.println("adding entry to list now " + ((DisplayableArchiveEntry)aeo.entry).getName() + " at " + order);
+						//System.out.println("adding entry to list now " + ((DisplayableArchiveEntry)aeo.entry).getName() + " at " + order);
 
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -535,13 +553,13 @@ public class DDSToKTXBsaConverter extends Thread {
 
 			// 0 base makes this odd, e.g. num thread 4 will mean "mod % 4 == 3" means 3,7,11...
 			if ((entryIdx % NUM_THREADS == (NUM_THREADS - 1)) || entryIdx == entries.size() - 1) {
-				//				System.out.println("entryIdx " + entryIdx + " about to call invokeAll");
+				//System.out.println("entryIdx " + entryIdx + " about to call invokeAll");
 
 				// before executing the batch of converters add a task to the end to write out the previous converted batch
 				// 2 lists so writing and processing are not interwoven
 				entriesToWriteNow.addAll(entriesToWrite);
 				// must keep them as null so the order of writing can be maintained
-				//				System.out.println("entriesToWrite set back to nulls");
+				// System.out.println("entriesToWrite set back to nulls");
 				for (int i = 0; i < NUM_THREADS * 2; i++) {
 					entriesToWrite.set(i, null);
 				}
@@ -555,14 +573,11 @@ public class DDSToKTXBsaConverter extends Thread {
 								ArchiveEntry entry = aeo.entry;
 
 								try {
-
-									//									System.out.println("entry to write " + entry.getFileName());
+									//System.out.println("entry to write " + entry.getFileName());
 									in = aeo.in;
 
 									int residualLength = entry.getFileLength();
 
-									//NOTICE entry now configured for output only, input permanently broken
-									//entry.setFileOffset(out.getFilePointer());
 									long fileOffsetStart = out.getFilePointer();
 
 									if ((archiveFlags & 0x100) != 0) {
@@ -635,9 +650,9 @@ public class DDSToKTXBsaConverter extends Thread {
 									setInteger(byteLen, buffer, 0);
 									setInteger((int)fileOffsetStart, buffer, 4);
 									long indexPosition = extraInfo.get(entry).entryHeaderFilePos;
-									//									System.out.println("byteLen " + byteLen);
-									//									System.out.println("fileOffsetStart " + fileOffsetStart);										
-									//									System.out.println("indexPosition " + indexPosition);																		
+									//System.out.println("byteLen " + byteLen);
+									//System.out.println("fileOffsetStart " + fileOffsetStart);										
+									//System.out.println("indexPosition " + indexPosition);																		
 									indexPosition += 8; // this is the file hash skipped
 									out.seek(indexPosition);
 									out.write(buffer, 0, 8); // this is int size and int location
@@ -665,7 +680,7 @@ public class DDSToKTXBsaConverter extends Thread {
 								int newProgress = (++entriesWritten * 100) / fileCount;
 								if (newProgress >= currentProgress + 1) {
 									currentProgress = newProgress;
-									//									System.out.println("Conversion Progress " + currentProgress);
+									//System.out.println("Conversion Progress " + currentProgress);
 									if (statusDialog != null)
 										statusDialog.updateProgress(currentProgress);
 								}
@@ -676,9 +691,9 @@ public class DDSToKTXBsaConverter extends Thread {
 							long here = out.getFilePointer();
 
 							// record at the header how far we've written successfully
-							// index of last good is  1 less than count of good
+							// notice index of last written is 1 less than count of written
 							setInteger(entriesWritten - 1, buffer, 0);
-							//							System.out.println("Written count into second int " + entriesWritten);
+							//System.out.println("Written count into second int " + entriesWritten);
 							out.seek(8);
 							out.write(buffer, 0, 4);
 							// return to here
@@ -689,7 +704,7 @@ public class DDSToKTXBsaConverter extends Thread {
 						}
 
 						entriesToWriteNow.clear();
-						//						System.out.println("entriesToWriteNow.clear()");
+						//System.out.println("entriesToWriteNow.clear()");
 					}
 				}));
 
@@ -711,47 +726,7 @@ public class DDSToKTXBsaConverter extends Thread {
 		setInteger(104, buffer, 0);
 		setInteger(header.length, buffer, 4);
 		out.seek(4);
-		out.write(buffer, 0, 8);
-
-		// Note the files above don't need a pos reset as the next section finds itself
-		/*
-				long fileOffset2 = header.length + folderCount * 16;
-				out.seek(fileOffset2);
-				int entryIndex = 0;
-				for (Folder folder : folders) {
-		
-					// this read was used, however it seems to just be the folder name prefixed with length, better to do no reads
-					//int length = out.readByte() & 0xff;
-					//out.skipBytes(length);// account for length on the front string
-		
-					out.skipBytes(1 + folder.name.getBytes().length + 1);// account for length on the front string and... null on the back?
-		
-					for (int i = 0; i < folder.getFileCount(); i++) {
-						ArchiveEntry entry = entries.get(entryIndex++);
-		
-						int byteLen;
-						if ((archiveFlags & 0x100) != 0) {
-							byteLen = entry.getFileName().getBytes().length + 1;
-						} else {
-							byteLen = 0;
-						}
-		
-						if (entry.isCompressed()) {
-							byteLen += entry.getCompressedLength();
-						} else {
-							byteLen += entry.getFileLength();
-						}
-		
-						setInteger(byteLen, buffer, 0);
-						long entryPosition = entry.getFileOffset();
-						if (fileOffset2 > 0x7fffffffL) {
-							throw new DBException("File offset exceeds 2GB");
-						}
-						setInteger((int)entryPosition, buffer, 4);
-						out.skipBytes(8); // this is the file hash skipped
-						out.write(buffer, 0, 8); // this is int size and int location
-					}
-				}*/
+		out.write(buffer, 0, 8);		
 	}
 
 	private class ArchiveEntryOutput {
@@ -846,17 +821,11 @@ public class DDSToKTXBsaConverter extends Thread {
 	}
 
 	private class ArchiveEntryExtras {
-
 		// used to point back to the entries index so we can quickly set the byte count and offset position in the file heap
-		public long	entryHeaderFilePos	= -1;
-
-		// maybe I want these, count and location in the file heap
-		public long	entryHeaderByteLen	= -1;
-		public long	entryHeaderBytesPos	= -1;
+		public long entryHeaderFilePos = -1;
 
 		public ArchiveEntryExtras(long entryHeaderFilePos) {
 			this.entryHeaderFilePos = entryHeaderFilePos;
 		}
-
 	}
 }
