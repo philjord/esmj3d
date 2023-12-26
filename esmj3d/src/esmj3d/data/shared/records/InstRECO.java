@@ -2,8 +2,8 @@ package esmj3d.data.shared.records;
 
 import org.jogamp.vecmath.Vector3f;
 
-import esmio.common.data.record.IRecordStore;
-import esmio.common.data.record.Record;
+import esfilemanager.common.data.record.IRecordStore;
+import esfilemanager.common.data.record.Record;
 import esmj3d.data.shared.subrecords.XESP;
 import tools.io.ESMByteConvert;
 

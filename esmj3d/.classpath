@@ -6,7 +6,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Tools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/3DTools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/BSAManager"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ESMManager"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ESFileManager"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core-and"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/vecmath"/>
