@@ -209,7 +209,9 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	private void insertEntry(ArchiveEntry inEntry) throws DBException {
 		String folderName = ((DisplayableArchiveEntry)inEntry).getFolderName();
-
+		
+		
+		
 		//folderName = folderName.substring(baseName.length() + 1);
 		if (folderName.length() > 254) {
 			throw new DBException("Maximum folder path length is 254 characters");
@@ -277,9 +279,10 @@ public class DDSToKTXBsaConverter extends Thread {
 			}
 		}
 
-		if ((inputArchive.getSig() != SIG.TES3) && ((fileFlags & 2) != 0 && (fileFlags & -3) != 0)) {
-			throw new DBException("Texture files must be packaged by themselves");
-		}
+		// FO3 DLC don't conform to this requirement
+		//if ((inputArchive.getSig() != SIG.TES3) && ((fileFlags & 2) != 0 && (fileFlags & -3) != 0)) {
+		//	throw new DBException("Texture files must be packaged by themselves");
+		//}
 		
 		insert = true;
 		Iterator<Folder> i$ = folders.iterator();
@@ -500,6 +503,153 @@ public class DDSToKTXBsaConverter extends Thread {
 			entriesToWrite.add(null);
 		}
 		ArrayList<ArchiveEntryOutput> entriesToWriteNow = new ArrayList<ArchiveEntryOutput>();
+		
+		// create a single writer, called in the loop below to write out the prepped batch of entries
+		Runnable entryWriter = new Runnable() {
+			@Override
+			public void run() {
+				for (int i = 0; i < entriesToWriteNow.size(); i++) {
+					ArchiveEntryOutput aeo = entriesToWriteNow.get(i);
+					if (aeo != null) {
+						InputStream in = null;
+						ArchiveEntry entry = aeo.entry;
+						try {
+							//System.out.println("entry to write " + entry.getFileName());
+							in = aeo.in;
+
+							int residualLength = entry.getFileLength();
+
+							long fileOffsetStart = out.getFilePointer();
+
+							if ((archiveFlags & 0x100) != 0) {
+								byte nameBuffer2[] = entry.getFileName().getBytes();
+								buffer[0] = (byte)nameBuffer2.length;
+								out.write(buffer, 0, 1);
+								out.write(nameBuffer2);
+							}
+
+							//Note either whole archive compressed or not, this is not per entry
+							if ((archiveFlags & 4) != 0) {
+								setInteger(residualLength, buffer, 0);
+								out.write(buffer, 0, 4);
+								int compressedLength = 4;
+								if (residualLength > 0) {
+
+									while (!deflater.finished()) {
+										int count;
+										if (deflater.needsInput() && residualLength > 0) {
+											int length = Math.min(dataBuffer.length, residualLength);
+											count = in.read(dataBuffer, 0, length);
+											if (count == -1) {
+												throw new EOFException(
+														"Unexpected end of stream while deflating data");
+											}
+											residualLength -= count;
+											deflater.setInput(dataBuffer, 0, count);
+											if (residualLength == 0)
+												deflater.finish();
+										}
+										count = deflater.deflate(compressedBuffer, 0, compressedBuffer.length);
+										if (count > 0) {
+											out.write(compressedBuffer, 0, count);
+											compressedLength += count;
+										}
+									}
+								}
+								entry.setCompressed(true);
+								entry.setCompressedLength(compressedLength);
+							} else {
+								int count;
+								for (; residualLength > 0; residualLength -= count) {
+									count = in.read(dataBuffer);
+									if (count == -1) {
+										throw new EOFException("Unexpected end of stream while copying data");
+									}
+									out.write(dataBuffer, 0, count);
+								}
+
+								entry.setCompressed(false);
+							}
+
+							// now we jump back to teh file index and set the len and pos ints
+							int byteLen;
+							if ((archiveFlags & 0x100) != 0) {
+								byteLen = entry.getFileName().getBytes().length + 1;
+							} else {
+								byteLen = 0;
+							}
+
+							if (entry.isCompressed()) {
+								byteLen += entry.getCompressedLength();
+							} else {
+								byteLen += entry.getFileLength();
+							}
+
+							// get here
+							long here = out.getFilePointer();
+							// update the file index with the len and pos data we now know
+							setInteger(byteLen, buffer, 0);
+							setInteger((int)fileOffsetStart, buffer, 4);
+							long indexPosition = extraInfo.get(entry).entryHeaderFilePos;
+							//System.out.println("byteLen " + byteLen);
+							//System.out.println("fileOffsetStart " + fileOffsetStart);										
+							//System.out.println("indexPosition " + indexPosition);																		
+							indexPosition += 8; // this is the file hash skipped
+							out.seek(indexPosition);
+							out.write(buffer, 0, 8); // this is int size and int location
+
+							// return to here
+							out.seek(here);
+
+							if (in != null)
+								in.close();
+							if (deflater != null)
+								deflater.reset();
+						} catch (IOException e) {
+							System.out.println("IOException " + ((DisplayableArchiveEntry)entry).getName());
+							try {
+								if (in != null)
+									in.close();
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+							if (deflater != null)
+								deflater.reset();
+							e.printStackTrace();
+						}
+
+						int newProgress = (++entriesWritten * 100) / fileCount;
+						if (newProgress >= currentProgress + 1) {
+							currentProgress = newProgress;
+							//System.out.println("Conversion Progress " + currentProgress);
+							if (statusDialog != null)
+								statusDialog.updateProgress(currentProgress);
+						}
+					}
+				}
+
+				try {
+					long here = out.getFilePointer();
+
+					// record at the header how far we've written successfully
+					// notice index of last written is 1 less than count of written
+					setInteger(entriesWritten - 1, buffer, 0);
+					//System.out.println("Written count into second int " + entriesWritten);
+					out.seek(8);
+					out.write(buffer, 0, 4);
+					// return to here
+					out.seek(here);
+
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				entriesToWriteNow.clear();
+				//System.out.println("entriesToWriteNow.clear()");
+			}
+		};
+		
+		
 
 		int writeOrder = 0;
 		//lastGoodEntryWritten will be -1 (if this is not a restart)
@@ -508,8 +658,8 @@ public class DDSToKTXBsaConverter extends Thread {
 
 			final ArchiveEntry entryToProcess = entries.get(entryIdx);
 			final int order = writeOrder++;
-			//System.out.println("entry to process " + entryToProcess.getFileName());			
-
+			//System.out.println("entry to process " + entryToProcess.getFileName());	
+			
 			todo.add(Executors.callable(new Runnable() {
 				@Override
 				public void run() {
@@ -550,6 +700,8 @@ public class DDSToKTXBsaConverter extends Thread {
 					}
 				}
 			}));
+			
+		 
 
 			// 0 base makes this odd, e.g. num thread 4 will mean "mod % 4 == 3" means 3,7,11...
 			if ((entryIdx % NUM_THREADS == (NUM_THREADS - 1)) || entryIdx == entries.size() - 1) {
@@ -563,162 +715,30 @@ public class DDSToKTXBsaConverter extends Thread {
 				for (int i = 0; i < NUM_THREADS * 2; i++) {
 					entriesToWrite.set(i, null);
 				}
-				todo.add(Executors.callable(new Runnable() {
-					@Override
-					public void run() {
-						for (int i = 0; i < entriesToWriteNow.size(); i++) {
-							ArchiveEntryOutput aeo = entriesToWriteNow.get(i);
-							if (aeo != null) {
-								InputStream in = null;
-								ArchiveEntry entry = aeo.entry;
-
-								try {
-									//System.out.println("entry to write " + entry.getFileName());
-									in = aeo.in;
-
-									int residualLength = entry.getFileLength();
-
-									long fileOffsetStart = out.getFilePointer();
-
-									if ((archiveFlags & 0x100) != 0) {
-										byte nameBuffer2[] = entry.getFileName().getBytes();
-										buffer[0] = (byte)nameBuffer2.length;
-										out.write(buffer, 0, 1);
-										out.write(nameBuffer2);
-									}
-
-									//Note either whole archive compressed or not, this is not per entry
-									if ((archiveFlags & 4) != 0) {
-										setInteger(residualLength, buffer, 0);
-										out.write(buffer, 0, 4);
-										int compressedLength = 4;
-										if (residualLength > 0) {
-
-											while (!deflater.finished()) {
-												int count;
-												if (deflater.needsInput() && residualLength > 0) {
-													int length = Math.min(dataBuffer.length, residualLength);
-													count = in.read(dataBuffer, 0, length);
-													if (count == -1) {
-														throw new EOFException(
-																"Unexpected end of stream while deflating data");
-													}
-													residualLength -= count;
-													deflater.setInput(dataBuffer, 0, count);
-													if (residualLength == 0)
-														deflater.finish();
-												}
-												count = deflater.deflate(compressedBuffer, 0, compressedBuffer.length);
-												if (count > 0) {
-													out.write(compressedBuffer, 0, count);
-													compressedLength += count;
-												}
-											}
-										}
-										entry.setCompressed(true);
-										entry.setCompressedLength(compressedLength);
-									} else {
-										int count;
-										for (; residualLength > 0; residualLength -= count) {
-											count = in.read(dataBuffer);
-											if (count == -1) {
-												throw new EOFException("Unexpected end of stream while copying data");
-											}
-											out.write(dataBuffer, 0, count);
-										}
-
-										entry.setCompressed(false);
-									}
-
-									// now we jump back to teh file index and set the len and pos ints
-									int byteLen;
-									if ((archiveFlags & 0x100) != 0) {
-										byteLen = entry.getFileName().getBytes().length + 1;
-									} else {
-										byteLen = 0;
-									}
-
-									if (entry.isCompressed()) {
-										byteLen += entry.getCompressedLength();
-									} else {
-										byteLen += entry.getFileLength();
-									}
-
-									// get here
-									long here = out.getFilePointer();
-									// update the file index with the len and pos data we now know
-									setInteger(byteLen, buffer, 0);
-									setInteger((int)fileOffsetStart, buffer, 4);
-									long indexPosition = extraInfo.get(entry).entryHeaderFilePos;
-									//System.out.println("byteLen " + byteLen);
-									//System.out.println("fileOffsetStart " + fileOffsetStart);										
-									//System.out.println("indexPosition " + indexPosition);																		
-									indexPosition += 8; // this is the file hash skipped
-									out.seek(indexPosition);
-									out.write(buffer, 0, 8); // this is int size and int location
-
-									// return to here
-									out.seek(here);
-
-									if (in != null)
-										in.close();
-									if (deflater != null)
-										deflater.reset();
-								} catch (IOException e) {
-									System.out.println("IOException " + ((DisplayableArchiveEntry)entry).getName());
-									try {
-										if (in != null)
-											in.close();
-									} catch (IOException e1) {
-										e1.printStackTrace();
-									}
-									if (deflater != null)
-										deflater.reset();
-									e.printStackTrace();
-								}
-
-								int newProgress = (++entriesWritten * 100) / fileCount;
-								if (newProgress >= currentProgress + 1) {
-									currentProgress = newProgress;
-									//System.out.println("Conversion Progress " + currentProgress);
-									if (statusDialog != null)
-										statusDialog.updateProgress(currentProgress);
-								}
-							}
-						}
-
-						try {
-							long here = out.getFilePointer();
-
-							// record at the header how far we've written successfully
-							// notice index of last written is 1 less than count of written
-							setInteger(entriesWritten - 1, buffer, 0);
-							//System.out.println("Written count into second int " + entriesWritten);
-							out.seek(8);
-							out.write(buffer, 0, 4);
-							// return to here
-							out.seek(here);
-
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
-						entriesToWriteNow.clear();
-						//System.out.println("entriesToWriteNow.clear()");
-					}
-				}));
-
-				writeOrder = 0;// reset for the next round
+				todo.add(Executors.callable(entryWriter));
 				try {
 					List<Future<Object>> answers = es.invokeAll(todo);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				
+				writeOrder = 0;// reset for the next round
+				
 				todo.clear();
 
 			}
 
 		}
+		
+		// one final run through to add the last entries prepared
+		entriesToWriteNow.addAll(entriesToWrite);
+		todo.add(Executors.callable(entryWriter));
+		try {
+			List<Future<Object>> answers = es.invokeAll(todo);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 		es.shutdown();
 		if (deflater != null)
 			deflater.end();
@@ -728,6 +748,8 @@ public class DDSToKTXBsaConverter extends Thread {
 		out.seek(4);
 		out.write(buffer, 0, 8);		
 	}
+	
+	
 
 	private class ArchiveEntryOutput {
 		ArchiveEntry	entry;
