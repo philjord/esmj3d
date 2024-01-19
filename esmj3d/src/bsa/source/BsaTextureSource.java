@@ -323,7 +323,7 @@ public class BsaTextureSource implements TextureSource {
 	 * @return
 	 */
 	private static String cleanTexName(String texName) {
-		texName.toLowerCase();
+		texName = texName.toLowerCase();
 
 		// remove incorrect file path prefix, if it exists
 		if (texName.startsWith("data\\")) {
