@@ -21,7 +21,7 @@ import bsaio.ArchiveFile;
 import bsaio.ArchiveFile.SIG;
 import bsaio.DBException;
 import bsaio.HashCode;
-import bsaio.displayables.DisplayableArchiveEntry;
+import bsaio.displayables.Displayable;
 import texture.DDSToKTXConverter;
 import tools.io.FileChannelRAF;
 
@@ -208,7 +208,7 @@ public class DDSToKTXBsaConverter extends Thread {
 	}
 
 	private void insertEntry(ArchiveEntry inEntry) throws DBException {
-		String folderName = ((DisplayableArchiveEntry)inEntry).getFolderName();
+		String folderName = ((Displayable)inEntry).getFolderName();
 		
 		
 		
@@ -221,7 +221,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			inEntry.setFileName(inEntry.getFileName().replace(".dds", ".ktx"));
 		}
 
-		String fileName = ((DisplayableArchiveEntry)inEntry).getName();
+		String fileName = ((Displayable)inEntry).getName();
 		if (fileName.length() > 254) {
 			throw new DBException("Maximum file name length is 254 characters");
 		}
@@ -234,8 +234,8 @@ public class DDSToKTXBsaConverter extends Thread {
 			ArchiveEntry listEntry = entries.get(i);
 			int diff = inEntry.compareTo(listEntry);
 			if (diff == 0) {
-				throw new DBException("Hash collision: '"	+ ((DisplayableArchiveEntry)inEntry).getName() + "' and '"
-										+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
+				throw new DBException("Hash collision: '"	+ ((Displayable)inEntry).getName() + "' and '"
+										+ ((Displayable)listEntry).getName() + "'");
 			}
 			if (diff < 0) {
 				insert = false;
@@ -606,7 +606,7 @@ public class DDSToKTXBsaConverter extends Thread {
 							if (deflater != null)
 								deflater.reset();
 						} catch (IOException e) {
-							System.out.println("IOException " + ((DisplayableArchiveEntry)entry).getName());
+							System.out.println("IOException " + ((Displayable)entry).getName());
 							try {
 								if (in != null)
 									in.close();
@@ -676,13 +676,13 @@ public class DDSToKTXBsaConverter extends Thread {
 						if (CONVERT_DDS_to_KTX && entryToProcess.getFileName().endsWith(".ktx")) {
 							//System.out.println("converting  " +((DisplayableArchiveEntry)entryToProcess).getName());
 							ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in,
-									((DisplayableArchiveEntry)entryToProcess).getName());
+									((Displayable)entryToProcess).getName());
 							if (bbKtx != null) {
 								in = new ByteBufferBackedInputStream(bbKtx);
 								entryToProcess.setFileLength(bbKtx.limit());
 							} else {
 								System.out.println(
-										"Conversion failed for " + ((DisplayableArchiveEntry)entryToProcess).getName());
+										"Conversion failed for " + ((Displayable)entryToProcess).getName());
 							}
 						} else {
 							aeo.in = in;

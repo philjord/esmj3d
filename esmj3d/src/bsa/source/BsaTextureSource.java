@@ -4,22 +4,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.Buffer;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jogamp.java3d.CompressedImageComponent2D;
 import org.jogamp.java3d.ImageComponent;
-import org.jogamp.java3d.NioImageBuffer;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.Texture2D;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
-import org.jogamp.java3d.compressedtexture.dktxtools.dds.DDSDecompressor;
 
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
@@ -28,9 +22,6 @@ import compressedtexture.CompressedBufferedImage;
 import compressedtexture.DDSImage;
 import compressedtexture.KTXImage;
 import compressedtexture.dktxtools.ktx.KTXFormatException;
-import etcpack.ETCPack;
-import etcpack.ETCPack.FORMAT;
-import etcpack.QuickETC;
 import javaawt.image.BufferedImage;
 import texture.DDSToKTXConverter;
 import utils.source.TextureSource;
@@ -98,17 +89,7 @@ public class BsaTextureSource implements TextureSource {
 	@Override
 	public boolean textureFileExists(String texName) {
 		if (texName != null && texName.length() > 0) {
-			texName = texName.toLowerCase();
-
-			// remove incorrect file path prefix, if it exists
-			if (texName.startsWith("data\\")) {
-				texName = texName.substring(5);
-			}
-
-			// add the textures path part
-			if (!texName.startsWith("textures")) {
-				texName = "textures\\" + texName;
-			}
+			texName = cleanTexName(texName);
 
 			Texture tex = null;
 			//check cache hit
@@ -148,17 +129,7 @@ public class BsaTextureSource implements TextureSource {
 	@Override
 	public Texture getTexture(String texName) {
 		if (texName != null && texName.length() > 0) {
-			texName = texName.toLowerCase();
-
-			// remove incorrect file path prefix, if it exists
-			if (texName.startsWith("data\\")) {
-				texName = texName.substring(5);
-			}
-
-			// add the textures path part
-			if (!texName.startsWith("textures")) {
-				texName = "textures\\" + texName;
-			}
+			texName = cleanTexName(texName);
 
 			Texture tex = null;
 
@@ -187,24 +158,25 @@ public class BsaTextureSource implements TextureSource {
 						try {
 							//InputStream in = archiveFile.getInputStream(archiveEntry);
 							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
-
-							if (texNameForArchive.endsWith(".dds")) {
-								if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
-									tex = CompressedTextureLoaderETCPackDDS.getTexture(texNameForArchive, in);
-								else
-									tex = CompressedTextureLoader.DDS.getTexture(texNameForArchive, in);
-							} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
-								tex = CompressedTextureLoader.ASTC.getTexture(texNameForArchive, in);
-							} else if (texNameForArchive.endsWith(".ktx")) {
-								tex = CompressedTextureLoader.KTX.getTexture(texNameForArchive, in);
-							} else {
-								//FIXME: generic texture loading system
-								/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
-								tex = tl.getTexture();*/
-							}
-
-							if (tex != null) {
-								return tex;
+							if(in != null) {
+								if (texNameForArchive.endsWith(".dds")) {
+									if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
+										tex = CompressedTextureLoaderETCPackDDS.getTexture(texNameForArchive, in);
+									else
+										tex = CompressedTextureLoader.DDS.getTexture(texNameForArchive, in);
+								} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
+									tex = CompressedTextureLoader.ASTC.getTexture(texNameForArchive, in);
+								} else if (texNameForArchive.endsWith(".ktx")) {
+									tex = CompressedTextureLoader.KTX.getTexture(texNameForArchive, in);
+								} else {
+									//FIXME: generic texture loading system
+									/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
+									tex = tl.getTexture();*/
+								}
+	
+								if (tex != null) {
+									return tex;
+								}
 							}
 						} catch (IOException e) {
 							System.out.println(
@@ -228,17 +200,7 @@ public class BsaTextureSource implements TextureSource {
 	@Override
 	public TextureUnitState getTextureUnitState(String texName) {
 		if (texName != null && texName.length() > 0) {
-			texName = texName.toLowerCase();
-
-			// remove incorrect file path prefix, if it exists
-			if (texName.startsWith("data\\")) {
-				texName = texName.substring(5);
-			}
-
-			// add the textures path part
-			if (!texName.startsWith("textures")) {
-				texName = "textures\\" + texName;
-			}
+			texName = cleanTexName(texName);
 
 			TextureUnitState tex = null;
 
@@ -267,24 +229,25 @@ public class BsaTextureSource implements TextureSource {
 						try {
 							//InputStream in = archiveFile.getInputStream(archiveEntry);
 							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
-
-							if (texNameForArchive.endsWith(".dds")) {
-								if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
-									tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive, in);
-								else
-									tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in);
-							} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
-								tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in);
-							} else if (texNameForArchive.endsWith(".ktx")) {
-								tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in);
-							} else {
-								//FIXME: generic texture loading system
-								/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
-								tex = tl.getTexture();*/
-							}
-
-							if (tex != null) {
-								return tex;
+							if(in != null) {
+									if (texNameForArchive.endsWith(".dds")) {
+									if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
+										tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive, in);
+									else
+										tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in);
+								} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
+									tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in);
+								} else if (texNameForArchive.endsWith(".ktx")) {
+									tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in);
+								} else {
+									//FIXME: generic texture loading system good for png images
+									/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
+									tex = tl.getTexture();*/
+								}
+	
+								if (tex != null) {
+									return tex;
+								}
 							}
 						} catch (IOException e) {
 							System.out.println(
@@ -301,7 +264,7 @@ public class BsaTextureSource implements TextureSource {
 			}
 		}
 
-		//No many times this will fall through here, if texture doesn't exist for example
+		//Many times this will fall through here, if texture doesn't exist for example
 		//System.out.println("BsaTextureSource TextureUnitState not found in archive bsas: " + texName);
 		//new Throwable().printStackTrace();
 		return null;
@@ -326,17 +289,7 @@ public class BsaTextureSource implements TextureSource {
 
 	public InputStream getInputStream(String texName) {
 		if (texName != null && texName.length() > 0) {
-			texName.toLowerCase();
-
-			// remove incorrect file path prefix, if it exists
-			if (texName.startsWith("data\\")) {
-				texName = texName.substring(5);
-			}
-
-			// add the textures path part (unless tes3 bookart folder)
-			if (!texName.startsWith("textures") && !texName.startsWith("bookart")) {
-				texName = "textures\\" + texName;
-			}
+			texName = cleanTexName(texName);
 
 			for (ArchiveFile archiveFile : bsas) {
 				// shall we inspect this archive?
@@ -362,6 +315,25 @@ public class BsaTextureSource implements TextureSource {
 		System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
 		new Throwable().printStackTrace();
 		return null;
+	}
+
+	/**
+	 * add the textures path part (unless one of the other types)
+	 * @param texName
+	 * @return
+	 */
+	private static String cleanTexName(String texName) {
+		texName.toLowerCase();
+
+		// remove incorrect file path prefix, if it exists
+		if (texName.startsWith("data\\")) {
+			texName = texName.substring(5);
+		}
+
+		if (!texName.startsWith("textures") && !texName.startsWith("bookart") && !texName.startsWith("interface")) {
+			texName = "textures\\" + texName;
+		}
+		return texName;
 	}
 
 	/**
