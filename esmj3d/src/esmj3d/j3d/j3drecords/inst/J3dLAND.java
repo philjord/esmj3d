@@ -649,7 +649,12 @@ public class J3dLAND extends J3dRECOStatInst
 			for (int col = 0; col < (GRID_COUNT + 1); col++)
 			{
 				int idx = col + (row * (GRID_COUNT + 1)) + 4;//+4 is start float
-				height += heightBytes[idx] * 4;
+				
+				// not sure why this exception in oblivion
+				// java.lang.ArrayIndexOutOfBoundsException: length=1096; index=1096
+            	//at esmj3d.j3d.j3drecords.inst.J3dLAND.extractHeights(J3dLAND.java:652)
+				if(idx < heightBytes.length)
+					height += heightBytes[idx] * 4;
 
 				// start next row relative to the start of this row
 				if (col == 0)
