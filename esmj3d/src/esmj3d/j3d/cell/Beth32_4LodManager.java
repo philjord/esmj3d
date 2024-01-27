@@ -99,8 +99,12 @@ public class Beth32_4LodManager extends BethLodManager
 				 
 	//			System.out.println("minXYRemoval " + minXYRemoval);
 	//			System.out.println("maxXYRemoval " + maxXYRemoval);
-				((ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("minXYRemoval")).setValue(minXYRemoval);
-				((ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("maxXYRemoval")).setValue(maxXYRemoval);
+				ShaderAttributeValue sav1 = (ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("minXYRemoval");
+				if(sav1 != null)
+					sav1.setValue(minXYRemoval);
+				ShaderAttributeValue sav2 = (ShaderAttributeValue)MorphingLandscape.shaderAttributeSet.get("maxXYRemoval");
+				if(sav2 != null)
+					sav2.setValue(maxXYRemoval);
 				
 				
 				prevCharLodPoint = charLodPoint;
