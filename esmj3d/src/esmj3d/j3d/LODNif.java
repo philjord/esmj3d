@@ -46,53 +46,69 @@ public class LODNif extends Group
 
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
 
-				// j3dNiAVObjectRoot = J3dNiNode.createNiNode((BSFadeNode) root, niToJ3dData,
-				// mediaSources.getTextureSource(), false);
-
-				for (int i = 0; i < niNode.numChildren; i++)
-				{
-					NiAVObject child = (NiAVObject) niToJ3dData.get(niNode.children[i]);
-					if (child != null)
-					{
-						J3dNiTriBasedGeom ntbg = null;
-
-						if (child instanceof NiTriShape)
-						{
-							NiTriShape niTriShape = (NiTriShape) child;
-							ntbg = new J3dNiTriShape(niTriShape, niToJ3dData, textureSource);
-						}
-						else if (child instanceof BSLODTriShape)
-						{
-							BSLODTriShape bSLODTriShape = (BSLODTriShape) child;
-							ntbg = new J3dNiTriShape(bSLODTriShape, niToJ3dData, textureSource);
-						}
-						else if (child instanceof NiTriStrips)
-						{
-							NiTriStrips niTriStrips = (NiTriStrips) child;
-							ntbg = new J3dNiTriStrips(niTriStrips, niToJ3dData, textureSource);
-						}
-						else if (child instanceof BSTriShape)
-						{
-							BSTriShape bsTriShape = (BSTriShape) child;
-							ntbg = new J3dBSTriShape(bsTriShape, niToJ3dData, textureSource);
-						}
-						else
-						{
-							System.out.println("bad child type for lod nif " + child + " " + nifFileName);
-						}
-
-						if (ntbg != null)
-						{
-							ntbg.compact();
-							addChild(ntbg);
-						}
-					}
-				}
+				
+				createChildren(niNode, niToJ3dData, nifFileName, textureSource );
 			}
 			else
 			{
 				System.out.println("LodBSFadeNode not rooted by fade node! " + root);
 			}
 		}
+	}
+	
+	public void createChildren(NiNode niNode, NiToJ3dData niToJ3dData, String nifFileName, TextureSource textureSource) 
+	{
+		if (niNode != null)
+		{
+			for (int i = 0; i < niNode.numChildren; i++)
+			{
+				NiAVObject child = (NiAVObject) niToJ3dData.get(niNode.children[i]);
+				if (child != null)
+				{
+					J3dNiTriBasedGeom ntbg = null;
+
+					if (child instanceof NiTriShape)
+					{
+						NiTriShape niTriShape = (NiTriShape) child;
+						ntbg = new J3dNiTriShape(niTriShape, niToJ3dData, textureSource);
+					}
+					else if (child instanceof BSLODTriShape)
+					{
+						BSLODTriShape bSLODTriShape = (BSLODTriShape) child;
+						ntbg = new J3dNiTriShape(bSLODTriShape, niToJ3dData, textureSource);
+					}
+					else if (child instanceof NiTriStrips)
+					{
+						NiTriStrips niTriStrips = (NiTriStrips) child;
+						ntbg = new J3dNiTriStrips(niTriStrips, niToJ3dData, textureSource);
+					}
+					else if (child instanceof BSTriShape)
+					{
+						BSTriShape bsTriShape = (BSTriShape) child;
+						ntbg = new J3dBSTriShape(bsTriShape, niToJ3dData, textureSource);
+					}					
+					else if (child instanceof NiNode)
+					{
+						NiNode c = (NiNode)child;					
+						if (c.translation.x != 0 || c.translation.y != 0 || c.translation.z != 0)
+							System.out.println("non identity child ninode trans for lod nif "	+ child + " " + c.translation + " "
+												+ nifFileName);	
+						
+						createChildren(c, niToJ3dData,nifFileName, textureSource);
+					}
+					else
+					{
+						System.out.println("bad child type for lod nif " + child + " " + nifFileName);						
+					}
+
+					if (ntbg != null)
+					{
+						ntbg.compact();
+						addChild(ntbg);
+					}
+				}
+			}
+		}
+			
 	}
 }
