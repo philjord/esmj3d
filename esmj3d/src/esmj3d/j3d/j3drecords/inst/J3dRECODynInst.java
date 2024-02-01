@@ -150,7 +150,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	 */
 	public void setLocation(float x, float y, float z, float rx, float ry, float rz, float scale)
 	{
-		Transform3D transform = new Transform3D();
+		//Transform3D transform = new Transform3D();
 
 		Transform3D xrotT = new Transform3D();
 		xrotT.rotX(-rx);
@@ -174,6 +174,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 
 	public void setLocation(Transform3D t)
 	{
+		transform.set(t);
 		transformGroup.setTransform(t);
 	}
 
@@ -187,7 +188,7 @@ public class J3dRECODynInst extends BranchGroup implements BethRenderSettings.Up
 	@Override
 	public void setLocation(Vector3f loc, Quat4f rotation)
 	{
-		transform.setTranslation(loc);
+		transform.set(rotation, loc, 1.1f);
 		transformGroup.setTransform(transform);
 	}
 
