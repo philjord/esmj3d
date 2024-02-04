@@ -319,16 +319,19 @@ public class DDSToKTXBsaConverter extends Thread {
 		fileCount++;
 	}
 
+	// this is a memebr variable which makes the writing to the file very single thread
+	private long pos = 0;
 	/**
 	 * Note this writes out a ArchiveFileBsa version of archive files, not tes3, Btdx or starfields one
 	 * @param out
 	 * @throws DBException
 	 * @throws IOException
 	 */
-	private void writeArchive(FileChannelRAF out, FileChannel outReader) throws DBException, IOException {
+	private void writeArchive(FileChannelRAF out2, FileChannel outReader) throws DBException, IOException {
 
 		// First things first, let's see if the outputs readable channel has a marker for partial completion and if start from that point		
 		// partial writes are indicated by an int at 4 and a counted int at 8 (which are completed by setting to 104 and 36, respectively)
+		FileChannel ch = out2.getChannel();
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);// 2 ints worth
 		int bytesCount = outReader.read(byteBuffer, 4);// from the 4th byte
@@ -374,7 +377,8 @@ public class DDSToKTXBsaConverter extends Thread {
 				//int hashtableOffset = getInteger(header, 4);
 				//fileCount = getInteger(header, 8);
 			}
-			out.write(header);
+			ch.write(ByteBuffer.wrap(header), pos);
+			pos += header.length;
 			
 			// keep track as we write so we can record where folder details live in the folder heap			
 			// this offset is now pointing past the folder index, into the folder heap
@@ -388,7 +392,8 @@ public class DDSToKTXBsaConverter extends Thread {
 				setLong(folder.getHashCode().getHash(), buffer, 0);
 				setInteger(folder.getFileCount(), buffer, 8);
 				setInteger((int)fileOffset + fileNamesLength, buffer, 12);// notice the crazy oddity of this needing to have fileNamesLength added, loading takes that value off the offset value ahhh!
-				out.write(buffer, 0, 16);
+				ch.write(ByteBuffer.wrap(buffer, 0, 16), pos);
+				pos += 16;
 				// measure the distance past this folders heap data, for the next folder to point at as its heap start pos
 				fileOffset += folder.getName().length() + 2 + folder.getFileCount() * 16;
 				if (fileOffset > 0x7fffffffL) {
@@ -407,19 +412,20 @@ public class DDSToKTXBsaConverter extends Thread {
 				buffer[0] = (byte)(nameBuffer.length + 1); // 1 byte len
 				System.arraycopy(nameBuffer, 0, buffer, 1, nameBuffer.length);
 				buffer[nameBuffer.length + 1] = 0; // null at end
-				out.write(buffer, 0, nameBuffer.length + 2); // 1byte len to start and null at end
-
+				ch.write(ByteBuffer.wrap(buffer, 0, nameBuffer.length + 2), pos);// 1byte len to start and null at end
+				pos += nameBuffer.length + 2;
 				for (int i = 0; i < folder.getFileCount(); i++) {
 					ArchiveEntry entry = entries.get(fileIndex++);
 
 					// In order to easily update these 2 numbers when the actual file content is written 
 					// we record this file info pointer for use later
-					extraInfo.put(entry, new ArchiveEntryExtras(out.getFilePointer()));
+					extraInfo.put(entry, new ArchiveEntryExtras(pos));
 
 					setLong(entry.getFileHashCode().getHash(), buffer, 0);
 					setInteger(0, buffer, 8); // int of size (unknown for now)
 					setInteger(0, buffer, 12); // int location (unknown for now)					
-					out.write(buffer, 0, 16);
+					ch.write(ByteBuffer.wrap(buffer, 0, 16), pos);
+					pos += 16;
 				}
 			}
 
@@ -432,10 +438,11 @@ public class DDSToKTXBsaConverter extends Thread {
 				}
 				System.arraycopy(nameBuffer, 0, buffer, 0, nameBuffer.length);
 				buffer[nameBuffer.length] = 0;// put a null at the end, notice no len at start
-				out.write(buffer, 0, nameBuffer.length + 1);
+				ch.write(ByteBuffer.wrap(buffer, 0, nameBuffer.length + 1), pos);
+				pos += nameBuffer.length + 1;
 			}
 
-			//out is now pointing at the start of the file heap
+			//pos is now pointing at the start of the file heap
 
 		} else {
 			// jump forward with no writes but spot the file header positions on the way			
@@ -479,13 +486,13 @@ public class DDSToKTXBsaConverter extends Thread {
 			if (writeStartPos <= 0) {
 				// flag away skipping any thing
 				lastGoodEntryWritten = -1;				
-				out.seek(fileOffset);// this is now pointing to the start of the heap
+				pos = fileOffset;// this is now pointing to the start of the heap
 				System.out.println("Couldn't find a good writeStartPos, restarting. lastGoodEntryWritten = "
 									+ lastGoodEntryWritten);
 			} else {
 				System.out.println("jumping forward with incomplete set to "	+ lastGoodEntryWritten + " file pos="
 									+ writeStartPos);
-				out.seek(writeStartPos);
+				pos = writeStartPos;
 			}
 
 		}
@@ -519,19 +526,23 @@ public class DDSToKTXBsaConverter extends Thread {
 
 							int residualLength = entry.getFileLength();
 
-							long fileOffsetStart = out.getFilePointer();
+							long fileOffsetStart = pos;
 
 							if ((archiveFlags & 0x100) != 0) {
 								byte nameBuffer2[] = entry.getFileName().getBytes();
 								buffer[0] = (byte)nameBuffer2.length;
-								out.write(buffer, 0, 1);
-								out.write(nameBuffer2);
+								ch.write(ByteBuffer.wrap(buffer, 0, 1), pos);
+								pos += 1;
+								ch.write(ByteBuffer.wrap(nameBuffer2), pos);
+								pos += nameBuffer2.length;
+								
 							}
 
 							//Note either whole archive compressed or not, this is not per entry
 							if ((archiveFlags & 4) != 0) {
 								setInteger(residualLength, buffer, 0);
-								out.write(buffer, 0, 4);
+								ch.write(ByteBuffer.wrap(buffer, 0, 4), pos);
+								pos += 4;
 								int compressedLength = 4;
 								if (residualLength > 0) {
 
@@ -551,7 +562,8 @@ public class DDSToKTXBsaConverter extends Thread {
 										}
 										count = deflater.deflate(compressedBuffer, 0, compressedBuffer.length);
 										if (count > 0) {
-											out.write(compressedBuffer, 0, count);
+											ch.write(ByteBuffer.wrap(compressedBuffer, 0, count), pos);
+											pos += count;
 											compressedLength += count;
 										}
 									}
@@ -565,7 +577,8 @@ public class DDSToKTXBsaConverter extends Thread {
 									if (count == -1) {
 										throw new EOFException("Unexpected end of stream while copying data");
 									}
-									out.write(dataBuffer, 0, count);
+									ch.write(ByteBuffer.wrap(dataBuffer, 0, count), pos);
+									pos += count;
 								}
 
 								entry.setCompressed(false);
@@ -584,9 +597,7 @@ public class DDSToKTXBsaConverter extends Thread {
 							} else {
 								byteLen += entry.getFileLength();
 							}
-
-							// get here
-							long here = out.getFilePointer();
+						 
 							// update the file index with the len and pos data we now know
 							setInteger(byteLen, buffer, 0);
 							setInteger((int)fileOffsetStart, buffer, 4);
@@ -595,11 +606,8 @@ public class DDSToKTXBsaConverter extends Thread {
 							//System.out.println("fileOffsetStart " + fileOffsetStart);										
 							//System.out.println("indexPosition " + indexPosition);																		
 							indexPosition += 8; // this is the file hash skipped
-							out.seek(indexPosition);
-							out.write(buffer, 0, 8); // this is int size and int location
-
-							// return to here
-							out.seek(here);
+							// this is int size and int location
+							ch.write(ByteBuffer.wrap(buffer, 0, 8), indexPosition);// doesn't touch pos
 
 							if (in != null)
 								in.close();
@@ -629,17 +637,11 @@ public class DDSToKTXBsaConverter extends Thread {
 				}
 
 				try {
-					long here = out.getFilePointer();
-
 					// record at the header how far we've written successfully
 					// notice index of last written is 1 less than count of written
 					setInteger(entriesWritten - 1, buffer, 0);
 					//System.out.println("Written count into second int " + entriesWritten);
-					out.seek(8);
-					out.write(buffer, 0, 4);
-					// return to here
-					out.seek(here);
-
+					ch.write(ByteBuffer.wrap(buffer, 0, 4), 8);// doesn't touch pos
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -745,8 +747,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 		setInteger(104, buffer, 0);
 		setInteger(header.length, buffer, 4);
-		out.seek(4);
-		out.write(buffer, 0, 8);		
+		ch.write(ByteBuffer.wrap(buffer, 0, 8), 4);// doesn't touch pos2
 	}
 	
 	
