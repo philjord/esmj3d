@@ -34,10 +34,11 @@ public class Beth32_4LodManager extends BethLodManager
 
 	private HashMap<Point, BranchGroup> loadedGrosses4 = new HashMap<Point, BranchGroup>();
 
+	private int worldFormId = -1;
+	
 	private String lodWorldName = "";
 
 	private J3dICellFactory j3dCellFactory;
-
 
 	public Beth32_4LodManager(J3dICellFactory j3dCellFactory)
 	{
@@ -64,6 +65,7 @@ public class Beth32_4LodManager extends BethLodManager
 	@Override
 	public void setWorldFormId(int worldFormId)
 	{
+		this.worldFormId  = worldFormId;
 		String newLodWorldName = j3dCellFactory.getLODWorldName(worldFormId);
 
 		if (!this.lodWorldName.equals(newLodWorldName))
@@ -195,7 +197,7 @@ public class Beth32_4LodManager extends BethLodManager
 			for (Point key : pointsToAttach) {
 				BranchGroup lod = store.get(key);
 				if (lod == null) {
-					lod = j3dCellFactory.makeLODLandscape(key.x, key.y, scale, lodWorldName);
+					lod = j3dCellFactory.makeLODLandscape(worldFormId, key.x, key.y, scale, lodWorldName);
 					lod.setCapability(Node.ALLOW_PARENT_READ);
 					store.put(key, lod);
 				}

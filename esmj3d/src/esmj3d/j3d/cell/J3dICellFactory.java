@@ -53,7 +53,7 @@ public abstract class J3dICellFactory implements IRecordStoreTes3
 
 	public abstract String getLODWorldName(int worldFormId);
 
-	public abstract BranchGroup makeLODLandscape(int lodX, int lodY, int scale, String lodWorldName);
+	public abstract BranchGroup makeLODLandscape(int wrldFormId, int lodX, int lodY, int scale, String lodWorldName);
 
 	public abstract AICellGeneral makeAICell(int cellId, AIActorServices aiActorLocator);
 

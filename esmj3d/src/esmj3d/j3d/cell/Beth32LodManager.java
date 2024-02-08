@@ -25,12 +25,16 @@ public class Beth32LodManager extends BethLodManager
 	private static int SCALE_32 = 32;
 
 	private HashMap<Point, MorphingLandscape> loadedGrosses = new HashMap<Point, MorphingLandscape>();
-
-	private String lodWorldFormId = "";
+	
+	private int worldFormId = -1;
+	
+	private String lodWorldName = "";
 
 	private J3dICellFactory j3dCellFactory;
 	
 	private LinearFog fog = new LinearFog(new Color3f(0.8f, 0.8f, 0.8f), 500, 3500);
+	
+
 
 	public Beth32LodManager(J3dICellFactory j3dCellFactory)
 	{
@@ -52,12 +56,13 @@ public class Beth32LodManager extends BethLodManager
 	@Override
 	public void setWorldFormId(int worldFormId)
 	{
-		String newLodWorldFormId = j3dCellFactory.getLODWorldName(worldFormId);
-		if (!this.lodWorldFormId.equals(newLodWorldFormId))
+		this.worldFormId  = worldFormId;
+		String newLodWorldName = j3dCellFactory.getLODWorldName(worldFormId);
+		if (!this.lodWorldName.equals(newLodWorldName))
 		{
 			this.removeAllChildren();
 			addChild(fog);
-			this.lodWorldFormId = newLodWorldFormId;
+			this.lodWorldName = newLodWorldName;
 
 			long start = System.currentTimeMillis();
 
@@ -66,7 +71,7 @@ public class Beth32LodManager extends BethLodManager
 				for (int y = OBLIVION_MIN_LOD; y < OBLIVION_MAX_LOD; y += SCALE_32)
 				{
 					Point key = new Point(x, y);
-					MorphingLandscape bg = (MorphingLandscape) j3dCellFactory.makeLODLandscape(x, y, SCALE_32, lodWorldFormId);
+					MorphingLandscape bg = (MorphingLandscape) j3dCellFactory.makeLODLandscape(worldFormId, x, y, SCALE_32, lodWorldName);
 					bg.setCapability(Node.ALLOW_PARENT_READ);
 					loadedGrosses.put(key, bg);
 					bg.compile();// better to be done not on the j3d thread?
