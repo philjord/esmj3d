@@ -18,6 +18,7 @@ import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 import esmj3d.j3d.water.Water;
 import esmj3d.j3d.water.WaterApp;
+import javaawt.Point;
 import tools.WeakListenerList;
 import utils.ESConfig;
 import utils.source.MediaSources;
@@ -131,4 +132,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 	public WeakListenerList<J3dCELLGeneral> getMemoryUseList() {
 		return memoryUseList;
 	}
+
+
+	protected abstract J3dLAND getJ3dLAND();
 }
