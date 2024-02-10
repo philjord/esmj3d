@@ -134,5 +134,5 @@ public abstract class J3dCELLGeneral extends BranchGroup
 	}
 
 
-	protected abstract J3dLAND getJ3dLAND();
+	public abstract J3dLAND getJ3dLAND();
 }

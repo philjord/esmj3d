@@ -235,6 +235,7 @@ public class J3dLAND extends J3dRECOStatInst
 	 */
 
 	private float lowestHeight = Float.MAX_VALUE;
+	private float highestHeight = Float.MIN_VALUE;
 
 	private static ShaderProgram shaderProgram = null;
 
@@ -666,6 +667,7 @@ public class J3dLAND extends J3dRECOStatInst
 
 				//update lowest
 				lowestHeight = h < lowestHeight ? h : lowestHeight;
+				highestHeight = h > highestHeight ? h : highestHeight;
 			}
 		}
 
@@ -908,7 +910,11 @@ public class J3dLAND extends J3dRECOStatInst
 	{
 		return lowestHeight;
 	}
-
+	public float getHighestHeight()
+	{
+		return highestHeight;
+	}
+	
 	public void tes3LAND(LAND land, IRecordStore master, TextureSource textureSource)
 	{
 		this.land = land;
