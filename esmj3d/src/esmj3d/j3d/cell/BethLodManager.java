@@ -7,8 +7,7 @@ import javaawt.Point;
 import javaawt.Rectangle;
 
 public abstract class BethLodManager extends BranchGroup
-{	
-	
+{		
 	public BethLodManager()
 	{
 		this.setCapability(BranchGroup.ALLOW_DETACH);
@@ -24,9 +23,7 @@ public abstract class BethLodManager extends BranchGroup
 		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
 		return new Point(charLodX, charLodY);
 	}
-	
-
-	
+		
 	/**
 	 * 4 ints represent the near grid x,y locations. The count of grids to include (e.g. x = 2 width = 4 means grids 2,3,4,5,6 that's 5! grids)
 	 * @return
