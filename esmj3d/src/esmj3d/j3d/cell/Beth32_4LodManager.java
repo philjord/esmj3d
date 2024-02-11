@@ -15,7 +15,6 @@ import org.jogamp.vecmath.Vector2f;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import javaawt.Point;
-import javaawt.Rectangle;
 import tools3d.utils.Utils3D;
 
 public class Beth32_4LodManager extends BethLodManager
@@ -79,6 +78,7 @@ public class Beth32_4LodManager extends BethLodManager
 	@Override
 	public void updateGross(float charX, float charY)
 	{
+		//FIXME: probably better to use a shader like the 32 one so I can using a 4 wherever I need to
 		if (LOD_SCOPE_EXTREMES != 0)
 		{						
 			Point charLodPoint = new Point((int) Math.floor(charX / J3dLAND.LAND_SIZE), (int) Math.floor(charY / J3dLAND.LAND_SIZE));
@@ -236,23 +236,7 @@ public class Beth32_4LodManager extends BethLodManager
 		}
 	}
 
-	public Point convertCharToLodXY(float charX, float charY)
-	{
-		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
-		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
-		return new Point(charLodX, charLodY);
-	}
+	
 
-	@Override
-	public Rectangle getGridBounds(float charX, float charY)
-	{
-		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
-		charLodX -= nearGridLoadCount;
-		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
-		charLodY -= nearGridLoadCount;
-		int w = (nearGridLoadCount * 2) + 1;
-		int h = (nearGridLoadCount * 2) + 1;
-
-		return new Rectangle(charLodX, charLodY, w, h);
-	}	 
+	
 }

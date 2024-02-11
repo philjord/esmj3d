@@ -3,7 +3,6 @@ package esmj3d.j3d.cell;
 import org.jogamp.java3d.LinearFog;
 import org.jogamp.vecmath.Color3f;
 
-import javaawt.Rectangle;
 import tools3d.utils.Utils3D;
 
 public class BethNoLodManager extends BethLodManager
@@ -28,11 +27,5 @@ public class BethNoLodManager extends BethLodManager
 	@Override
 	public void updateGross(float charX, float charY)
 	{
-	}
-
-	@Override
-	public Rectangle getGridBounds(float charX, float charY)
-	{
-		return getBounds(charX, charY, this.nearGridLoadCount);
 	}
 }

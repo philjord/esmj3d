@@ -3,12 +3,11 @@ package esmj3d.j3d.cell;
 import org.jogamp.java3d.BranchGroup;
 
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
+import javaawt.Point;
 import javaawt.Rectangle;
-import javaawt.geom.Rectangle2D;
 
 public abstract class BethLodManager extends BranchGroup
 {	
-	protected int nearGridLoadCount = 1;
 	
 	public BethLodManager()
 	{
@@ -18,28 +17,32 @@ public abstract class BethLodManager extends BranchGroup
 	public abstract void updateGross(float charX, float charY);
 
 	public abstract void setWorldFormId(int worldFormId);
+	
+	public Point convertCharToLodXY(float charX, float charY)
+	{
+		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
+		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
+		return new Point(charLodX, charLodY);
+	}
+	
 
-	public abstract Rectangle getGridBounds(float charX, float charY);
-		
-	// FIXME!! this is identical to getGridBounds in Beth32_4LodManager
-	public static Rectangle getBounds(float charX, float charY, int count)
+	
+	/**
+	 * 4 ints represent the near grid x,y locations. The count of grids to include (e.g. x = 2 width = 4 means grids 2,3,4,5,6 that's 5! grids)
+	 * @return
+	 */
+	public static Rectangle getGridBounds(float charX, float charY, int gridCount)
 	{
 		int charLodX = (int) Math.floor(charX / J3dLAND.LAND_SIZE);
 		int charLodY = (int) Math.floor(charY / J3dLAND.LAND_SIZE);
 
-		int lowX = (charLodX - count);
-		int lowY = (charLodY - count);
-		//+1 cos 1 size is 3 wide the center plus 1 on each side, see getGridBounds
-		int w = (count * 2) + 1;
-		int h = (count * 2) + 1;
+		int lowX = (charLodX - gridCount);
+		int lowY = (charLodY - gridCount);
+		//+1 cos 1 size is 3 wide the center plus 1 on each side 
+		int w = (gridCount * 2) + 1;
+		int h = (gridCount * 2) + 1;
 		return new Rectangle(lowX, lowY, w, h);
 	}
 	
-	public int getNearGridLoadCount() {
-		return nearGridLoadCount;
-	}
 
-	public void setNearGridLoadCount(int nearGridLoadCount) {
-		this.nearGridLoadCount = nearGridLoadCount;
-	}
 }

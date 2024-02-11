@@ -78,8 +78,7 @@ public class GridSpaces extends BranchGroup
 	///TODO: for now the near system is used to load gridspaces to make it predictable (skyrim loads too many
 	public void update(float charX, float charY, BethLodManager bethLodManager)
 	{
-		bethLodManager.setNearGridLoadCount(BethRenderSettings.getNearLoadGridCount());
-		Rectangle bounds = bethLodManager.getGridBounds(charX, charY);
+		Rectangle bounds = BethLodManager.getGridBounds(charX, charY, BethRenderSettings.getNearLoadGridCount());
 
 		List<GridSpace> gridsToRemove = getGridSpacesToRemove(bounds);
 		for (GridSpace gridSpace : gridsToRemove)

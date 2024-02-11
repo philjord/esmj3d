@@ -13,7 +13,6 @@ import org.jogamp.vecmath.Vector2f;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import javaawt.Point;
-import javaawt.Rectangle;
 import tools3d.utils.Utils3D;
 
 public class Beth32LodManager extends BethLodManager
@@ -129,15 +128,7 @@ public class Beth32LodManager extends BethLodManager
 			System.out.println("Beth32LodManager.updateGross in " + (System.currentTimeMillis() - start) + "ms");
 	}
 
-	/**
-	 * 4 ints represent the near grid x,y locations (not floats of real points)
-	 * @return
-	 */
-	@Override
-	public Rectangle getGridBounds(float charX, float charY)
-	{
-		return getBounds(charX, charY, this.nearGridLoadCount);
-	}
+	
 
 	
 }
