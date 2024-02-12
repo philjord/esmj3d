@@ -140,7 +140,6 @@ public class GridSpace extends BranchGroup implements UpdateListener
 
 	public void loadChildren()
 	{
-		System.out.println("GRidSapce loadChildren " + this.key);
 		//skip if loaded already
 		if (children == null)
 		{
@@ -168,7 +167,6 @@ public class GridSpace extends BranchGroup implements UpdateListener
 
 	public void unloadChildren()
 	{
-		System.out.println("GRidSapce unload " + this.key);
 		if (children != null)
 		{
 			children.detach();
