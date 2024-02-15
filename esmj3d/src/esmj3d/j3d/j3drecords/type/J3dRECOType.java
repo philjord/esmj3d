@@ -2,10 +2,24 @@ package esmj3d.j3d.j3drecords.type;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.jogamp.java3d.AlternateAppearance;
+import org.jogamp.java3d.Background;
+import org.jogamp.java3d.Behavior;
+import org.jogamp.java3d.BoundingLeaf;
 import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Clip;
+import org.jogamp.java3d.Fog;
+import org.jogamp.java3d.Group;
 import org.jogamp.java3d.MediaContainer;
+import org.jogamp.java3d.ModelClip;
 import org.jogamp.java3d.Node;
+import org.jogamp.java3d.SharedGroup;
+import org.jogamp.java3d.Soundscape;
+import org.jogamp.java3d.ViewPlatform;
 import org.jogamp.vecmath.Color3f;
 
 import esmj3d.data.shared.records.RECO;
@@ -18,6 +32,7 @@ import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiControllerSequence;
 import nif.j3d.particles.J3dNiParticleSystem;
+import tools.WeakValueHashMap;
 import tools3d.audio.SimpleSounds;
 import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.Fadable;
@@ -30,7 +45,7 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 
 	public String physNifFile = "";
 
-	public String shortName = "";//very temp helper
+	public String shortName = "";//very temp helper for ActionableMouseOverHandler
 
 	protected J3dNiAVObject j3dNiAVObject;
 
@@ -147,28 +162,7 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 
 	}
 
-	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MediaSources mediaSources)
-	{
-		J3dNiAVObject j3dNiAVObject;
-
-		if (makePhys)
-		{
-			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
-			if (nhr == null)
-				return null;
-			j3dNiAVObject = nhr.getHavokRoot();
-		}
-		else
-		{
-			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
-			if (nvr == null)
-				return null;
-			j3dNiAVObject = nvr.getVisualRoot();
-		}
-
-		return j3dNiAVObject;
-
-	}
+	
 
 	class SkinUpdateBehavior extends VaryingLODBehaviour
 	{
@@ -252,5 +246,72 @@ public abstract class J3dRECOType extends BranchGroup implements Fadable
 	{
 		return "" + this.getClass().getSimpleName() + " id " + RECO.getRecordId() + " : " + physNifFile;
 	}
+	
+	public static J3dNiAVObject loadNif(String nifFileName, boolean makePhys, MediaSources mediaSources)
+	{
+		J3dNiAVObject j3dNiAVObject;
 
+		if (makePhys)
+		{
+			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
+			if (nhr == null)
+				return null;
+			j3dNiAVObject = nhr.getHavokRoot();
+		}
+		else
+		{
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
+			if (nvr == null)
+				return null;
+			j3dNiAVObject = nvr.getVisualRoot();
+		}
+
+		return j3dNiAVObject;
+
+	}
+	
+	
+	//FIXME: for all static I should now, hold the loaded visualroot and use a shared node to place it in the world
+	// might make a bunch of things faster and better?
+
+	protected static Map<String, SharedGroup>	loadedFiles		= Collections
+			.synchronizedMap(new WeakValueHashMap<String, SharedGroup>());
+	protected static int								hit				= 0;
+	protected static int								miss			= 0;
+	
+	public static boolean					SHARE_MODELS	= true;
+	
+	protected static boolean checkTreeForSharable(Node node) {
+		/*
+				 * An IllegalSharingException is thrown if any of the following leaf nodes
+				 * appear in a shared subgraph:<P>
+				 * <UL>
+				 * <LI>AlternateAppearance</LI>
+				 * <LI>Background</LI>
+				 * <LI>Behavior</LI>
+				 * <LI>BoundingLeaf</LI>
+				 * <LI>Clip</LI>
+				 * <LI>Fog</LI>
+				 * <LI>ModelClip</LI>
+				 * <LI>Soundscape</LI>
+				 * <LI>ViewPlatform</LI></UL>*/
+
+		if (node instanceof AlternateAppearance || node instanceof Background || node instanceof Behavior
+			|| node instanceof BoundingLeaf || node instanceof Clip || node instanceof Fog || node instanceof ModelClip
+			|| node instanceof Soundscape || node instanceof ViewPlatform) {
+			return false;
+		} else {
+			if (node instanceof Group) {
+				Iterator<Node> it = ((Group)node).getAllChildren();
+				while (it.hasNext()) {
+					Node nex = it.next();
+					boolean sharableChildren = checkTreeForSharable(nex);
+					if (!sharableChildren)
+						return false;
+				}
+			}
+		}
+
+		return true;
+	}
 }

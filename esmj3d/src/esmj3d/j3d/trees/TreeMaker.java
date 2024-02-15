@@ -21,6 +21,7 @@ import org.jogamp.vecmath.Vector3f;
 import esmj3d.data.shared.records.InstRECO;
 import esmj3d.j3d.LODNif;
 import esmj3d.j3d.j3drecords.inst.J3dRECOStatInst;
+import esmj3d.j3d.j3drecords.type.J3dRECOType;
 import esmj3d.j3d.j3drecords.type.J3dRECOTypeStatic;
 import nif.j3d.J3dNiAVObject;
 import tools.WeakValueHashMap;
@@ -154,13 +155,13 @@ public class TreeMaker
 	}
 
 	//NOTE! before you enable this bad boy notice that scale factors in the instRECO may be be handled properly
-	private static boolean ENABLE_SG = false;
+	public static boolean SHARE_MODELS = true;
 
 	private static WeakValueHashMap<String, SharedGroup> loadedFlatLodSharedGroups = new WeakValueHashMap<String, SharedGroup>();
 
 	public static BranchGroup makeFlatLodTree(String nifFileName, MediaSources mediaSources)
 	{
-		if (ENABLE_SG)
+		if (SHARE_MODELS)
 		{
 			String keyString = nifFileName;
 			SharedGroup sg = loadedFlatLodSharedGroups.get(keyString);
@@ -169,7 +170,7 @@ public class TreeMaker
 			{
 				sg = new SharedGroup();
 
-				J3dNiAVObject nif = J3dRECOTypeStatic.loadNif(nifFileName, false, mediaSources);
+				J3dNiAVObject nif = J3dRECOType.loadNif(nifFileName, false, mediaSources);
 				sg.addChild(nif);
 				loadedFlatLodSharedGroups.put(keyString, sg);
 
@@ -185,7 +186,7 @@ public class TreeMaker
 		}
 		else
 		{
-			return J3dRECOTypeStatic.loadNif(nifFileName, false, mediaSources).getRootNode();
+			return J3dRECOType.loadNif(nifFileName, false, mediaSources).getRootNode();
 		}
 	}
 
@@ -194,7 +195,7 @@ public class TreeMaker
 	public static Node makeLODTreeX(String sptFileName, float billWidth, float billHeight, TextureSource textureSource)
 	{
 
-		if (ENABLE_SG)
+		if (SHARE_MODELS)
 		{
 			String keyString = sptFileName + "_" + billWidth + "_" + billHeight;
 			SharedGroup sg = loadedLodXSharedGroups.get(keyString);
