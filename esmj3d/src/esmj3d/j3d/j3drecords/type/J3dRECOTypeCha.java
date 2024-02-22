@@ -81,12 +81,14 @@ public class J3dRECOTypeCha extends J3dRECOType implements Fadable
 		return nifCharacter;
 	}
 
-	protected void addIdleAnimations(ArrayList<String> idleAnimations, List<String> filesInFolder)
+	protected void addIdleAnimations(ArrayList<String> idleAnimations, List<String> filesInFolder, String[] wildcards)
 	{
 		for (String fireName : filesInFolder)
 		{
-			if (fireName.toLowerCase().contains("idle"))
-				idleAnimations.add(fireName);
+			for(String wildcard : wildcards) {
+				if (fireName.toLowerCase().contains(wildcard))
+					idleAnimations.add(fireName);
+			}
 		}
 
 	}
