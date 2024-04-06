@@ -6,13 +6,14 @@ import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.ZString;
 
+/**
+ * Texture set, containing base, normal, glow, bump etc
+ * In Fo3, TES5, FO4
+ * oddly FO4 has REFR pointing at these
+ */
 public class TXST extends RECO
 {
-	//In Fo3, TES5
 
-	/**
-	 * Texture set, containing base, normal, glow, bump etc
-	 */
 	public ZString EDID = null;
 
 	public ZString TX00;//base
