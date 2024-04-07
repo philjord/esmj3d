@@ -573,7 +573,7 @@ public class J3dLAND extends J3dRECOStatInst
 						// new fallout 4 texture system
 						try
 						{
-							BSMaterial material = BgsmSource.getMaterial("Materials\\" + textureSet.MNAM.str);
+							BSMaterial material = BgsmSource.bgsmSource.getMaterial("Materials\\" + textureSet.MNAM.str);
 							if (material != null)
 							{
 								tus = textureSource.getTextureUnitState(material.textureList.get(0));
