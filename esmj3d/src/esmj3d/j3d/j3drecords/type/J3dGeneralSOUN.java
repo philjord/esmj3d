@@ -3,7 +3,7 @@ package esmj3d.j3d.j3drecords.type;
 import esfilemanager.common.data.record.IRecordStore;
 import esmj3d.data.shared.records.GenericSOUN;
 import esmj3d.data.shared.records.RECO;
-import nif.compound.NifKey;
+import nif.compound.NifKey.NifKeyString;
 import nif.niobject.NiTextKeyExtraData;
 import utils.source.MediaSources;
 
@@ -73,17 +73,17 @@ public class J3dGeneralSOUN extends J3dRECOType
 			 System.out.println("what the hell is the file for the sound? " + f);
 			 }*/
 
-			NifKey[] textKeys = niTextKeyExtraData.textKeys;
+			NifKeyString[] textKeys = niTextKeyExtraData.textKeys;
 
 			if (textKeys.length > 0)
 			{
 
 				for (int i = 0; i < textKeys.length; i++)
 				{
-					NifKey key = textKeys[i];
+					NifKeyString key = textKeys[i];
 
 					//float time = key.time;
-					String soundName = ((String) key.value);
+					String soundName = (key.value);
 					if (soundName.startsWith("sound:"))
 					{
 						//NOTE the sound name is a reference to an ESM EditorID for a sound					 
