@@ -521,6 +521,10 @@ public class J3dLAND extends J3dRECOStatInst
 
 	public static TextureUnitState getTextureTes3(int textureID, IRecordStore master, TextureSource textureSource)
 	{
+		return getTextureTes3(textureID, master, textureSource, false);
+	}
+	public static TextureUnitState getTextureTes3(int textureID, IRecordStore master, TextureSource textureSource, boolean dropMip0)
+	{
 		//0 means default?
 		if (textureID > 0)
 		{
@@ -533,7 +537,7 @@ public class J3dLAND extends J3dRECOStatInst
 					LTEX ltex = new LTEX(ltexRec);
 					if (ltex.ICON != null)
 					{
-						TextureUnitState tus = J3dNiGeometry.loadTextureUnitState(ltex.ICON.str, textureSource);
+						TextureUnitState tus = J3dNiGeometry.loadTextureUnitState(ltex.ICON.str, textureSource, dropMip0);
 						if (tus != null)
 						{
 							return tus;

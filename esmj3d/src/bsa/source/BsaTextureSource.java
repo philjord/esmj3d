@@ -29,6 +29,7 @@ import utils.source.file.FileTextureSource;
 
 public class BsaTextureSource implements TextureSource {
 
+
 	//DDS will be in .dds and are S3TC compress, KTX are .ktx and ETC2 compressed, ASTC will be .astc
 	public enum AllowedTextureFormats {
 		ALL, DDS, KTX, ASTC
@@ -199,13 +200,17 @@ public class BsaTextureSource implements TextureSource {
 
 	@Override
 	public TextureUnitState getTextureUnitState(String texName) {
+		return getTextureUnitState(texName, false); 
+	}
+	@Override
+	public TextureUnitState getTextureUnitState(String texName, boolean dropMip0) {
 		if (texName != null && texName.length() > 0) {
 			texName = cleanTexName(texName);
 
 			TextureUnitState tex = null;
 
 			//check cache hit
-			tex = CompressedTextureLoader.checkCachedTextureUnitState(texName);
+			tex = CompressedTextureLoader.checkCachedTextureUnitState(texName, dropMip0);
 			if (tex != null) {
 				return tex;
 			}
@@ -234,11 +239,11 @@ public class BsaTextureSource implements TextureSource {
 									if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
 										tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive, in);
 									else
-										tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in);
+										tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in, dropMip0);
 								} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
-									tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in);
+									tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in, dropMip0);
 								} else if (texNameForArchive.endsWith(".ktx")) {
-									tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in);
+									tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in, dropMip0);
 								} else {
 									//FIXME: generic texture loading system good for png images
 									/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
