@@ -6,11 +6,15 @@ public class ZString
 
 	public ZString(byte[] bytes)
 	{
-		str = new String(bytes, 0, bytes.length - 1);
-		//if (!Pattern.matches("[^\\p{C}[\\s]]*", str))
-		//{
-		//	new Throwable("Not a String!! " + str).printStackTrace();
-		//}
+		if(bytes.length > 0) {
+			str = new String(bytes, 0, bytes.length - 1);
+			//if (!Pattern.matches("[^\\p{C}[\\s]]*", str))
+			//{
+			//	new Throwable("Not a String!! " + str).printStackTrace();
+			//}
+		} else {
+			new Throwable("bytes " + bytes.length).printStackTrace();
+		}
 	}
 
 	@Override

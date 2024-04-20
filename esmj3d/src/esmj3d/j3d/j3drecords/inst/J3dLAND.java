@@ -44,6 +44,7 @@ import nif.BgsmSource;
 import nif.j3d.J3dNiGeometry;
 import nif.j3d.J3dNiTriBasedGeom;
 import nif.niobject.bgsm.BSMaterial;
+import nif.niobject.bgsm.ShaderMaterial;
 import nif.shader.ShaderSourceIO;
 import tools.io.ESMByteConvert;
 import tools3d.utils.PhysAppearance;
@@ -580,7 +581,7 @@ public class J3dLAND extends J3dRECOStatInst
 							BSMaterial material = BgsmSource.bgsmSource.getMaterial("Materials\\" + textureSet.MNAM.str);
 							if (material != null)
 							{
-								tus = textureSource.getTextureUnitState(material.textureList.get(0));
+								tus = textureSource.getTextureUnitState(((ShaderMaterial)material).DiffuseTexture);
 							}
 
 						}
