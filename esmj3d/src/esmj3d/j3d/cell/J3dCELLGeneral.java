@@ -1,7 +1,5 @@
 package esmj3d.j3d.cell;
 
-import java.util.List;
-
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Node;
@@ -23,9 +21,9 @@ import utils.source.MediaSources;
 
 public abstract class J3dCELLGeneral extends BranchGroup
 {
+	public static boolean PAUSE_CELL_LOADING = false;
+	
 	protected IRecordStore master;
-
-	protected List<Record> children;
 
 	protected SparseArray<J3dRECOInst> j3dRECOs = new SparseArray<J3dRECOInst>();
 
@@ -39,19 +37,16 @@ public abstract class J3dCELLGeneral extends BranchGroup
 
 	protected int worldId;
 
-	public J3dCELLGeneral(IRecordStore master, int worldId, List<Record> children, boolean makePhys, MediaSources mediaSources)
+	public J3dCELLGeneral(IRecordStore master, int worldId, boolean makePhys, MediaSources mediaSources)
 	{
 		this.setName(this.getClass().getSimpleName());
 		this.master = master;
 		this.worldId = worldId;
-		this.children = children;
 		this.makePhys = makePhys;
 		this.mediaSources = mediaSources;
 		this.setCapability(BranchGroup.ALLOW_DETACH);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
-		
-		//memoryUseList.add(this);
 	}
 
 	
