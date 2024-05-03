@@ -275,16 +275,15 @@ public class BsaTextureSource implements TextureSource {
 		return null;
 	}
 
-	@Override
-	public List<String> getFilesInFolder(String folderName) {
-		ArrayList<String> ret = new ArrayList<String>();
+	public List<ArchiveEntry> getEntriesInFolder(String folderName) {
+		ArrayList<ArchiveEntry> ret = new ArrayList<ArchiveEntry>();
 
 		for (ArchiveFile archiveFile : bsas) {
 			Folder folder = archiveFile.getFolder(folderName, true);
 			if (folder != null) {
 				for (int i = 0; i < folder.fileToHashMap.size(); i++) {
 					ArchiveEntry e = folder.fileToHashMap.get(folder.fileToHashMap.keyAt(i));
-					ret.add(folderName + "\\" + e.getFileName());
+					ret.add(e);
 				}
 			}
 		}

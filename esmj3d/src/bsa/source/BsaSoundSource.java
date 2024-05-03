@@ -161,10 +161,9 @@ public class BsaSoundSource implements SoundSource
 		return null;
 	}
 
-	@Override
-	public List<String> getFilesInFolder(String folderName)
+	public List<ArchiveEntry> getEntriesInFolder(String folderName)
 	{
-		ArrayList<String> ret = new ArrayList<String>();
+		ArrayList<ArchiveEntry> ret = new ArrayList<ArchiveEntry>();
 
 		for (ArchiveFile archiveFile : bsas)
 		{
@@ -174,7 +173,7 @@ public class BsaSoundSource implements SoundSource
 				for (int i = 0; i < folder.fileToHashMap.size(); i++)
 				{
 					ArchiveEntry e = folder.fileToHashMap.get(folder.fileToHashMap.keyAt(i));
-					ret.add(folderName + "\\" + e.getFileName());
+					ret.add(e);
 				}
 			}
 		}

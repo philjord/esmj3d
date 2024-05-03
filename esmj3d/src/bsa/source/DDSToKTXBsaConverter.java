@@ -217,8 +217,8 @@ public class DDSToKTXBsaConverter extends Thread {
 			throw new DBException("Maximum folder path length is 254 characters");
 		}
 
-		if (CONVERT_DDS_to_KTX && inEntry.getFileName().endsWith(".dds")) {
-			inEntry.setFileName(inEntry.getFileName().replace(".dds", ".ktx"));
+		if (CONVERT_DDS_to_KTX && ((Displayable)inEntry).getFileName().endsWith(".dds")) {
+			((Displayable)inEntry).setFileName(((Displayable)inEntry).getFileName().replace(".dds", ".ktx"));
 		}
 
 		String fileName = ((Displayable)inEntry).getName();
@@ -431,7 +431,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 			// file names, but oddly just in order with no len to start each one!
 			for (ArchiveEntry entry : entries) {
-				String fileName = entry.getFileName();
+				String fileName = ((Displayable)entry).getFileName();
 				byte[] nameBuffer = fileName.getBytes();
 				if (nameBuffer.length != fileName.length()) {
 					throw new DBException("Encoded file name is longer than character name");
@@ -529,7 +529,7 @@ public class DDSToKTXBsaConverter extends Thread {
 							long fileOffsetStart = pos;
 
 							if ((archiveFlags & 0x100) != 0) {
-								byte nameBuffer2[] = entry.getFileName().getBytes();
+								byte nameBuffer2[] = ((Displayable)entry).getFileName().getBytes();
 								buffer[0] = (byte)nameBuffer2.length;
 								ch.write(ByteBuffer.wrap(buffer, 0, 1), pos);
 								pos += 1;
@@ -587,7 +587,7 @@ public class DDSToKTXBsaConverter extends Thread {
 							// now we jump back to teh file index and set the len and pos ints
 							int byteLen;
 							if ((archiveFlags & 0x100) != 0) {
-								byteLen = entry.getFileName().getBytes().length + 1;
+								byteLen = ((Displayable)entry).getFileName().getBytes().length + 1;
 							} else {
 								byteLen = 0;
 							}
@@ -675,7 +675,7 @@ public class DDSToKTXBsaConverter extends Thread {
 						in = inputArchive.getInputStream(entryToProcess);
 
 						// convert to etc2 if needed
-						if (CONVERT_DDS_to_KTX && entryToProcess.getFileName().endsWith(".ktx")) {
+						if (CONVERT_DDS_to_KTX && ((Displayable)entryToProcess).getFileName().endsWith(".ktx")) {
 							//System.out.println("converting  " +((DisplayableArchiveEntry)entryToProcess).getName());
 							ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in,
 									((Displayable)entryToProcess).getName());
