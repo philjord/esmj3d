@@ -6,11 +6,12 @@ import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.ZString;
 
+
 public class GenericSOUN extends RECO
 {
-	public ZString EDID = null;
+	
 
-	public ZString FNAM = null;
+	public String FNAM = null;
 
 	public GenericSOUN(Record recordData)
 	{
@@ -24,19 +25,12 @@ public class GenericSOUN extends RECO
 
 			if (sr.getSubrecordType().equals("EDID"))
 			{
-				EDID = new ZString(bs);
+				setEDID(bs);
 			}
 			else if (sr.getSubrecordType().equals("FNAM"))
 			{
-				FNAM = new ZString(bs);
+				FNAM = ZString.toString(bs);
 			}
 		}
 	}
-
-	@Override
-	public String showDetails()
-	{
-		return "SOUN : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str;
-	}
-
 }

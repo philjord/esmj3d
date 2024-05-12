@@ -4,6 +4,8 @@ import java.util.List;
 
 import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
+import esmj3d.data.shared.subrecords.ZString;
+
 
 public abstract class RECO
 {
@@ -62,22 +64,28 @@ public abstract class RECO
 	public int formId = -1;
 
 	public int flags1;
+	
+	private String EDID;
 
 	public RECO(Record recordData)
 	{
 		formId = recordData.getFormID();
 		flags1 = recordData.getRecordFlags1();
 	}
+	
+	protected void setEDID(byte[] bs) {
+		EDID = ZString.toString(bs);
+	}
+	
+	public String getEDID() {
+		return EDID;
+	}
+
 
 	public int getRecordId()
 	{
 		return formId;
-	}
-
-	public String showDetails()
-	{
-		return "" + this.getClass() + " : (" + formId + "|" + Integer.toHexString(formId) + ") ";
-	}
+	}	
 
 	public boolean isFlagSet(int flagMask)
 	{
@@ -94,9 +102,14 @@ public abstract class RECO
 			return null;
 	}
 	
+	public String showDetails()
+	{
+		return toString();
+	}
+	
 	@Override
 	public String toString()
 	{
-		return "" + this.getClass() + " : (" + formId + "|" + Integer.toHexString(formId) + ") ";
+		return "" + this.getClass() + " : (" + formId + "|" + Integer.toHexString(formId) + ") " + (EDID != null ? EDID : "");
 	}
 }

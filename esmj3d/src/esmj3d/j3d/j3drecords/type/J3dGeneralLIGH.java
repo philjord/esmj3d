@@ -51,14 +51,14 @@ public class J3dGeneralLIGH extends J3dRECOType
 
 	public J3dGeneralLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources)
 	{
-		super(ligh, ligh.MODL == null ? "" : ligh.MODL.model.str);
+		super(ligh, ligh.MODL == null ? "" : ligh.MODL.model);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
 
 		Point3f lightPosition = new Point3f(0, 0, 0);
 		if (ligh.MODL != null)
 		{
-			String nifFileName = ligh.MODL.model.str;
+			String nifFileName = ligh.MODL.model;
 			if (makePhys)
 			{
 				NifJ3dHavokRoot hr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());

@@ -8,12 +8,11 @@ import esfilemanager.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.CNTO;
 import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.MODL;
-import esmj3d.data.shared.subrecords.ZString;
 import tools.io.ESMByteConvert;
 
 public class GenericCONT extends RECO
 {
-	public ZString EDID;
+	
 
 	public LString FULL;
 
@@ -38,7 +37,7 @@ public class GenericCONT extends RECO
 
 			if (sr.getSubrecordType().equals("EDID"))
 			{
-				EDID = new ZString(bs);
+				setEDID(bs);
 			}
 			else if (sr.getSubrecordType().equals("MODL"))
 			{
@@ -68,9 +67,10 @@ public class GenericCONT extends RECO
 		}
 	}
 
+	@Override
 	public String showDetails()
 	{
-		return "CONT : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str + " : " + MODL.model;
+		return super.showDetails() + " : " + (MODL != null ? MODL.model : "");
 	}
 
 }

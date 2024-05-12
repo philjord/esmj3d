@@ -20,15 +20,15 @@ public class J3dCONT extends J3dRECOType
 
 	public J3dCONT(GenericCONT reco, boolean makePhys, MediaSources mediaSources)
 	{
-		super(reco, reco.MODL.model.str);
+		super(reco, reco.MODL.model);
 
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model.str, mediaSources.getMeshSource()).getHavokRoot();
+			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model, mediaSources.getMeshSource()).getHavokRoot();
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, mediaSources.getMeshSource(), mediaSources.getTextureSource())
+			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model, mediaSources.getMeshSource(), mediaSources.getTextureSource())
 					.getVisualRoot();
 		}
 

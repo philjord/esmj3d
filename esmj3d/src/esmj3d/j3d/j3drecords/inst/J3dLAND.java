@@ -538,7 +538,7 @@ public class J3dLAND extends J3dRECOStatInst
 					LTEX ltex = new LTEX(ltexRec);
 					if (ltex.ICON != null)
 					{
-						TextureUnitState tus = J3dNiGeometry.loadTextureUnitState(ltex.ICON.str, textureSource, dropMip0);
+						TextureUnitState tus = J3dNiGeometry.loadTextureUnitState(ltex.ICON, textureSource, dropMip0);
 						if (tus != null)
 						{
 							return tus;
@@ -571,14 +571,14 @@ public class J3dLAND extends J3dRECOStatInst
 					TXST textureSet = new TXST(texSetRec);
 					if (textureSet.TX00 != null)
 					{
-						tus = textureSource.getTextureUnitState(textureSet.TX00.str);
+						tus = textureSource.getTextureUnitState(textureSet.TX00);
 					}
 					else if (textureSet.MNAM != null)
 					{
 						// new fallout 4 texture system
 						try
 						{
-							BSMaterial material = BgsmSource.bgsmSource.getMaterial("Materials\\" + textureSet.MNAM.str);
+							BSMaterial material = BgsmSource.bgsmSource.getMaterial("Materials\\" + textureSet.MNAM);
 							if (material != null)
 							{
 								tus = textureSource.getTextureUnitState(((ShaderMaterial)material).DiffuseTexture);
@@ -594,7 +594,7 @@ public class J3dLAND extends J3dRECOStatInst
 				else if (ltex.ICON != null)
 				{
 					//obliv uses simpler system					
-					tus = textureSource.getTextureUnitState("Landscape\\" + ltex.ICON.str);
+					tus = textureSource.getTextureUnitState("Landscape\\" + ltex.ICON);
 				}
 				return tus;
 			}

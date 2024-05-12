@@ -16,12 +16,11 @@ import esmj3d.data.shared.subrecords.XLOC;
 import esmj3d.data.shared.subrecords.XLOD;
 import esmj3d.data.shared.subrecords.XRNK;
 import esmj3d.data.shared.subrecords.XTEL;
-import esmj3d.data.shared.subrecords.ZString;
 import tools.io.ESMByteConvert;
 
 public class CommonREFR extends InstRECO
 {
-	public ZString EDID;
+	
 
 	public FormID NAME;
 
@@ -81,7 +80,7 @@ public class CommonREFR extends InstRECO
 				}
 				else if (sr.getSubrecordType().equals("EDID"))
 				{
-					EDID = new ZString(bs);
+					setEDID(bs);
 				}
 				else if (sr.getSubrecordType().equals("XTEL"))
 				{
@@ -159,12 +158,9 @@ public class CommonREFR extends InstRECO
 		}
 	}
 
- 
-	
-
 	@Override
 	public String toString()
 	{
-		return this.getClass().getSimpleName() + " : " + (EDID != null ? EDID : NAME != null ? NAME.formId : "");
+		return super.toString() + " Base Record = " + (NAME != null ? NAME.formId : "");
 	}
 }

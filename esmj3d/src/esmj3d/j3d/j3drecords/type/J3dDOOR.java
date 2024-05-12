@@ -22,16 +22,16 @@ public class J3dDOOR extends J3dRECOType implements Doorable
 
 	public J3dDOOR(GenericDOOR reco, boolean makePhys, MediaSources mediaSources)
 	{
-		super(reco, reco.MODL.model.str, mediaSources);
+		super(reco, reco.MODL.model, mediaSources);
 		this.reco = reco;
 
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model.str, mediaSources.getMeshSource()).getHavokRoot();
+			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model, mediaSources.getMeshSource()).getHavokRoot();
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model.str, mediaSources.getMeshSource(), mediaSources.getTextureSource())
+			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model, mediaSources.getMeshSource(), mediaSources.getTextureSource())
 					.getVisualRoot();
 		}
 

@@ -94,11 +94,11 @@ public abstract class InstRECO extends RECO
 			
 					if (baseRecord.getRecordType().equals("STAT"))
 					{
-						System.out.println("0STAT of " + new STAT(baseRecord).MODL.model.str);
+						System.out.println("0STAT of " + new STAT(baseRecord).MODL.model);
 					}
 					else if (baseRecord.getRecordType().equals("DOOR"))
 					{
-						System.out.println("0DOOR of " + new DOOR(baseRecord).MODL.model.str);
+						System.out.println("0DOOR of " + new DOOR(baseRecord).MODL.model);
 					}
 					else
 						System.out.println("0refer type " + baseRecord);
@@ -128,11 +128,11 @@ public abstract class InstRECO extends RECO
 					
 							if (baseRecord2.getRecordType().equals("STAT"))
 							{
-								System.out.println("STAT of " + new STAT(baseRecord2).MODL.model.str);
+								System.out.println("STAT of " + new STAT(baseRecord2).MODL.model);
 							}
 							else if (baseRecord2.getRecordType().equals("DOOR"))
 							{
-								System.out.println("DOOR of " + new DOOR(baseRecord2).MODL.model.str);
+								System.out.println("DOOR of " + new DOOR(baseRecord2).MODL.model);
 							}
 							else
 								System.out.println("" + level + "refer type " + baseRecord2);

@@ -6,12 +6,11 @@ import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.LString;
 import esmj3d.data.shared.subrecords.MODL;
-import esmj3d.data.shared.subrecords.ZString;
 import tools.io.ESMByteConvert;
 
 public class GenericDOOR extends RECO
 {
-	public ZString EDID;
+	
 
 	public LString FULL;
 
@@ -37,7 +36,7 @@ public class GenericDOOR extends RECO
 
 			if (sr.getSubrecordType().equals("EDID"))
 			{
-				EDID = new ZString(bs);
+				setEDID(bs);
 			}
 			else if (sr.getSubrecordType().equals("MODL"))
 			{
@@ -81,7 +80,7 @@ public class GenericDOOR extends RECO
 	@Override
 	public String showDetails()
 	{
-		return "DOOR : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str;
+		return super.showDetails() + " : " + (MODL != null ? MODL.model : "");
 	}
 
 }

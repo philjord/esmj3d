@@ -7,13 +7,10 @@ import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.data.shared.subrecords.LString;
-import esmj3d.data.shared.subrecords.ZString;
 import tools.io.ESMByteConvert;
 
 public class CommonCELL extends InstRECO
 {
-	public ZString EDID;
-
 	public LString FULL;
 
 	public FormID XOWN;
@@ -47,7 +44,7 @@ public class CommonCELL extends InstRECO
 
 			if (sr.getSubrecordType().equals("EDID"))
 			{
-				EDID = new ZString(bs);
+				setEDID(bs);
 			}
 			else if (sr.getSubrecordType().equals("FULL"))
 			{

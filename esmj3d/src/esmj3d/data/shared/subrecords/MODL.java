@@ -2,7 +2,7 @@ package esmj3d.data.shared.subrecords;
 
 public class MODL
 {
-	public ZString model;
+	public String model;
 
 	public MODT MODT;
 
@@ -12,7 +12,7 @@ public class MODL
 
 	public MODL(byte[] bytes)
 	{
-		model = new ZString(bytes);
+		model = ZString.toString(bytes);
 	}
 
 	public void addMODTSub(byte[] bytes)

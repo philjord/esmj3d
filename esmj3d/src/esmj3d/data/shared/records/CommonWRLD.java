@@ -6,11 +6,10 @@ import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esmj3d.data.shared.subrecords.FormID;
 import esmj3d.data.shared.subrecords.LString;
-import esmj3d.data.shared.subrecords.ZString;
 
 public class CommonWRLD extends RECO
 {
-	public ZString EDID = null;
+	
 
 	public LString FULL = null;
 
@@ -33,7 +32,7 @@ public class CommonWRLD extends RECO
 
 			if (sr.getSubrecordType().equals("EDID"))
 			{
-				EDID = new ZString(bs);
+				setEDID(bs);
 			}
 			else if (sr.getSubrecordType().equals("FULL"))
 			{
@@ -70,10 +69,5 @@ public class CommonWRLD extends RECO
 				DATA = bs[0];
 			}
 		}
-	}
-
-	public String showDetails()
-	{
-		return "WRLD : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str;
 	}
 }

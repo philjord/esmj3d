@@ -11,13 +11,13 @@ import tools.io.ESMByteConvert;
 
 public class LTEX extends RECO
 {
-	public ZString EDID;
+	
 
 	//FO3 onwards
 	public int textureSetId = -1;
 
 	//TES4
-	public ZString ICON = null;
+	public String ICON = null;
 
 	public byte[] HNAM = null;
 
@@ -39,7 +39,7 @@ public class LTEX extends RECO
 
 			if (sr.getSubrecordType().equals("EDID"))
 			{
-				EDID = new ZString(bs);
+				setEDID(bs);
 			}
 			else if (sr.getSubrecordType().equals("TNAM"))
 			{
@@ -47,7 +47,7 @@ public class LTEX extends RECO
 			}
 			else if (sr.getSubrecordType().equals("ICON"))
 			{
-				ICON = new ZString(bs);
+				ICON = ZString.toString(bs);
 			}
 			else if (sr.getSubrecordType().equals("HNAM"))
 			{
@@ -72,7 +72,7 @@ public class LTEX extends RECO
 			//TES3 only
 			else if (sr.getSubrecordType().equals("NAME"))
 			{
-				EDID = new ZString(bs);
+				setEDID(bs);
 			}
 			else if (sr.getSubrecordType().equals("INTV"))
 			{
@@ -80,7 +80,7 @@ public class LTEX extends RECO
 			}
 			else if (sr.getSubrecordType().equals("DATA"))
 			{
-				ICON = new ZString(bs);
+				ICON = ZString.toString(bs);
 			}
 			
 			else
@@ -94,9 +94,10 @@ public class LTEX extends RECO
 		}
 	}
 
+	@Override
 	public String showDetails()
 	{
-		return "LTEX : (" + formId + "|" + Integer.toHexString(formId) + ") " + EDID.str + " : TextureSet " + textureSetId;
+		return super.showDetails() + " : TextureSet " + textureSetId;
 	}
 
 }
