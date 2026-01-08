@@ -70,7 +70,7 @@ public abstract class RECO
 	public RECO(Record recordData)
 	{
 		formId = recordData.getFormID();
-		flags1 = recordData.getRecordFlags1();
+		flags1 = recordData.getRecordFlags();
 	}
 	
 	protected void setEDID(byte[] bs) {
