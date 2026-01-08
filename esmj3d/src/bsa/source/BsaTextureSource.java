@@ -179,7 +179,13 @@ public class BsaTextureSource implements TextureSource {
 									return tex;
 								}
 							}
-						} catch (IOException e) {
+						}
+						catch (IllegalArgumentException e) {
+							// occurs in at compressedtexture.DDSImage.getMipMap(DDSImage.java:466) if mip map sizes are wrong
+							System.out.println(
+									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
+						}
+						catch (IOException e) {
 							System.out.println(
 									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 						}
