@@ -3,6 +3,7 @@ package bsa.source;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import bsaio.ArchiveEntry;
@@ -11,117 +12,100 @@ import nif.BgsmSource;
 import nif.niobject.bgsm.BSMaterial;
 import nif.niobject.bgsm.BgsmFile;
 import utils.source.file.FileMeshSource;
- 
 
 public class BsaMaterialsSource extends BgsmSource {
-	
 
-	public static boolean FALLBACK_TO_FILE_SOURCE = false;
-	private List<ArchiveFile> bsas;
-	private FileMeshSource fileMeshSource = null;
-	
-	public BsaMaterialsSource(List<ArchiveFile> allBsas)
-	{
+	public static boolean		FALLBACK_TO_FILE_SOURCE	= false;
+	private List<ArchiveFile>	bsas;
+	private FileMeshSource		fileMeshSource			= null;
+
+	public BsaMaterialsSource(List<ArchiveFile> allBsas) {
 		this.bsas = new ArrayList<ArchiveFile>();
-		for (ArchiveFile archiveFile : allBsas)
-		{
-			if (archiveFile != null && archiveFile.hasMaterials())
-			{
+		for (ArchiveFile archiveFile : allBsas) {
+			if (archiveFile != null && archiveFile.hasMaterials()) {
 				bsas.add(archiveFile);
 			}
 		}
 
-		if (bsas.size() == 0 && !FALLBACK_TO_FILE_SOURCE)
-		{
+		if (bsas.size() == 0 && !FALLBACK_TO_FILE_SOURCE) {
 			System.out.print("No hasMaterials archive files found in:");
-			for (ArchiveFile archiveFile : allBsas)
-			{
+			for (ArchiveFile archiveFile : allBsas) {
 				System.out.print(" Looked in Archive:" + archiveFile.getName());
 			}
 			System.out.println("");
 		}
 
-		if (FALLBACK_TO_FILE_SOURCE)
-		{
+		if (FALLBACK_TO_FILE_SOURCE) {
 			fileMeshSource = new FileMeshSource();
 		}
 	}
-	
+
 	@Override
-	public BSMaterial getMaterial(String fileName) throws IOException
-	{	
-		
+	public BSMaterial getMaterial(String fileName) throws IOException {
+
 		// the chop up name thing for things like
 		//C:\Projects\Fallout4\Build\PC\Data\materials\Interiors\Utility\MetalUtilityDoor01.BGSM
-		
 
-		
-		if (fileName.length() > 0)
-		{
-			if (!fileName.toLowerCase().startsWith("materials"))
-			{
-				if (fileName.toLowerCase().indexOf("materials") == -1)
-				{
+		if (fileName.length() > 0) {
+			if (!fileName.toLowerCase().startsWith("materials")) {
+				if (fileName.toLowerCase().indexOf("materials") == -1) {
 					fileName = "materials\\" + fileName;
 				} else {
- 					fileName = fileName.substring(fileName.toLowerCase().indexOf("materials"));
-				}				
+					fileName = fileName.substring(fileName.toLowerCase().indexOf("materials"));
+				}
 			}
+
+			//fallout 4 missing  materials\Architecture\Buildings\BrickWhite01R.BGSM
+			// drop the R as that file exists
+			fileName = fileName.replace("BrickWhite01R.BGSM", "BrickWhite01.BGSM");
 
 			BSMaterial material = materialFiles.get(fileName);
 
-			if (material == null)
-			{
-				for (ArchiveFile archiveFile : bsas)
-				{
+			if (material == null) {
+				for (ArchiveFile archiveFile : bsas) {
 					ArchiveEntry archiveEntry = archiveFile.getEntry(fileName);
-					if (archiveEntry != null)
-					{
-						try
-						{					 
+					if (archiveEntry != null) {
+						try {
 							ByteBuffer inputStream = archiveFile.getByteBuffer(archiveEntry);
-							try
-							{
+							try {
 								material = BgsmFile.readMaterialFile(fileName, inputStream);
 								materialFiles.put(fileName, material);
+							} catch (IOException e) {
+								System.out.println(
+										"BsaMaterialsSource:  " + fileName + " " + e + " " + e.getStackTrace()[0]);
 							}
-							catch (IOException e)
-							{
-								System.out.println("BsaMaterialsSource:  " + fileName + " " + e + " " + e.getStackTrace()[0]);
-							}
-	
-							if (material != null)
-							{
+
+							if (material != null) {
 								return material;
 							}
+						} catch (IOException e) {
+							System.out
+									.println("BsaMaterialsSource  " + fileName + " " + e + " " + e.getStackTrace()[0]);
 						}
-						catch (IOException e)
-						{
-							System.out.println("BsaMaterialsSource  " + fileName + " " + e + " " + e.getStackTrace()[0]);
-						}
-	
+
 					}
 				}
 			} else {
 				return material;
 			}
-			
 
-			if (FALLBACK_TO_FILE_SOURCE)
-			{
-				material  = BgsmFile.readMaterialFile(fileName, fileMeshSource.getByteBuffer(fileName));
+			if (FALLBACK_TO_FILE_SOURCE) {
+				material = BgsmFile.readMaterialFile(fileName, fileMeshSource.getByteBuffer(fileName));
 				if (material != null)
 					return material;
 			}
-
-			System.out.print("getMaterial Material " + fileName + " not found in archive bsas");
-			for (ArchiveFile archiveFile : bsas)
-			{
-				System.out.print(" checked: " + archiveFile.getName() + ", ");
+			if (!warningGiven.contains(fileName)) {
+				System.out.print("getMaterial Material " + fileName + " not found in archive bsas");
+				for (ArchiveFile archiveFile : bsas) {
+					System.out.print(" checked: " + archiveFile.getName() + ", ");
+				}
+				System.out.println("");
+				warningGiven.add(fileName);
 			}
-			System.out.println("");
 		}
 		return null;
 	}
+
+	private static HashSet<String> warningGiven = new HashSet<String>();
 
 }

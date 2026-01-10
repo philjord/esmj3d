@@ -421,7 +421,7 @@ public class DDSToKTXBsaConverter extends Thread {
 					// we record this file info pointer for use later
 					extraInfo.put(entry, new ArchiveEntryExtras(pos));
 
-					setLong(entry.getFileHashCode().getHash(), buffer, 0);
+					setLong(entry.getFileHashCode(), buffer, 0);
 					setInteger(0, buffer, 8); // int of size (unknown for now)
 					setInteger(0, buffer, 12); // int location (unknown for now)					
 					ch.write(ByteBuffer.wrap(buffer, 0, 16), pos);

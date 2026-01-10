@@ -4,6 +4,8 @@ import org.jogamp.vecmath.Color3f;
 
 import esmj3d.data.shared.records.GenericCONT;
 import esmj3d.j3d.BethRenderSettings;
+import nif.NifJ3dHavokRoot;
+import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.j3d.animation.J3dNiControllerManager;
 import nif.j3d.animation.J3dNiControllerSequence;
@@ -22,14 +24,25 @@ public class J3dCONT extends J3dRECOType
 	{
 		super(reco, reco.MODL.model);
 
+		String nifFileName = reco.MODL.model;
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model, mediaSources.getMeshSource()).getHavokRoot();
+			NifJ3dHavokRoot hr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
+			if (hr != null)
+			{
+				j3dNiAVObject = hr.getHavokRoot();
+			}
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model, mediaSources.getMeshSource(), mediaSources.getTextureSource())
-					.getVisualRoot();
+			if (nifFileName.length() > 0)
+			{
+				NifJ3dVisRoot vr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
+				// not found messages will have already been published
+				if (vr != null) {
+					j3dNiAVObject = vr.getVisualRoot();
+				}
+			}			
 		}
 
 		if (j3dNiAVObject != null)

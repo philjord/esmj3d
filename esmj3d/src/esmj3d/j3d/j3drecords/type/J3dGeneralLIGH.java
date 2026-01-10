@@ -72,12 +72,15 @@ public class J3dGeneralLIGH extends J3dRECOType
 				if (nifFileName.length() > 0)
 				{
 					NifJ3dVisRoot vr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
-					j3dNiAVObject = vr.getVisualRoot();
+					// not found messages will have already been published
+					if (vr != null) {
+						j3dNiAVObject = vr.getVisualRoot();
 
-					// let's find out where the attach point is
-					Vector3f attachNode = findAttachLight(j3dNiAVObject.getNiAVObject(), vr.getNiToJ3dData());
-					if (attachNode != null)
-						lightPosition = new Point3f(attachNode);
+						// let's find out where the attach point is
+						Vector3f attachNode = findAttachLight(j3dNiAVObject.getNiAVObject(), vr.getNiToJ3dData());
+						if (attachNode != null)
+							lightPosition = new Point3f(attachNode);
+					}
 
 				}
 			}

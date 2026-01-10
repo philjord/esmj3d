@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.jogamp.java3d.CompressedImageComponent2D;
@@ -28,7 +29,6 @@ import utils.source.TextureSource;
 import utils.source.file.FileTextureSource;
 
 public class BsaTextureSource implements TextureSource {
-
 
 	//DDS will be in .dds and are S3TC compress, KTX are .ktx and ETC2 compressed, ASTC will be .astc
 	public enum AllowedTextureFormats {
@@ -159,7 +159,7 @@ public class BsaTextureSource implements TextureSource {
 						try {
 							//InputStream in = archiveFile.getInputStream(archiveEntry);
 							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
-							if(in != null) {
+							if (in != null) {
 								if (texNameForArchive.endsWith(".dds")) {
 									if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
 										tex = CompressedTextureLoaderETCPackDDS.getTexture(texNameForArchive, in);
@@ -174,18 +174,16 @@ public class BsaTextureSource implements TextureSource {
 									/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
 									tex = tl.getTexture();*/
 								}
-	
+
 								if (tex != null) {
 									return tex;
 								}
 							}
-						}
-						catch (IllegalArgumentException e) {
+						} catch (IllegalArgumentException e) {
 							// occurs in at compressedtexture.DDSImage.getMipMap(DDSImage.java:466) if mip map sizes are wrong
 							System.out.println(
 									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
-						}
-						catch (IOException e) {
+						} catch (IOException e) {
 							System.out.println(
 									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 						}
@@ -199,15 +197,24 @@ public class BsaTextureSource implements TextureSource {
 					return mc;
 			}
 		}
-		System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
-		//new Throwable().printStackTrace();
+		if (!warningGiven.contains(texName)) {
+			System.out.print("BsaTextureSource texture not found in archive bsas: " + texName);
+			for (ArchiveFile archiveFile : bsas) {
+				System.out.print(" checked: " + archiveFile.getName() + ", ");
+			}
+			System.out.println("");
+			warningGiven.add(texName);
+		}
 		return null;
 	}
 
+	private static HashSet<String> warningGiven = new HashSet<String>();
+
 	@Override
 	public TextureUnitState getTextureUnitState(String texName) {
-		return getTextureUnitState(texName, false); 
+		return getTextureUnitState(texName, false);
 	}
+
 	@Override
 	public TextureUnitState getTextureUnitState(String texName, boolean dropMip0) {
 		if (texName != null && texName.length() > 0) {
@@ -240,22 +247,26 @@ public class BsaTextureSource implements TextureSource {
 						try {
 							//InputStream in = archiveFile.getInputStream(archiveEntry);
 							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
-							if(in != null) {
-									if (texNameForArchive.endsWith(".dds")) {
+							if (in != null) {
+								if (texNameForArchive.endsWith(".dds")) {
 									if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
-										tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive, in);
+										tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive,
+												in);
 									else
-										tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in, dropMip0);
+										tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in,
+												dropMip0);
 								} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
-									tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in, dropMip0);
+									tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in,
+											dropMip0);
 								} else if (texNameForArchive.endsWith(".ktx")) {
-									tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in, dropMip0);
+									tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in,
+											dropMip0);
 								} else {
 									//FIXME: generic texture loading system good for png images
 									/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
 									tex = tl.getTexture();*/
 								}
-	
+
 								if (tex != null) {
 									return tex;
 								}
@@ -275,12 +286,22 @@ public class BsaTextureSource implements TextureSource {
 			}
 		}
 
-		//Many times this will fall through here, if texture doesn't exist for example
-		//System.out.println("BsaTextureSource TextureUnitState not found in archive bsas: " + texName);
-		//new Throwable().printStackTrace();
+		if (!warningGiven.contains(texName)) {
+			System.out.print("BsaTextureSource texture not found in archive bsas: " + texName);
+			for (ArchiveFile archiveFile : bsas) {
+				System.out.print(" checked: " + archiveFile.getName() + ", ");
+			}
+			System.out.println("");
+			warningGiven.add(texName);
+		}
 		return null;
 	}
 
+	/**
+	 * Expensive don't call this casually
+	 * @param folderName
+	 * @return
+	 */
 	public List<ArchiveEntry> getEntriesInFolder(String folderName) {
 		ArrayList<ArchiveEntry> ret = new ArrayList<ArchiveEntry>();
 
@@ -322,8 +343,11 @@ public class BsaTextureSource implements TextureSource {
 			}
 
 		}
-		System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
-		new Throwable().printStackTrace();
+		if (!warningGiven.contains(texName)) {
+			System.out.println("BsaTextureSource texture not found in archive bsas: " + texName);
+			new Throwable().printStackTrace();
+			warningGiven.add(texName);
+		}
 		return null;
 	}
 

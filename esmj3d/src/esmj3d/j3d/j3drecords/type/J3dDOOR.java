@@ -6,6 +6,8 @@ import org.jogamp.vecmath.Color3f;
 import esmj3d.data.shared.records.GenericDOOR;
 import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.Doorable;
+import nif.NifJ3dHavokRoot;
+import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
@@ -25,14 +27,25 @@ public class J3dDOOR extends J3dRECOType implements Doorable
 		super(reco, reco.MODL.model, mediaSources);
 		this.reco = reco;
 
+		String nifFileName = reco.MODL.model;
 		if (makePhys)
 		{
-			j3dNiAVObject = NifToJ3d.loadHavok(reco.MODL.model, mediaSources.getMeshSource()).getHavokRoot();
+			NifJ3dHavokRoot hr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
+			if (hr != null)
+			{
+				j3dNiAVObject = hr.getHavokRoot();
+			}
 		}
 		else
 		{
-			j3dNiAVObject = NifToJ3d.loadShapes(reco.MODL.model, mediaSources.getMeshSource(), mediaSources.getTextureSource())
-					.getVisualRoot();
+			if (nifFileName.length() > 0)
+			{
+				NifJ3dVisRoot vr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
+				// not found messages will have already been published
+				if (vr != null) {
+					j3dNiAVObject = vr.getVisualRoot();
+				}
+			}			
 		}
 
 		if (j3dNiAVObject != null)
