@@ -8,9 +8,10 @@ import java.util.List;
 
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
-import nif.BgsmSource;
 import nif.niobject.bgsm.BSMaterial;
-import nif.niobject.bgsm.BgsmFile;
+import nif.niobject.bgsm.EffectMaterial;
+import nif.niobject.bgsm.ShaderMaterial;
+import utils.source.BgsmSource;
 import utils.source.file.FileMeshSource;
 
 public class BsaMaterialsSource extends BgsmSource {
@@ -41,7 +42,25 @@ public class BsaMaterialsSource extends BgsmSource {
 	}
 
 	@Override
-	public BSMaterial getMaterial(String fileName) throws IOException {
+	public EffectMaterial getEffectMaterial(String fileName) {
+		BSMaterial material = getMaterial(fileName);
+		if (!(material instanceof EffectMaterial)) {
+			// it is possible for a desired EffectMaterial to have the header string BGSM and 
+			// thus cause chaos about now 
+			//example FO4: Materials\SetDressing\WaterCooler\WaterCooler_Dirty.BGEM
+			return null;
+		}
+
+		return (EffectMaterial)material;
+	}
+
+	@Override
+	public ShaderMaterial getShaderMaterial(String fileName) {
+
+		return (ShaderMaterial)getMaterial(fileName);
+	}
+
+	public BSMaterial getMaterial(String fileName) {
 
 		// the chop up name thing for things like
 		//C:\Projects\Fallout4\Build\PC\Data\materials\Interiors\Utility\MetalUtilityDoor01.BGSM
@@ -57,43 +76,44 @@ public class BsaMaterialsSource extends BgsmSource {
 
 			//fallout 4 missing  materials\Architecture\Buildings\BrickWhite01R.BGSM
 			// drop the R as that file exists
-			fileName = fileName.replace("BrickWhite01R.BGSM", "BrickWhite01.BGSM");
+			//fileName = fileName.replace("BrickWhite01R.BGSM", "BrickWhite01.BGSM");
 
 			BSMaterial material = materialFiles.get(fileName);
 
-			if (material == null) {
-				for (ArchiveFile archiveFile : bsas) {
-					ArchiveEntry archiveEntry = archiveFile.getEntry(fileName);
-					if (archiveEntry != null) {
-						try {
-							ByteBuffer inputStream = archiveFile.getByteBuffer(archiveEntry);
-							try {
-								material = BgsmFile.readMaterialFile(fileName, inputStream);
-								materialFiles.put(fileName, material);
-							} catch (IOException e) {
-								System.out.println(
-										"BsaMaterialsSource:  " + fileName + " " + e + " " + e.getStackTrace()[0]);
-							}
-
-							if (material != null) {
-								return material;
-							}
-						} catch (IOException e) {
-							System.out
-									.println("BsaMaterialsSource  " + fileName + " " + e + " " + e.getStackTrace()[0]);
-						}
-
-					}
-				}
-			} else {
+			if (material != null)
 				return material;
+
+			for (ArchiveFile archiveFile : bsas) {
+				ArchiveEntry archiveEntry = archiveFile.getEntry(fileName);
+				if (archiveEntry != null) {
+					try {
+						ByteBuffer inputStream = archiveFile.getByteBuffer(archiveEntry);
+
+						material = readMaterialFile(fileName, inputStream);
+						if (material != null) {
+							materialFiles.put(fileName, material);
+							return material;
+						}
+					} catch (IOException e) {
+						System.out.println("BsaMaterialsSource  " + fileName + " " + e + " " + e.getStackTrace()[0]);
+					}
+
+				}
 			}
 
 			if (FALLBACK_TO_FILE_SOURCE) {
-				material = BgsmFile.readMaterialFile(fileName, fileMeshSource.getByteBuffer(fileName));
-				if (material != null)
-					return material;
+				try {
+					material = readMaterialFile(fileName, fileMeshSource.getByteBuffer(fileName));
+
+					if (material != null)
+						return material;
+				} catch (IOException e) {
+					System.out.println(
+							"BsaMaterialsSource:FileBgsmSource " + fileName + " " + e + " " + e.getStackTrace()[0]);
+				}
 			}
+
+			//oops no material today
 			if (!warningGiven.contains(fileName)) {
 				System.out.print("getMaterial Material " + fileName + " not found in archive bsas");
 				for (ArchiveFile archiveFile : bsas) {

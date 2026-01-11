@@ -45,8 +45,7 @@ public class BsaTextureSource implements TextureSource {
 		this.bsas = new ArrayList<ArchiveFile>();
 
 		for (ArchiveFile archiveFile : allBsas) {
-			if (archiveFile != null
-				&& (archiveFile.hasTextureFiles() || archiveFile.hasKTX() || archiveFile.hasASTC())) {
+			if (archiveFile != null && (archiveFile.hasTextureFiles() || archiveFile.hasKTX())) {
 				bsas.add(archiveFile);
 			}
 		}
@@ -79,14 +78,6 @@ public class BsaTextureSource implements TextureSource {
 		return false;
 	}
 
-	public boolean hasASTC() {
-		for (ArchiveFile archiveFile : bsas) {
-			if (archiveFile.hasASTC())
-				return true;
-		}
-		return false;
-	}
-
 	@Override
 	public boolean textureFileExists(String texName) {
 		if (texName != null && texName.length() > 0) {
@@ -103,13 +94,10 @@ public class BsaTextureSource implements TextureSource {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
 					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
-					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
-					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
+					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
 					String texNameForArchive = texName;
 					if (archiveFile.hasKTX()) {
 						texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
-					} else if (archiveFile.hasASTC()) {
-						texNameForArchive = texNameForArchive.replace(".dds", ".tga.astc");
 					}
 
 					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
@@ -145,13 +133,10 @@ public class BsaTextureSource implements TextureSource {
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
 					|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS
 													|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
-					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
-					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
+					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
 					String texNameForArchive = texName;
 					if (archiveFile.hasKTX()) {
 						texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
-					} else if (archiveFile.hasASTC()) {
-						texNameForArchive = texNameForArchive.replace(".dds", ".tga.astc");
 					}
 
 					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
@@ -233,14 +218,11 @@ public class BsaTextureSource implements TextureSource {
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
 					|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS
 													|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
-					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
-					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
+					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
 					String texNameForArchive = texName;
 					if (archiveFile.hasKTX()) {
 						texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
-					} else if (archiveFile.hasASTC()) {
-						texNameForArchive = texNameForArchive.replace(".dds", ".tga.astc");
-					}
+					} 
 
 					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
 					if (archiveEntry != null) {
@@ -326,8 +308,7 @@ public class BsaTextureSource implements TextureSource {
 				// shall we inspect this archive?
 				if (allowedTextureFormats == AllowedTextureFormats.ALL
 					|| (archiveFile.hasTextureFiles() && allowedTextureFormats == AllowedTextureFormats.DDS)
-					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)
-					|| (archiveFile.hasASTC() && allowedTextureFormats == AllowedTextureFormats.ASTC)) {
+					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
 					ArchiveEntry archiveEntry = archiveFile.getEntry(texName);
 					if (archiveEntry != null) {
 						try {

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -141,7 +142,7 @@ public class DDSToKTXBsaConverter extends Thread {
 	/**
 	 * 
 	 * @param outputArchiveFile this is the writable interface, if this is not a partially written file it must have
-	 *            been deleted or truncated
+	 *            been deleted or truncated, it's filename REALLY should end in "_ktx.bsa" or trouble
 	 * @param outputArchiveFileReader this is the readable interface, this will be used to determine if the file has
 	 *            been partially written and if so conversion will continue from that point
 	 * @param inputArchive this MUST have been loaded as displayable=true so we have the names on entries
@@ -209,14 +210,13 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	private void insertEntry(ArchiveEntry inEntry) throws DBException {
 		String folderName = ((Displayable)inEntry).getFolderName();
-		
-		
-		
+
 		//folderName = folderName.substring(baseName.length() + 1);
 		if (folderName.length() > 254) {
 			throw new DBException("Maximum folder path length is 254 characters");
 		}
 
+		//TODO: this is a mighty odd place to change the name, I wager the writeEntry code should be doing it
 		if (CONVERT_DDS_to_KTX && ((Displayable)inEntry).getFileName().endsWith(".dds")) {
 			((Displayable)inEntry).setFileName(((Displayable)inEntry).getFileName().replace(".dds", ".ktx"));
 		}
@@ -283,7 +283,7 @@ public class DDSToKTXBsaConverter extends Thread {
 		//if ((inputArchive.getSig() != SIG.TES3) && ((fileFlags & 2) != 0 && (fileFlags & -3) != 0)) {
 		//	throw new DBException("Texture files must be packaged by themselves");
 		//}
-		
+
 		insert = true;
 		Iterator<Folder> i$ = folders.iterator();
 		while (i$.hasNext()) {
@@ -319,10 +319,12 @@ public class DDSToKTXBsaConverter extends Thread {
 		fileCount++;
 	}
 
-	// this is a memebr variable which makes the writing to the file very single thread
+	// this is a member variable which makes the writing to the file very single thread
 	private long pos = 0;
+
 	/**
-	 * Note this writes out a ArchiveFileBsa version of archive files, not tes3, Btdx or starfields one
+	 * Note this writes out a ArchiveFileBsa version of archive files, not tes3, Btdx or starfields one So it MUST be
+	 * given an out2 for a file ending in _ktx.bsa!!
 	 * @param out
 	 * @throws DBException
 	 * @throws IOException
@@ -346,7 +348,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 		if (peekInComplete != ArchiveFile.PARTIAL_FILE || lastGoodEntryWritten == -1) {
 			lastGoodEntryWritten = -1;// clear the value out and ensure we start entry writing at the first entry
-			
+
 			//TES3 header is different, but we don't want to use it anyway
 			if (inputArchive.getSig() != SIG.TES3 || true) {
 
@@ -379,7 +381,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			}
 			ch.write(ByteBuffer.wrap(header), pos);
 			pos += header.length;
-			
+
 			// keep track as we write so we can record where folder details live in the folder heap			
 			// this offset is now pointing past the folder index, into the folder heap
 			long fileOffset = header.length + folderCount * 16;
@@ -468,7 +470,7 @@ public class DDSToKTXBsaConverter extends Thread {
 						byteBuffer.rewind();
 						bytesCount = outReader.read(byteBuffer, fileOffset + 8);// absolute read and skip hash 8 bytes
 						int fileSize = byteBuffer.getInt(0);
-						int offset = byteBuffer.getInt(4); 					 
+						int offset = byteBuffer.getInt(4);
 
 						writeStartPos = fileSize + offset;
 					}
@@ -485,7 +487,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			// in case of trouble just start again
 			if (writeStartPos <= 0) {
 				// flag away skipping any thing
-				lastGoodEntryWritten = -1;				
+				lastGoodEntryWritten = -1;
 				pos = fileOffset;// this is now pointing to the start of the heap
 				System.out.println("Couldn't find a good writeStartPos, restarting. lastGoodEntryWritten = "
 									+ lastGoodEntryWritten);
@@ -510,7 +512,7 @@ public class DDSToKTXBsaConverter extends Thread {
 			entriesToWrite.add(null);
 		}
 		ArrayList<ArchiveEntryOutput> entriesToWriteNow = new ArrayList<ArchiveEntryOutput>();
-		
+
 		// create a single writer, called in the loop below to write out the prepped batch of entries
 		Runnable entryWriter = new Runnable() {
 			@Override
@@ -521,7 +523,7 @@ public class DDSToKTXBsaConverter extends Thread {
 						InputStream in = null;
 						ArchiveEntry entry = aeo.entry;
 						try {
-							//System.out.println("entry to write " + entry.getFileName());
+							//System.out.println("entry to write " + ((Displayable)entry).getFileName());
 							in = aeo.in;
 
 							int residualLength = entry.getFileLength();
@@ -535,7 +537,7 @@ public class DDSToKTXBsaConverter extends Thread {
 								pos += 1;
 								ch.write(ByteBuffer.wrap(nameBuffer2), pos);
 								pos += nameBuffer2.length;
-								
+
 							}
 
 							//Note either whole archive compressed or not, this is not per entry
@@ -552,8 +554,7 @@ public class DDSToKTXBsaConverter extends Thread {
 											int length = Math.min(dataBuffer.length, residualLength);
 											count = in.read(dataBuffer, 0, length);
 											if (count == -1) {
-												throw new EOFException(
-														"Unexpected end of stream while deflating data");
+												throw new EOFException("Unexpected end of stream while deflating data");
 											}
 											residualLength -= count;
 											deflater.setInput(dataBuffer, 0, count);
@@ -584,7 +585,7 @@ public class DDSToKTXBsaConverter extends Thread {
 								entry.setCompressed(false);
 							}
 
-							// now we jump back to teh file index and set the len and pos ints
+							// now we jump back to the file index and set the len and pos ints
 							int byteLen;
 							if ((archiveFlags & 0x100) != 0) {
 								byteLen = ((Displayable)entry).getFileName().getBytes().length + 1;
@@ -597,7 +598,7 @@ public class DDSToKTXBsaConverter extends Thread {
 							} else {
 								byteLen += entry.getFileLength();
 							}
-						 
+
 							// update the file index with the len and pos data we now know
 							setInteger(byteLen, buffer, 0);
 							setInteger((int)fileOffsetStart, buffer, 4);
@@ -629,7 +630,7 @@ public class DDSToKTXBsaConverter extends Thread {
 						int newProgress = (++entriesWritten * 100) / fileCount;
 						if (newProgress >= currentProgress + 1) {
 							currentProgress = newProgress;
-							//System.out.println("Conversion Progress " + currentProgress);
+							System.out.println("Conversion Progress " + currentProgress);
 							if (statusDialog != null)
 								statusDialog.updateProgress(currentProgress);
 						}
@@ -650,8 +651,6 @@ public class DDSToKTXBsaConverter extends Thread {
 				//System.out.println("entriesToWriteNow.clear()");
 			}
 		};
-		
-		
 
 		int writeOrder = 0;
 		//lastGoodEntryWritten will be -1 (if this is not a restart)
@@ -660,8 +659,8 @@ public class DDSToKTXBsaConverter extends Thread {
 
 			final ArchiveEntry entryToProcess = entries.get(entryIdx);
 			final int order = writeOrder++;
-			//System.out.println("entry to process " + entryToProcess.getFileName());	
-			
+			//System.out.println("entry to process " + ((Displayable)entryToProcess).getFileName());
+
 			todo.add(Executors.callable(new Runnable() {
 				@Override
 				public void run() {
@@ -674,7 +673,7 @@ public class DDSToKTXBsaConverter extends Thread {
 					try {
 						in = inputArchive.getInputStream(entryToProcess);
 
-						// convert to etc2 if needed
+						// convert to etc2 if needed (changed from dds to ktx waaay back in the insertEntry method)
 						if (CONVERT_DDS_to_KTX && ((Displayable)entryToProcess).getFileName().endsWith(".ktx")) {
 							//System.out.println("converting  " +((DisplayableArchiveEntry)entryToProcess).getName());
 							ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in,
@@ -683,8 +682,7 @@ public class DDSToKTXBsaConverter extends Thread {
 								in = new ByteBufferBackedInputStream(bbKtx);
 								entryToProcess.setFileLength(bbKtx.limit());
 							} else {
-								System.out.println(
-										"Conversion failed for " + ((Displayable)entryToProcess).getName());
+								System.out.println("Conversion failed for " + ((Displayable)entryToProcess).getName());
 							}
 						} else {
 							aeo.in = in;
@@ -702,8 +700,6 @@ public class DDSToKTXBsaConverter extends Thread {
 					}
 				}
 			}));
-			
-		 
 
 			// 0 base makes this odd, e.g. num thread 4 will mean "mod % 4 == 3" means 3,7,11...
 			if ((entryIdx % NUM_THREADS == (NUM_THREADS - 1)) || entryIdx == entries.size() - 1) {
@@ -720,27 +716,43 @@ public class DDSToKTXBsaConverter extends Thread {
 				todo.add(Executors.callable(entryWriter));
 				try {
 					List<Future<Object>> answers = es.invokeAll(todo);
+					for (Future<Object> a : answers) {
+						try {
+							// no results get returns null, but it reports exceptions
+							a.get();
+						} catch (ExecutionException e) {
+							e.printStackTrace();
+						}
+					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				writeOrder = 0;// reset for the next round
-				
+
 				todo.clear();
 
 			}
 
 		}
-		
+
 		// one final run through to add the last entries prepared
 		entriesToWriteNow.addAll(entriesToWrite);
 		todo.add(Executors.callable(entryWriter));
 		try {
 			List<Future<Object>> answers = es.invokeAll(todo);
+			for (Future<Object> a : answers) {
+				try {
+					// no results get returns null, but it reports exceptions
+					a.get();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		es.shutdown();
 		if (deflater != null)
 			deflater.end();
@@ -748,9 +760,9 @@ public class DDSToKTXBsaConverter extends Thread {
 		setInteger(104, buffer, 0);
 		setInteger(header.length, buffer, 4);
 		ch.write(ByteBuffer.wrap(buffer, 0, 8), 4);// doesn't touch pos2
+
+		ch.force(false);
 	}
-	
-	
 
 	private class ArchiveEntryOutput {
 		ArchiveEntry	entry;

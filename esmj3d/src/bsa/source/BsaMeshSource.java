@@ -79,6 +79,7 @@ public class BsaMeshSource implements MeshSource {
 				if (archiveEntry != null) {
 					try {
 						NifFile nifFile = null;
+									
 						ByteBuffer inputStream = archiveFile.getByteBuffer(archiveEntry);
 						// String fileName = archiveEntry.getName();
 
