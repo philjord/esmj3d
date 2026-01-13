@@ -41,13 +41,13 @@ import esmj3d.data.shared.records.TXST;
 import esmj3d.j3d.TESLANDGen;
 import nif.j3d.J3dNiGeometry;
 import nif.j3d.J3dNiTriBasedGeom;
-import nif.niobject.bgsm.ShaderMaterial;
+import nif.niobject.bgsm.BSMaterialDataBGSM;
 import nif.shader.ShaderSourceIO;
 import tools.io.ESMByteConvert;
 import tools3d.utils.PhysAppearance;
 import tools3d.utils.Utils3D;
 import utils.ESConfig;
-import utils.source.BgsmSource;
+import utils.source.MaterialsSource;
 import utils.source.TextureSource;
 
 public class J3dLAND extends J3dRECOStatInst {
@@ -541,7 +541,7 @@ public class J3dLAND extends J3dRECOStatInst {
 					} else if (textureSet.MNAM != null) {
 						// new fallout 4 texture system
 
-						ShaderMaterial material = BgsmSource.bgsmSource
+						BSMaterialDataBGSM material = MaterialsSource.bgsmSource
 								.getShaderMaterial("Materials\\" + textureSet.MNAM);
 						if (material != null) {
 							tus = textureSource.getTextureUnitState(material.DiffuseTexture);

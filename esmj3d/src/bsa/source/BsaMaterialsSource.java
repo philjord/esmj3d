@@ -9,12 +9,12 @@ import java.util.List;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import nif.niobject.bgsm.BSMaterial;
-import nif.niobject.bgsm.EffectMaterial;
-import nif.niobject.bgsm.ShaderMaterial;
-import utils.source.BgsmSource;
+import nif.niobject.bgsm.BSMaterialDataBGEM;
+import nif.niobject.bgsm.BSMaterialDataBGSM;
+import utils.source.MaterialsSource;
 import utils.source.file.FileMeshSource;
 
-public class BsaMaterialsSource extends BgsmSource {
+public class BsaMaterialsSource extends MaterialsSource {
 
 	public static boolean		FALLBACK_TO_FILE_SOURCE	= false;
 	private List<ArchiveFile>	bsas;
@@ -42,22 +42,22 @@ public class BsaMaterialsSource extends BgsmSource {
 	}
 
 	@Override
-	public EffectMaterial getEffectMaterial(String fileName) {
+	public BSMaterialDataBGEM getEffectMaterial(String fileName) {
 		BSMaterial material = getMaterial(fileName);
-		if (!(material instanceof EffectMaterial)) {
+		if (!(material instanceof BSMaterialDataBGEM)) {
 			// it is possible for a desired EffectMaterial to have the header string BGSM and 
 			// thus cause chaos about now 
 			//example FO4: Materials\SetDressing\WaterCooler\WaterCooler_Dirty.BGEM
 			return null;
 		}
 
-		return (EffectMaterial)material;
+		return (BSMaterialDataBGEM)material;
 	}
 
 	@Override
-	public ShaderMaterial getShaderMaterial(String fileName) {
+	public BSMaterialDataBGSM getShaderMaterial(String fileName) {
 
-		return (ShaderMaterial)getMaterial(fileName);
+		return (BSMaterialDataBGSM)getMaterial(fileName);
 	}
 
 	public BSMaterial getMaterial(String fileName) {
