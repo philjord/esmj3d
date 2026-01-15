@@ -21,7 +21,7 @@ import utils.source.file.FileMeshSource;
  * for example fallout76 sounds files have only .lip but I'm looking  in them for nif files
  * because I use teh GNRL signal, which is nonsense
  */
-public class BsaMeshSource implements MeshSource {
+public class BsaMeshSource extends MeshSource {
 
 	public static boolean		FALLBACK_TO_FILE_SOURCE	= false;
 	private List<ArchiveFile>	bsas;
