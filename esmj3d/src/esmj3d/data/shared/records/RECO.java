@@ -104,7 +104,7 @@ public abstract class RECO
 	
 	public String showDetails()
 	{
-		return toString();
+		return "" + this.getClass() + " : (" + formId + "|" + Integer.toHexString(formId) + ") " + (EDID != null ? EDID : "");
 	}
 	
 	@Override
