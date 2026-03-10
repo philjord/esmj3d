@@ -17,7 +17,9 @@ public class ZString {
 				}
 			}
 		} else {
-			new Throwable("bytes " + bytes.length).printStackTrace();
+			//presumably just a null string
+			str = ""; // to avoid null checks elsewhere
+			//new Throwable("bytes " + bytes.length).printStackTrace();
 		}
 		return str;
 	}
