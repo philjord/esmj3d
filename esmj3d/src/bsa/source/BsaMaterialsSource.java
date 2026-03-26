@@ -2,6 +2,7 @@ package bsa.source;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,34 +12,39 @@ import bsaio.ArchiveFile;
 import nif.niobject.bgsm.BSMaterial;
 import nif.niobject.bgsm.BSMaterialDataBGEM;
 import nif.niobject.bgsm.BSMaterialDataBGSM;
+import nif.niobject.bgsm.bsmatcdb.BSMaterialsCDB;
+import tools.WeakValueHashMap;
 import utils.source.MaterialsSource;
-import utils.source.file.FileMeshSource;
 
 public class BsaMaterialsSource extends MaterialsSource {
 
-	public static boolean		FALLBACK_TO_FILE_SOURCE	= false;
 	private List<ArchiveFile>	bsas;
-	private FileMeshSource		fileMeshSource			= null;
+	
+	private List<ArchiveFile>	bsasCDB;//starfield one db file in the ba2 file
+	protected static WeakValueHashMap<String, BSMaterial>	materialFilesCDB	= new WeakValueHashMap<String, BSMaterial>();
 
 	public BsaMaterialsSource(List<ArchiveFile> allBsas) {
 		this.bsas = new ArrayList<ArchiveFile>();
+		this.bsasCDB = new ArrayList<ArchiveFile>();
 		for (ArchiveFile archiveFile : allBsas) {
 			if (archiveFile != null && archiveFile.hasMaterials()) {
 				bsas.add(archiveFile);
 			}
 		}
-
-		if (bsas.size() == 0 && !FALLBACK_TO_FILE_SOURCE) {
+		
+		for (ArchiveFile archiveFile : allBsas) {
+			if (archiveFile != null && archiveFile.hasMaterialCDB()) {
+				bsasCDB.add(archiveFile);
+			}
+		}
+		
+		if (bsas.size() == 0 && bsasCDB.size() == 0) {
 			System.out.print("No hasMaterials archive files found in:");
 			for (ArchiveFile archiveFile : allBsas) {
 				System.out.print(" Looked in Archive:" + archiveFile.getName());
 			}
 			System.out.println("");
-		}
-
-		if (FALLBACK_TO_FILE_SOURCE) {
-			fileMeshSource = new FileMeshSource();
-		}
+		}		
 	}
 
 	@Override
@@ -100,18 +106,7 @@ public class BsaMaterialsSource extends MaterialsSource {
 
 				}
 			}
-
-			if (FALLBACK_TO_FILE_SOURCE) {
-				try {
-					material = readMaterialFile(fileName, fileMeshSource.getByteBuffer(fileName));
-
-					if (material != null)
-						return material;
-				} catch (IOException e) {
-					System.out.println(
-							"BsaMaterialsSource:FileBgsmSource " + fileName + " " + e + " " + e.getStackTrace()[0]);
-				}
-			}
+			
 
 			//oops no material today
 			if (!warningGiven.contains(fileName)) {
@@ -127,5 +122,64 @@ public class BsaMaterialsSource extends MaterialsSource {
 	}
 
 	private static HashSet<String> warningGiven = new HashSet<String>();
+	
+	
+	
+	public static BSMaterialsCDB materialsCDB;
+	/**h
+	 * https://forums.nexusmods.com/topic/13361451-starfields-cdb-material-database/
+	 starfield in a cdb file in a ba2
+	 */
+	@Override
+	public BSMaterial readMaterialFileCDB(String fileName) {
+
+		// load on first read
+		if (materialsCDB == null) {
+			for (ArchiveFile archiveFile : bsasCDB) {
+				ArchiveEntry archiveEntry = archiveFile.getEntry("materials\\materialsbeta.cdb");
+				if (archiveEntry != null) {
+					try {
+						ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
+						if (in != null) {
+							in.order(ByteOrder.LITTLE_ENDIAN);
+							materialsCDB = new BSMaterialsCDB(in);
+							break;
+						} else {
+							System.err.println("materials\\materialsbeta.cdb Not Found in Material BSAs");
+							return null;
+						}
+
+					} catch (IOException e) {
+						System.out.println("BsaMaterialsSource  " + fileName + " " + e + " " + e.getStackTrace()[0]);
+					}
+
+				}
+			}
+			return null;
+		}
+		
+		
+		BSMaterial material = materialFilesCDB.get(fileName);
+
+		if (material != null)
+			return material;
+
+		 
+		try {
+			material = materialsCDB.getMaterialFileCDB(fileName);
+		} catch (IOException e) {							 
+			e.printStackTrace();
+		}
+		if (material != null) {
+			materialFilesCDB.put(fileName, material);	
+			return material;
+		} 
+					 
+		 
+		return null;
+	}
+	
+
+	 
 
 }
