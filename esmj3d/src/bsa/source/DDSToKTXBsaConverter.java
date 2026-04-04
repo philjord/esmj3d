@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 import java.util.zip.Deflater;
 
 import bsaio.ArchiveEntry;
+import bsaio.ArchiveEntry.HashFormat;
 import bsaio.ArchiveFile;
 import bsaio.ArchiveFile.SIG;
 import bsaio.DBException;
@@ -218,7 +219,7 @@ public class DDSToKTXBsaConverter extends Thread {
 
 		//TODO: this is a mighty odd place to change the name, I wager the writeEntry code should be doing it
 		if (CONVERT_DDS_to_KTX && ((Displayable)inEntry).getFileName().endsWith(".dds")) {
-			((Displayable)inEntry).setFileName(((Displayable)inEntry).getFileName().replace(".dds", ".ktx"));
+			((Displayable)inEntry).setFileName(((Displayable)inEntry).getFileName().replace(".dds", ".ktx"), HashFormat.OLD);
 		}
 
 		String fileName = ((Displayable)inEntry).getName();
