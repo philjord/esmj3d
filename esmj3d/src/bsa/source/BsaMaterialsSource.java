@@ -145,7 +145,7 @@ public class BsaMaterialsSource extends MaterialsSource {
 							materialsCDB = new BSMaterialsCDB(in);
 							break;
 						} else {
-							System.err.println("materials\\materialsbeta.cdb Not Found in Material BSAs");
+							System.err.println("materials\\materialsbeta.cdb returned a null ByteBuffer");
 							return null;
 						}
 
@@ -155,7 +155,10 @@ public class BsaMaterialsSource extends MaterialsSource {
 
 				}
 			}
-			return null;
+			if (materialsCDB == null) {				
+				System.err.println("materials\\materialsbeta.cdb Not Found in Material BSAs");
+				return null;
+			}
 		}
 		
 		
