@@ -202,6 +202,9 @@ public class BsaTextureSource implements TextureSource {
 
 	@Override
 	public TextureUnitState getTextureUnitState(String texName, boolean dropMip0) {
+		
+
+		
 		if (texName != null && texName.length() > 0) {
 			texName = cleanTexName(texName);
 
@@ -254,6 +257,9 @@ public class BsaTextureSource implements TextureSource {
 								}
 							}
 						} catch (IOException e) {
+							System.out.println(
+									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
+						} catch (NullPointerException e) {
 							System.out.println(
 									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 						}
