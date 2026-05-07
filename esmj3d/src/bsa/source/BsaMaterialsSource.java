@@ -21,6 +21,9 @@ public class BsaMaterialsSource extends MaterialsSource {
 	private List<ArchiveFile>	bsas;
 	
 	private List<ArchiveFile>	bsasCDB;//starfield one db file in the ba2 file
+	
+	public static BSMaterialsCDB materialsCDB;
+	
 	protected static WeakValueHashMap<String, BSMaterial>	materialFilesCDB	= new WeakValueHashMap<String, BSMaterial>();
 
 	public BsaMaterialsSource(List<ArchiveFile> allBsas) {
@@ -35,6 +38,35 @@ public class BsaMaterialsSource extends MaterialsSource {
 		for (ArchiveFile archiveFile : allBsas) {
 			if (archiveFile != null && archiveFile.hasMaterialCDB()) {
 				bsasCDB.add(archiveFile);
+				//load it up now to save time later
+				
+				if(materialsCDB!=null)
+					System.err.println("eh more than 1 materialsCDB ??");
+				
+				Thread cdbLaoder = new Thread() {
+					public void run() {
+						// hold up ny material requests until we are loaded
+						synchronized(materialFilesCDB) {
+						ArchiveEntry archiveEntry = archiveFile.getEntry("materials\\materialsbeta.cdb");
+						if (archiveEntry != null) {
+							try {
+								ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
+								if (in != null) {
+									in.order(ByteOrder.LITTLE_ENDIAN);
+									materialsCDB = new BSMaterialsCDB(in);
+								} else {
+									System.err.println("materials\\materialsbeta.cdb returned a null ByteBuffer");
+								}
+
+							} catch (IOException e) {
+								System.out.println("BSMaterialsCDB load failed");
+							}
+
+						}
+						}
+					}
+				};
+				cdbLaoder.start();
 			}
 		}
 		
@@ -125,7 +157,7 @@ public class BsaMaterialsSource extends MaterialsSource {
 	
 	
 	
-	public static BSMaterialsCDB materialsCDB;
+
 	/**h
 	 * https://forums.nexusmods.com/topic/13361451-starfields-cdb-material-database/
 	 starfield in a cdb file in a ba2
@@ -134,7 +166,7 @@ public class BsaMaterialsSource extends MaterialsSource {
 	public BSMaterial readMaterialFileCDB(String fileName) {
 
 		// load on first read
-		if (materialsCDB == null) {
+/*		if (materialsCDB == null) {
 			for (ArchiveFile archiveFile : bsasCDB) {
 				ArchiveEntry archiveEntry = archiveFile.getEntry("materials\\materialsbeta.cdb");
 				if (archiveEntry != null) {
@@ -159,10 +191,17 @@ public class BsaMaterialsSource extends MaterialsSource {
 				System.err.println("materials\\materialsbeta.cdb Not Found in Material BSAs");
 				return null;
 			}
+		}*/
+		BSMaterial material;
+		// wait for the load up to finish
+		synchronized(materialFilesCDB) {
+			if (materialsCDB == null) {				
+				System.err.println("materials\\materialsbeta.cdb Not Found in Material BSAs");
+				return null;
+			}			
+			
+			material = materialFilesCDB.get(fileName);
 		}
-		
-		
-		BSMaterial material = materialFilesCDB.get(fileName);
 
 		if (material != null)
 			return material;
