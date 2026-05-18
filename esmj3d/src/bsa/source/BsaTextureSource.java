@@ -199,7 +199,7 @@ public class BsaTextureSource implements TextureSource {
 	public TextureUnitState getTextureUnitState(String texName) {
 		return getTextureUnitState(texName, false);
 	}
-
+	
 	@Override
 	public TextureUnitState getTextureUnitState(String texName, boolean dropMip0) {
 		
@@ -461,10 +461,11 @@ public class BsaTextureSource implements TextureSource {
 		private static Texture2D createTextureETCPack(String filename, DDSImage ddsImage) {
 
 			// return null for unsupported types
-			if (ddsImage.getPixelFormat() == DDSImage.D3DFMT_DXT2 //
-				|| ddsImage.getPixelFormat() == DDSImage.D3DFMT_DXT4 //
-				|| ddsImage.getPixelFormat() == DDSImage.D3DFMT_UNKNOWN) {
-				System.out.println("Unsupported DDS format " + ddsImage.getPixelFormat() + " for file " + filename);
+			int pixelFormat = ddsImage.getPixelFormat();
+			if (pixelFormat == DDSImage.D3DFMT_DXT2 //
+				|| pixelFormat == DDSImage.D3DFMT_DXT4 //
+				|| pixelFormat == DDSImage.D3DFMT_UNKNOWN) {
+				System.out.println("createTextureETCPack Unsupported DDS format " + pixelFormat + " for file " + filename);
 				return null;
 			}
 
