@@ -25,7 +25,6 @@ import bsaio.DBException;
 import bsaio.HashCode;
 import bsaio.displayables.Displayable;
 import texture.DDSToKTXConverter;
-import tools.io.FileChannelRAF;
 
 /**
  * This is primarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
@@ -160,7 +159,6 @@ public class DDSToKTXBsaConverter extends Thread {
 
 	@Override
 	public void run() {
-		FileChannelRAF out = null;
 		try {
 			entries = new ArrayList<ArchiveEntry>(256);
 			folders = new ArrayList<Folder>(256);
@@ -180,10 +178,9 @@ public class DDSToKTXBsaConverter extends Thread {
 
 			if (fileCount != 0) {
 				//if not empty then this output File must have a current progress written into the start of it (by this class)
-				out = new FileChannelRAF(outputArchiveFile);
-				writeArchive(out, outputArchiveFileReader);
-				out.close();
-				out = null;
+				writeArchive(outputArchiveFile, outputArchiveFileReader);
+				outputArchiveFile.close();
+				outputArchiveFile = null;
 			}
 			completed = true;
 		} catch (DBException exc) {
@@ -197,10 +194,10 @@ public class DDSToKTXBsaConverter extends Thread {
 			exc.printStackTrace();
 		}
 
-		if (!completed && out != null) {
+		if (!completed && outputArchiveFile != null) {
 			try {
-				out.close();
-				out = null;
+				outputArchiveFile.close();
+				outputArchiveFile = null;
 			} catch (IOException exc) {
 				System.out.println("I/O error while cleaning up");
 				exc.printStackTrace();
@@ -330,11 +327,10 @@ public class DDSToKTXBsaConverter extends Thread {
 	 * @throws DBException
 	 * @throws IOException
 	 */
-	private void writeArchive(FileChannelRAF out2, FileChannel outReader) throws DBException, IOException {
+	private void writeArchive(FileChannel ch, FileChannel outReader) throws DBException, IOException {
 
 		// First things first, let's see if the outputs readable channel has a marker for partial completion and if start from that point		
 		// partial writes are indicated by an int at 4 and a counted int at 8 (which are completed by setting to 104 and 36, respectively)
-		FileChannel ch = out2.getChannel();
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);// 2 ints worth
 		int bytesCount = outReader.read(byteBuffer, 4);// from the 4th byte
