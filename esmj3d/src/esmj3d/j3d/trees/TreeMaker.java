@@ -26,7 +26,7 @@ import esmj3d.j3d.j3drecords.type.J3dRECOTypeStatic;
 import nif.j3d.J3dNiAVObject;
 import tools.WeakValueHashMap;
 import tools3d.utils.Utils3D;
-import utils.ESConfig;
+import utils.convert.ConvertFromNif;
 import utils.source.MediaSources;
 import utils.source.TextureSource;
 
@@ -46,8 +46,8 @@ public class TreeMaker
 			if (treeName.endsWith(".spt"))
 			{
 				// give it the InstREco to prebake
-				Node node = createShapeX(treeName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE,
-						billBoardHeight * ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource(), inst);
+				Node node = createShapeX(treeName, ConvertFromNif.toJ3d(billBoardWidth),
+						ConvertFromNif.toJ3d(billBoardHeight), mediaSources.getTextureSource(), inst);
 
 				return node;
 			}
@@ -96,8 +96,8 @@ public class TreeMaker
 				if (!makePhys)
 				{
 					J3dRECOStatInst j3dinst = new J3dRECOStatInst(inst, false, makePhys);
-					Node node = makeLODTreeX(sptFileName, billBoardWidth * ESConfig.ES_TO_METERS_SCALE,
-							billBoardHeight * ESConfig.ES_TO_METERS_SCALE, mediaSources.getTextureSource());
+					Node node = makeLODTreeX(sptFileName, ConvertFromNif.toJ3d(billBoardWidth),
+							ConvertFromNif.toJ3d(billBoardHeight), mediaSources.getTextureSource());
 					j3dinst.addNodeChild(node);
 					return j3dinst;
 				}
@@ -290,9 +290,9 @@ public class TreeMaker
 			rectHeight = rectHeight * ir.getScale();
 
 			Vector3f t = ir.getTrans();
-			x = t.x * ESConfig.ES_TO_METERS_SCALE;
-			y = t.z * ESConfig.ES_TO_METERS_SCALE;
-			z = -t.y * ESConfig.ES_TO_METERS_SCALE;
+			x = ConvertFromNif.toJ3d(t.x);
+			y = ConvertFromNif.toJ3d(t.z);
+			z = ConvertFromNif.toJ3d(-t.y);
 		}
 
 		float zPosition = 0f;

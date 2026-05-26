@@ -16,7 +16,7 @@ import esmj3d.j3d.BethRenderSettings;
 import esmj3d.j3d.j3drecords.type.J3dRECOType;
 import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
-import utils.ESConfig;
+import utils.convert.ConvertFromNif;
 
 public class J3dRECOStatInst extends Group implements J3dRECOInst
 {
@@ -197,8 +197,7 @@ public class J3dRECOStatInst extends Group implements J3dRECOInst
 
 		transform.set(xrotT);
 
-		transform.setTranslation(
-				new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y * ESConfig.ES_TO_METERS_SCALE));
+		transform.setTranslation(ConvertFromNif.toJ3d(x, y, z));
 
 		transform.setScale(scale);
 

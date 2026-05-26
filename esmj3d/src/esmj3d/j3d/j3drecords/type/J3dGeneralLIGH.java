@@ -30,12 +30,12 @@ import nif.niobject.NiAVObject;
 import nif.niobject.NiNode;
 import nif.niobject.NiObject;
 import tools3d.utils.Utils3D;
-import utils.ESConfig;
+import utils.convert.ConvertFromNif;
 import utils.source.MediaSources;
 
 public class J3dGeneralLIGH extends J3dRECOType
 {
-	private static final boolean showDebug = true;
+	public static boolean showDebug = true;
 
 	private Light light = null;
 
@@ -96,7 +96,7 @@ public class J3dGeneralLIGH extends J3dRECOType
 		if (!makePhys)
 		{
 			color = new Color3f(ligh.color.x / 255f, ligh.color.y / 255f, ligh.color.z / 255f);
-			radius = ligh.radius * ESConfig.ES_TO_METERS_SCALE;
+			radius = ConvertFromNif.toJ3d(ligh.radius);
 			//System.out.println("new light " + color);
 			//System.out.println("falls fade " + ligh.fade + " falloffExponent " + ligh.falloffExponent + " fieldOfView " + ligh.fieldOfView);
 			//System.out.println("ligh.radius " + ligh.radius + " " + (ligh.radius * ESConfig.ES_TO_METERS_SCALE));
@@ -139,8 +139,7 @@ public class J3dGeneralLIGH extends J3dRECOType
 		//TODO: this should be the classic multiply up the chain gear
 		if (niAVObject.name.equals("AttachLight"))
 		{
-			return new Vector3f(niAVObject.translation.x * ESConfig.ES_TO_METERS_SCALE,
-					niAVObject.translation.z * ESConfig.ES_TO_METERS_SCALE, -niAVObject.translation.y * ESConfig.ES_TO_METERS_SCALE);
+			return ConvertFromNif.toJ3d(niAVObject.translation);					
 		}
 
 		if (niAVObject instanceof NiNode)

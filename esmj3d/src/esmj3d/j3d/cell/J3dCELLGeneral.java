@@ -16,7 +16,7 @@ import esmj3d.j3d.j3drecords.inst.J3dLAND;
 import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 import esmj3d.j3d.water.Water;
 import esmj3d.j3d.water.WaterApp;
-import utils.ESConfig;
+import utils.convert.ConvertFromNif;
 import utils.source.MediaSources;
 
 public abstract class J3dCELLGeneral extends BranchGroup
@@ -89,7 +89,7 @@ public abstract class J3dCELLGeneral extends BranchGroup
 		else if (cellWaterLevel != Float.POSITIVE_INFINITY && cellWaterLevel != 0x7F7FFFFF && cellWaterLevel != 0x4F7FFFC9)
 		{
 
-			return cellWaterLevel * ESConfig.ES_TO_METERS_SCALE;
+			return ConvertFromNif.toJ3d(cellWaterLevel);
 		}
 
 		return Float.POSITIVE_INFINITY;

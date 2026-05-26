@@ -19,7 +19,7 @@ import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiAVObject.AccumNodeListener;
 import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.BetterDistanceLOD;
-import utils.ESConfig;
+import utils.convert.ConvertFromNif;
 
 public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.UpdateListener, J3dRECOInst, AccumNodeListener
 {
@@ -270,7 +270,7 @@ public class J3dRECOChaInst extends BranchGroup implements BethRenderSettings.Up
 
 		t.set(xrotT);
 
-		t.setTranslation(new Vector3f(x * ESConfig.ES_TO_METERS_SCALE, z * ESConfig.ES_TO_METERS_SCALE, -y * ESConfig.ES_TO_METERS_SCALE));
+		t.setTranslation(ConvertFromNif.toJ3d(x, y, z));
 
 		t.setScale(scale);
 

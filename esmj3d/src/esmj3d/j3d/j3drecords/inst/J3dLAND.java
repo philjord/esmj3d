@@ -46,21 +46,21 @@ import nif.shader.ShaderSourceIO;
 import tools.io.ESMByteConvert;
 import tools3d.utils.PhysAppearance;
 import tools3d.utils.Utils3D;
-import utils.ESConfig;
+import utils.convert.ConvertFromNif;
 import utils.source.MaterialsSource;
 import utils.source.TextureSource;
 
 public class J3dLAND extends J3dRECOStatInst {
 	public static int				GRID_COUNT			= 32;
 
-	public static final float		TERRIAN_SQUARE_SIZE	= 128 * ESConfig.ES_TO_METERS_SCALE;// = 1.6256m
+	public static final float		TERRIAN_SQUARE_SIZE	= ConvertFromNif.toJ3d(128);// = 1.6256m
 
 	protected static final boolean	OUTPUT_BINDINGS		= false;
 
 	public static float				TEX_REPEAT			= 0.5f;								// suggests how many times to repeat the texture over a grid square
 
 	//	NOTE nif x,y,z to j3d x,z,-y
-	public static float				HEIGHT_TO_J3D_SCALE	= ESConfig.ES_TO_METERS_SCALE * 2f;	//this is one inch! 0.0254m
+	public static float				HEIGHT_TO_J3D_SCALE	= ConvertFromNif.toJ3d(2);		//this is one inch! 0.0254m
 
 	public static float				LAND_SIZE			= GRID_COUNT * TERRIAN_SQUARE_SIZE;	//= (32*1.6256) = 52.0192 (or 104.0384 tes3)
 

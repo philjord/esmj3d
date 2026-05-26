@@ -19,7 +19,7 @@ import esmj3d.j3d.j3drecords.inst.J3dRECOInst;
 import javaawt.Point;
 import javaawt.Rectangle;
 import javaawt.geom.Point2D;
-import utils.ESConfig;
+import utils.convert.ConvertFromNif;
 
 public class GridSpaces extends BranchGroup
 {
@@ -45,8 +45,8 @@ public class GridSpaces extends BranchGroup
 
 	public void sortOutBucket(InstRECO reco, Record record)
 	{
-		float recordX = reco.getTrans().x * ESConfig.ES_TO_METERS_SCALE;
-		float recordY = reco.getTrans().y * ESConfig.ES_TO_METERS_SCALE;
+		float recordX = ConvertFromNif.toJ3d(reco.getTrans().x);
+		float recordY = ConvertFromNif.toJ3d(reco.getTrans().y);
 		int xGridIdx = (int) Math.floor(recordX / BUCKET_RANGE);
 		int yGridIdx = (int) Math.floor(recordY / BUCKET_RANGE);
 		Point key = new Point(xGridIdx, yGridIdx);
