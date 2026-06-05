@@ -16,6 +16,9 @@ import org.jogamp.java3d.Texture2D;
 import org.jogamp.java3d.TextureUnitState;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.ArchiveFile.Folder;
@@ -142,11 +145,20 @@ public class BsaTextureSource implements TextureSource {
 					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
 					if (archiveEntry != null) {
 						try {
-							//InputStream in = archiveFile.getInputStream(archiveEntry);
-							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
+							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
 							if (in != null) {
 								if (texNameForArchive.endsWith(".dds")) {
-									if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
+									
+									//type == GL_ARGB16F always convert to ETC as I cannot get jogl to display it
+									boolean alwaysConvert = false;
+									// this will just read back the header, and point at the data
+									DDSImage ddsImage = DDSImage.read(in);
+									in.rewind();
+									if(ddsImage.getGLInternalFormat() == GL.GL_RGBA16F 
+											|| ddsImage.getGLInternalFormat() == GL2.GL_RGBA16)
+										alwaysConvert = true;
+									
+									if (alwaysConvert || CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
 										tex = CompressedTextureLoaderETCPackDDS.getTexture(texNameForArchive, in);
 									else
 										tex = CompressedTextureLoader.DDS.getTexture(texNameForArchive, in);
@@ -230,11 +242,20 @@ public class BsaTextureSource implements TextureSource {
 					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
 					if (archiveEntry != null) {
 						try {
-							//InputStream in = archiveFile.getInputStream(archiveEntry);
-							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry, true);
+							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
 							if (in != null) {
 								if (texNameForArchive.endsWith(".dds")) {
-									if (CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
+									
+									//type == GL_ARGB16F always convert to ETC as I cannot get jogl to display it
+									boolean alwaysConvert = false;
+									// this will just read back the header, and point at the data
+									DDSImage ddsImage = DDSImage.read(in);
+									in.rewind();
+									if(ddsImage.getGLInternalFormat() == GL.GL_RGBA16F
+											|| ddsImage.getGLInternalFormat() == GL2.GL_RGBA16)
+										alwaysConvert = true;									
+									
+									if (alwaysConvert || CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
 										tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive,
 												in);
 									else
