@@ -171,7 +171,8 @@ public class DDSToKTXBsaConverter extends Thread {
 			fileFlags = 0;
 
 			List<ArchiveEntry> inEntries = inputArchive.getEntries();
-			// notice we require the loader to have keep the displayable version which holds the folder name per entry
+
+			// notice we require the loader to have kept the displayable version which holds the folder name per entry
 			for (ArchiveEntry entry : inEntries) {
 				insertEntry(entry);
 			}
@@ -209,27 +210,31 @@ public class DDSToKTXBsaConverter extends Thread {
 	private void insertEntry(ArchiveEntry inEntry) throws DBException {
 		String folderName = ((Displayable)inEntry).getFolderName();
 
-		//folderName = folderName.substring(baseName.length() + 1);
 		if (folderName.length() > 254) {
 			throw new DBException("Maximum folder path length is 254 characters");
 		}
 
-		//TODO: this is a mighty odd place to change the name, I wager the writeEntry code should be doing it
+		String fileName = ((Displayable)inEntry).getFileName();
 		if (CONVERT_DDS_to_KTX && ((Displayable)inEntry).getFileName().endsWith(".dds")) {
-			((Displayable)inEntry).setFileName(((Displayable)inEntry).getFileName().replace(".dds", ".ktx"), HashFormat.OLD);
+			fileName = fileName.replace(".dds", ".ktx");
 		}
+		
+		//update the hashcode for file (and hence folder) to the old version to match the BSA format
+		// note the input fileEntry is now modified
+		((Displayable)inEntry).setFileName(fileName, HashFormat.OLD);		
 
-		String fileName = ((Displayable)inEntry).getName();
 		if (fileName.length() > 254) {
 			throw new DBException("Maximum file name length is 254 characters");
 		}
-
+		
+		//TODO: this is just a pure ordering based on normal compareTo operations
 		boolean insert = true;
-
 		int count = entries.size();
 		int i = 0;
 		while (i < count) {
 			ArchiveEntry listEntry = entries.get(i);
+			// note very important the compareTo of entry compares folder hash then file has so this is a 
+			// folder then filehash sort, so should be the same order as folders
 			int diff = inEntry.compareTo(listEntry);
 			if (diff == 0) {
 				throw new DBException("Hash collision: '"	+ ((Displayable)inEntry).getName() + "' and '"
@@ -282,6 +287,7 @@ public class DDSToKTXBsaConverter extends Thread {
 		//	throw new DBException("Texture files must be packaged by themselves");
 		//}
 
+		//TODO: this is just a pure ordering based on normal compareTo operations
 		insert = true;
 		Iterator<Folder> i$ = folders.iterator();
 		while (i$.hasNext()) {
@@ -295,7 +301,7 @@ public class DDSToKTXBsaConverter extends Thread {
 		}
 
 		if (insert) {
-			Folder folder = new Folder(folderName);
+			Folder folder = new Folder(folderName);			
 			folder.incrementFileCount();
 
 			for (int i2 = 0; i2 < folders.size(); i2++) {
@@ -366,16 +372,17 @@ public class DDSToKTXBsaConverter extends Thread {
 				setInteger(fileNamesLength, header, 28);
 				setInteger(fileFlags, header, 32);
 
-			} else {
-				// this is a bugger of a format best not to bother with it for this purpose
-				//TES3 == 256
-				header = new byte[12];
-				setInteger(256, header, 0);
-				setInteger(header.length, header, 4);
-				//TODO: need to write these 2 styles and the rest as well
-				//int hashtableOffset = getInteger(header, 4);
-				//fileCount = getInteger(header, 8);
-			}
+			}  
+			/*inputArchive.getSig() == SIG.TES3// this is a bugger of a format best not to bother with it for this purpose
+			//TES3 == 256
+			header = new byte[12];
+			setInteger(256, header, 0);
+			setInteger(header.length, header, 4);*/
+			//TODO: need to write these 2 styles and the rest as well
+			//int hashtableOffset = getInteger(header, 4);
+			//fileCount = getInteger(header, 8);
+			
+			 
 			ch.write(ByteBuffer.wrap(header), pos);
 			pos += header.length;
 
@@ -817,6 +824,12 @@ public class DDSToKTXBsaConverter extends Thread {
 		public boolean equals(Object obj) {
 			return (obj != null && (obj instanceof Folder) && hashCode.equals(((Folder)obj).getHashCode()));
 		}
+		
+		@Override
+		public String toString() {
+			return name + ":" + hashCode.getHash();
+		}
+		
 
 	}
 
