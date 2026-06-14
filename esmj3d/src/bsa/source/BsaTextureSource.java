@@ -6,15 +6,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.jogamp.java3d.CompressedImageComponent2D;
 import org.jogamp.java3d.ImageComponent;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.Texture2D;
 import org.jogamp.java3d.TextureUnitState;
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
+
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -22,12 +26,18 @@ import com.jogamp.opengl.GL2;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.ArchiveFile.Folder;
+import bsaio.btdx.ArchiveEntryDX10;
 import compressedtexture.CompressedBufferedImage;
 import compressedtexture.DDSImage;
 import compressedtexture.KTXImage;
 import compressedtexture.dktxtools.ktx.KTXFormatException;
 import javaawt.image.BufferedImage;
+import nif.NifFile;
+import nif.j3d.J3dNiAVObject;
+import old.utils.SoftValueHashMap;
+import texture.CompressedTextureLoaderExt;
 import texture.DDSToKTXConverter;
+import tools.WeakValueHashMap;
 import utils.source.TextureSource;
 import utils.source.file.FileTextureSource;
 
@@ -88,7 +98,7 @@ public class BsaTextureSource implements TextureSource {
 
 			Texture tex = null;
 			//check cache hit
-			tex = CompressedTextureLoader.checkCachedTexture(texName);
+			tex = CompressedTextureLoaderExt.checkCachedTexture(texName);
 			if (tex != null) {
 				return true;
 			}
@@ -117,81 +127,144 @@ public class BsaTextureSource implements TextureSource {
 
 		return false;
 	}
+	
+	// we must implement our own caching and cut out the CompressedTextureLoader
+	private static Map<String, Texture> loadedTexture = Collections.synchronizedMap(new WeakValueHashMap<String, Texture>());
 
+	// we can't request the same file at the same time, this tell threads to wait for each other
+	private static Set<String> loadingTexture = Collections.synchronizedSet(new HashSet<String>());
+		
 	@Override
 	public Texture getTexture(String texName) {
 		if (texName != null && texName.length() > 0) {
 			texName = cleanTexName(texName);
 
 			Texture tex = null;
+			boolean loading = false;
+			// in one go check if it's loaded or loading, and then indicate this thread will load it
+			synchronized(loadedTexture) {
+				tex = loadedTexture.get(texName);
+				loading = loadingTexture.contains(texName);
+				if (tex == null && !loading) {
+					loadingTexture.add(texName);
+				}
+			}
 
-			//check cache hit
-			tex = CompressedTextureLoader.checkCachedTexture(texName);
 			if (tex != null) {
 				return tex;
 			}
 
-			for (ArchiveFile archiveFile : bsas) {
-				// shall we inspect this archive?
-				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS
-													|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
-					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
-					String texNameForArchive = texName;
-					if (archiveFile.hasKTX()) {
-						texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
+			
+			if(loading) {	
+				// just wait until loaded then return it
+				while (loading) {
+					try {
+						Thread.sleep(5);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
+					
+					loading = loadingTexture.contains(texName);					
+				}
+				return loadedTexture.get(texName); // better be good...
+			} else {
 
-					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
-					if (archiveEntry != null) {
-						try {
-							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
-							if (in != null) {
-								if (texNameForArchive.endsWith(".dds")) {
+				for (ArchiveFile archiveFile : bsas) {
+					// shall we inspect this archive?
+					if (allowedTextureFormats == AllowedTextureFormats.ALL
+						|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS
+														|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
+						|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
+						String texNameForArchive = texName;
+						if (archiveFile.hasKTX()) {
+							texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
+						}
+	
+						ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
+						if (archiveEntry != null) {
+							try {
+								
+								
+								
+								if(archiveEntry instanceof ArchiveEntryDX10 && false) {
+									//TODO: at this point I can get back soe of the data ready for action,
+									//with the bigger data just set to baselevvel >0
+									// then when the base level 0 is ready (or 0 and 1) then I can
+									// somehow call the TextureRetained updateTexture with a new baselevel set
+									//Texture2D t = new Texture2D();
+									//cap(ALLOW_LOD_RANGE_WRITE)
+									//t.setBaseLevel(0);// looks about right in fact
+									ArchiveEntryDX10 archiveEntryDX10 = (ArchiveEntryDX10)archiveEntry;
 									
-									//type == GL_ARGB16F always convert to ETC as I cannot get jogl to display it
-									boolean alwaysConvert = false;
-									// this will just read back the header, and point at the data
-									DDSImage ddsImage = DDSImage.read(in);
-									in.rewind();
-									if(ddsImage.getGLInternalFormat() == GL.GL_RGBA16F 
-											|| ddsImage.getGLInternalFormat() == GL2.GL_RGBA16)
-										alwaysConvert = true;
+									// get the highest mip back only plus a loader that will eventually get teh rest back (like level 0)
 									
-									if (alwaysConvert || CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
-										tex = CompressedTextureLoaderETCPackDDS.getTexture(texNameForArchive, in);
-									else
-										tex = CompressedTextureLoader.DDS.getTexture(texNameForArchive, in);
-								} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
-									tex = CompressedTextureLoader.ASTC.getTexture(texNameForArchive, in);
-								} else if (texNameForArchive.endsWith(".ktx")) {
-									tex = CompressedTextureLoader.KTX.getTexture(texNameForArchive, in);
-								} else {
-									//FIXME: generic texture loading system
-									/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
-									tex = tl.getTexture();*/
+									
+									// then create a texture with base level set to whatever and all bundled up with a loady thing
+									//umm...
+									
+									// so a byte buffer with extension so it's loading up itself over time and the DDSImage 
+									//with it is wathcing and the DDSImage calls update texture ...uummmm... 
+									
+									
+									
+								} else {			
+								
+									ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
+									if (in != null) {
+										if (texNameForArchive.endsWith(".dds")) {
+											
+											//type == GL_ARGB16F always convert to ETC as I cannot get jogl to display it
+											boolean alwaysConvert = false;
+											// this will just read back the header, and point at the data
+											DDSImage ddsImage = DDSImage.read(in);
+											in.rewind();
+											if(ddsImage.getGLInternalFormat() == GL.GL_RGBA16F 
+													|| ddsImage.getGLInternalFormat() == GL2.GL_RGBA16)
+												alwaysConvert = true;
+											
+											if (alwaysConvert || CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
+												tex = CompressedTextureLoaderETCPackDDS.getTexture(texNameForArchive, in);
+											else
+												tex = CompressedTextureLoaderExt.DDS.getTexture(texNameForArchive, in);
+										} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
+											tex = CompressedTextureLoaderExt.ASTC.getTexture(texNameForArchive, in);
+										} else if (texNameForArchive.endsWith(".ktx")) {
+											tex = CompressedTextureLoaderExt.KTX.getTexture(texNameForArchive, in);
+										} else {
+											//FIXME: generic texture loading system
+											/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
+											tex = tl.getTexture();*/
+										}
+		
+										if (tex != null) {
+											synchronized (loadedTexture) {
+												loadedTexture.put(texName, tex);
+												loadingTexture.remove(texName);
+											}
+											return tex;
+										}
+									}
 								}
-
-								if (tex != null) {
-									return tex;
-								}
+							} catch (IllegalArgumentException e) {
+								// occurs in at compressedtexture.DDSImage.getMipMap(DDSImage.java:466) if mip map sizes are wrong
+								System.out.println(
+										"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
+							} catch (IOException e) {
+								System.out.println(
+										"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 							}
-						} catch (IllegalArgumentException e) {
-							// occurs in at compressedtexture.DDSImage.getMipMap(DDSImage.java:466) if mip map sizes are wrong
-							System.out.println(
-									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
-						} catch (IOException e) {
-							System.out.println(
-									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 						}
 					}
 				}
-			}
-
-			if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE) {
-				Texture mc = fileTextureSource.getTexture(texName);
-				if (mc != null)
-					return mc;
+	
+				if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE) {
+					Texture mc = fileTextureSource.getTexture(texName);
+					if (mc != null)
+						return mc;
+				}
+				
+				// although we didn't load it release any waiting threads
+				loadingTexture.remove(texName);
 			}
 		}
 		if (!warningGiven.contains(texName)) {
@@ -212,86 +285,124 @@ public class BsaTextureSource implements TextureSource {
 		return getTextureUnitState(texName, false);
 	}
 	
-	@Override
-	public TextureUnitState getTextureUnitState(String texName, boolean dropMip0) {
-		
+	
+	
+	// we must implement our own caching and cut out the CompressedTextureLoader
+	private static Map<String, TextureUnitState> loadedTextureUnitState = Collections.synchronizedMap(new WeakValueHashMap<String, TextureUnitState>());
 
-		
+	// we can't request the same file at the same time, this tell threads to wait for each other
+	private static Set<String> loadingTextureUnitState = Collections.synchronizedSet(new HashSet<String>());
+	
+	@Override
+	public TextureUnitState getTextureUnitState(String texName, boolean dropMip0) {		
 		if (texName != null && texName.length() > 0) {
 			texName = cleanTexName(texName);
 
 			TextureUnitState tex = null;
+			boolean loading = false;
+			// in one go check if it's loaded or loading, and then indicate this thread will load it
+			synchronized(loadedTextureUnitState) {
+				tex = loadedTextureUnitState.get(texName);
+				loading = loadingTextureUnitState.contains(texName);
+				if (tex == null && !loading) {
+					loadingTextureUnitState.add(texName);
+				}
+			}
 
-			//check cache hit
-			tex = CompressedTextureLoader.checkCachedTextureUnitState(texName, dropMip0);
 			if (tex != null) {
 				return tex;
 			}
 
-			for (ArchiveFile archiveFile : bsas) {
-				// shall we inspect this archive?
-				if (allowedTextureFormats == AllowedTextureFormats.ALL
-					|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS
-													|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
-					|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
-					String texNameForArchive = texName;
-					if (archiveFile.hasKTX()) {
-						texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
-					} 
-
-					ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
-					if (archiveEntry != null) {
-						try {
-							ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
-							if (in != null) {
-								if (texNameForArchive.endsWith(".dds")) {
-									
-									//type == GL_ARGB16F always convert to ETC as I cannot get jogl to display it
-									boolean alwaysConvert = false;
-									// this will just read back the header, and point at the data
-									DDSImage ddsImage = DDSImage.read(in);
-									in.rewind();
-									if(ddsImage.getGLInternalFormat() == GL.GL_RGBA16F
-											|| ddsImage.getGLInternalFormat() == GL2.GL_RGBA16)
-										alwaysConvert = true;									
-									
-									if (alwaysConvert || CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
-										tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive,
-												in);
-									else
-										tex = CompressedTextureLoader.DDS.getTextureUnitState(texNameForArchive, in,
+			
+			if(loading) {	
+				// just wait until loaded then return it
+				while (loading) {
+					try {
+						Thread.sleep(5);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+					loading = loadingTextureUnitState.contains(texName);					
+				}
+				return loadedTextureUnitState.get(texName); // better be good...
+			} else {
+				
+				
+			
+				for (ArchiveFile archiveFile : bsas) {
+					// shall we inspect this archive?
+					if (allowedTextureFormats == AllowedTextureFormats.ALL
+						|| (archiveFile.hasDDS() && (allowedTextureFormats == AllowedTextureFormats.DDS
+														|| CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2))
+						|| (archiveFile.hasKTX() && allowedTextureFormats == AllowedTextureFormats.KTX)) {
+						String texNameForArchive = texName;
+						if (archiveFile.hasKTX()) {
+							texNameForArchive = texNameForArchive.replace(".dds", ".ktx");
+						} 
+	
+						ArchiveEntry archiveEntry = archiveFile.getEntry(texNameForArchive);
+						if (archiveEntry != null) {
+							try {
+								ByteBuffer in = archiveFile.getByteBuffer(archiveEntry);
+								if (in != null) {
+									if (texNameForArchive.endsWith(".dds")) {
+										
+										//type == GL_ARGB16F always convert to ETC as I cannot get jogl to display it
+										boolean alwaysConvert = false;
+										// this will just read back the header, and point at the data
+										DDSImage ddsImage = DDSImage.read(in);
+										in.rewind();
+										if(ddsImage.getGLInternalFormat() == GL.GL_RGBA16F
+												|| ddsImage.getGLInternalFormat() == GL2.GL_RGBA16)
+											alwaysConvert = true;									
+										
+										if (alwaysConvert || CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2)
+											tex = CompressedTextureLoaderETCPackDDS.getTextureUnitState(texNameForArchive,
+													in);
+										else
+											tex = CompressedTextureLoaderExt.DDS.getTextureUnitState(texNameForArchive, in,
+													dropMip0);
+									} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
+										tex = CompressedTextureLoaderExt.ASTC.getTextureUnitState(texNameForArchive, in,
 												dropMip0);
-								} else if (texNameForArchive.endsWith(".astc") || texNameForArchive.endsWith(".atc")) {
-									tex = CompressedTextureLoader.ASTC.getTextureUnitState(texNameForArchive, in,
-											dropMip0);
-								} else if (texNameForArchive.endsWith(".ktx")) {
-									tex = CompressedTextureLoader.KTX.getTextureUnitState(texNameForArchive, in,
-											dropMip0);
-								} else {
-									//FIXME: generic texture loading system good for png images
-									/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
-									tex = tl.getTexture();*/
+									} else if (texNameForArchive.endsWith(".ktx")) {
+										tex = CompressedTextureLoaderExt.KTX.getTextureUnitState(texNameForArchive, in,
+												dropMip0);
+									} else {
+										//FIXME: generic texture loading system good for png images
+										/*TextureLoader tl = new TextureLoader(ImageIO.read(in));
+										tex = tl.getTexture();*/
+									}
+	
+									if (tex != null) {
+										synchronized (loadedTextureUnitState) {
+											loadedTextureUnitState.put(texName, tex);
+											loadingTextureUnitState.remove(texName);
+										}
+										return tex;
+									}
 								}
-
-								if (tex != null) {
-									return tex;
-								}
+							} catch (IOException e) {
+								System.out.println(
+										"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
+							} catch (NullPointerException e) {
+								System.out.println(
+										"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 							}
-						} catch (IOException e) {
-							System.out.println(
-									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
-						} catch (NullPointerException e) {
-							System.out.println(
-									"BsaTextureSource  " + texNameForArchive + " " + e + " " + e.getStackTrace()[0]);
 						}
 					}
 				}
-			}
-
-			if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE) {
-				TextureUnitState mc = fileTextureSource.getTextureUnitState(texName);
-				if (mc != null)
-					return mc;
+				 
+	
+				if (BsaMeshSource.FALLBACK_TO_FILE_SOURCE) {
+					TextureUnitState mc = fileTextureSource.getTextureUnitState(texName);
+					if (mc != null)
+						return mc;
+				}
+				
+				// although we didn't load it release any waiting threads
+				loadingTextureUnitState.remove(texName);
 			}
 		}
 
@@ -383,7 +494,7 @@ public class BsaTextureSource implements TextureSource {
 	 * @author pjnz
 	 *
 	 */
-	public static class CompressedTextureLoaderETCPackDDS extends CompressedTextureLoader {
+	public static class CompressedTextureLoaderETCPackDDS extends CompressedTextureLoaderExt {
 
 		public static boolean CONVERT_DDS_TO_ETC2 = false;
 

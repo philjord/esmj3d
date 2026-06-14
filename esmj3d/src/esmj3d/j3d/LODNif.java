@@ -29,13 +29,14 @@ import utils.source.TextureSource;
  */
 public class LODNif extends Group
 {
+	private NifFile nifFile;// just to keep the loaded byte buffer from being reloaded until this object is destroyed
 	public LODNif(String nifFileName, MediaSources mediaSources)
 	{
 		// TODO: can I optomise this like the X form ones
 		// need to make a generic lod nif loading system, fallout uses this for all lod things
 		// return J3dRECOTypeGeneral.loadNif(nifFileName, false, mediaSources);
 		TextureSource textureSource = mediaSources.getTextureSource();
-		NifFile nifFile = NifToJ3d.loadNiObjects(nifFileName, mediaSources.getMeshSource());
+		nifFile = NifToJ3d.loadNiObjects(nifFileName, mediaSources.getMeshSource());
 
 		if (nifFile != null)
 		{
@@ -45,7 +46,6 @@ public class LODNif extends Group
 				NiNode niNode = (NiNode) root;
 
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
-
 				
 				createChildren(niNode, niToJ3dData, nifFileName, textureSource );
 			}
