@@ -103,9 +103,17 @@ for (ArchiveEntry entry : entries) {
 */
 public class DDSToKTXBsaConverter extends Thread {
 
+	//Skyrim - Textures.bsa dds default zip = 1,356mb
+	//Skyrim - Textures_nocomp_ktx.bsa = 3,376mb
+	//Skyrim - Textures_level1_ktx.bsa = 1,450mb
+	//Skyrim - Textures_level3_ktx.bsa = 1,417mb
+	//Skyrim - Textures_level6_ktx.bsa = 1,301mb
+	//Skyrim - Textures_level9_ktx.bsa = 1,336mb
+	private static int									DEFLATE_LEVEL		= 1;	//6 is usual
+
 	public static int									NUM_THREADS			= 4;
 
-	private static final boolean						CONVERT_DDS_to_KTX	= true;
+	private static boolean								CONVERT_DDS_to_KTX	= true;
 
 	private FileChannel									outputArchiveFile;
 
@@ -166,8 +174,12 @@ public class DDSToKTXBsaConverter extends Thread {
 
 			archiveFlags = 3; // this is  2  and 1 being folders and filenames :  4 is compressed, (0x100==256) is required for names to be written with the file entry
 
-			if (inputArchive.getSig() != SIG.TES3)//tes3 no compression
+			
+			// experiment no compression at all
+			if (inputArchive.getSig() != SIG.TES3 && DEFLATE_LEVEL > 0)//tes3 no compression
 				archiveFlags |= 4;
+			
+			
 			fileFlags = 0;
 
 			List<ArchiveEntry> inEntries = inputArchive.getEntries();
@@ -504,8 +516,7 @@ public class DDSToKTXBsaConverter extends Thread {
 		}
 
 		// Multi-threaded below, very non linear
-
-		Deflater deflater = new Deflater(6);
+		Deflater deflater = new Deflater(DEFLATE_LEVEL);
 
 		ExecutorService es = Executors.newFixedThreadPool(NUM_THREADS);
 		List<Callable<Object>> todo = new ArrayList<Callable<Object>>();
