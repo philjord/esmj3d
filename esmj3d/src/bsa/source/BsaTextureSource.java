@@ -205,7 +205,7 @@ public class BsaTextureSource implements TextureSource {
 									// so a byte buffer with extension so it's loading up itself over time and the DDSImage 
 									//with it is wathcing and the DDSImage calls update texture ...uummmm... 
 									
-									
+									// notice teh whole concept requires Bdtx format files in chunks
 									
 								} else {			
 								
