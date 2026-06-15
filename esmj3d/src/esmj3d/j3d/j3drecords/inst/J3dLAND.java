@@ -969,8 +969,8 @@ public class J3dLAND extends J3dRECOStatInst {
 		// in case 2 threads come in trying to lazy create
 		synchronized (shaderLock) {
 			if (shaderProgram == null) {
-				String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.vert");
-				String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/landtes3.frag");
+				String vertexProgram = ShaderSourceIO.getTextFileAsString("shaders/tes3_land.vert");
+				String fragmentProgram = ShaderSourceIO.getTextFileAsString("shaders/tes3_land.frag");
 
 				Shader[] shaders = new Shader[2];
 				shaders[0] = new SourceCodeShader(Shader.SHADING_LANGUAGE_GLSL, Shader.SHADER_TYPE_VERTEX,
