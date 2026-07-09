@@ -43,7 +43,9 @@ public class BethRenderSettings
 	private static float globalAmbLightLevel = GLOBAL_AMB_LIGHT_LEVEL_DEFAULT;
 
 	private static float globalDirLightLevel = GLOBAL_DIR_LIGHT_LEVEL_DEFAULT;
-
+	
+	private static boolean enableDirLight = true;
+	
 	private static boolean enablePlacedLights = true;
 
 	private static boolean showPhysics = false;
@@ -287,7 +289,12 @@ public class BethRenderSettings
 		BethRenderSettings.outlineFocused = outlineFocused;
 		fireUpdate();
 	}
-
+	
+	public static boolean isEnableDirLight()
+	{
+		return enableDirLight;
+	}
+	
 	public static boolean isEnablePlacedLights()
 	{
 		return enablePlacedLights;
@@ -301,6 +308,13 @@ public class BethRenderSettings
 	public static void setOutlineLights(boolean outlineLights)
 	{
 		BethRenderSettings.outlineLights = outlineLights;
+		fireUpdate();
+	}
+	
+	
+	public static void setGlobalDirLightEnabled(boolean enableDirLight)
+	{
+		BethRenderSettings.enableDirLight = enableDirLight;
 		fireUpdate();
 	}
 
