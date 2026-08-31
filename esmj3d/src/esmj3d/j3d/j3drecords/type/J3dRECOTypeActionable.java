@@ -8,75 +8,63 @@ import esmj3d.j3d.BethRenderSettings;
 import nif.NifJ3dHavokRoot;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
+import nif.j3d.animation.J3dNiControllerManager;
+import nif.j3d.animation.J3dNiControllerSequence;
 import tools3d.utils.scenegraph.Fadable;
 import utils.source.MediaSources;
 
-public class J3dRECOTypeActionable extends J3dRECOType
-{
-	private boolean outlineSetOn = false;
+public class J3dRECOTypeActionable extends J3dRECOType {
+	private boolean	outlineSetOn	= false;
 
-	private Color3f outlineColor = new Color3f(0.5f, 0.4f, 0.9f);
+	private Color3f	outlineColor	= new Color3f(0.5f, 0.4f, 0.9f);
 
-	public J3dRECOTypeActionable(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources)
-	{
+	public J3dRECOTypeActionable(RECO reco, String nifFileName, boolean makePhys, MediaSources mediaSources) {
 		super(reco, nifFileName, mediaSources);
 
 		//ignore markers and targets for now (note only on load, not dynamic)
 		if (!BethRenderSettings.isShowEditorMarkers() && nifFileName.toLowerCase().contains("marker"))
 			return;
 
-		if (makePhys)
-		{
+		if (makePhys) {
 			NifJ3dHavokRoot nhr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
-			if (nhr != null)
-			{
+			if (nhr != null) {
 				j3dNiAVObject = nhr.getHavokRoot();
 				addChild(j3dNiAVObject);
 				fireIdle();
 			}
-		}
-		else
-		{
-			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
-			if (nvr != null)
-			{
+		} else {
+			NifJ3dVisRoot nvr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(),
+					mediaSources.getTextureSource());
+			if (nvr != null) {
 				j3dNiAVObject = nvr.getVisualRoot();
 
 				//prep for possible outlines later
-				if (j3dNiAVObject instanceof Fadable && !makePhys)
-				{
-					((Fadable) j3dNiAVObject).setOutline(outlineColor);
-					((Fadable) j3dNiAVObject).setOutline(null);
+				if (j3dNiAVObject instanceof Fadable && !makePhys) {
+					((Fadable)j3dNiAVObject).setOutline(outlineColor);
+					((Fadable)j3dNiAVObject).setOutline(null);
 				}
 
 				addChild(j3dNiAVObject);
 				fireIdle(nvr);
 
-				if (nifFileName.toLowerCase().contains("siltstrider.nif"))
-				{
+				if (nifFileName.toLowerCase().contains("siltstrider.nif")) {
 					this.setCapability(Group.ALLOW_CHILDREN_WRITE);
 					this.setCapability(Group.ALLOW_CHILDREN_EXTEND);
-				
+
 					Thread t = new Thread() {
 						@Override
-						public void run()
-						{
-							while (true)
-							{
-								try
-								{
+						public void run() {
+							while (true) {
+								try {
 									Thread.sleep(500);
-								}
-								catch (InterruptedException e)
-								{
-									 
+								} catch (InterruptedException e) {
+
 									e.printStackTrace();
 								}
-								if (System.currentTimeMillis() - siltstriderLastPlayed > 5000)
-								{
+								if (System.currentTimeMillis() - siltstriderLastPlayed > 5000) {
 									siltLastSound++;
 									siltLastSound = siltLastSound > 3 ? 1 : siltLastSound;
-									
+
 									playSound("Sound\\Cr\\silt\\silt0" + siltLastSound + ".wav", 20, 1);
 
 									siltstriderLastPlayed = System.currentTimeMillis();
@@ -90,27 +78,46 @@ public class J3dRECOTypeActionable extends J3dRECOType
 		}
 	}
 
-	private long siltstriderLastPlayed;// temp rubbish
-	private int siltLastSound = 0;// temp rubbish
+	private long	siltstriderLastPlayed;	// temp rubbish
+	private int		siltLastSound	= 0;	// temp rubbish
 
 	@Override
-	public void renderSettingsUpdated()
-	{
+	public void renderSettingsUpdated() {
 		super.renderSettingsUpdated();
 	}
 
 	@Override
-	public void setOutlined(boolean b)
-	{
+	public void setOutlined(boolean b) {
 		outlineSetOn = b;
-		if (j3dNiAVObject != null)
-		{
-			if (j3dNiAVObject instanceof Fadable)
-			{
+		if (j3dNiAVObject != null) {
+			if (j3dNiAVObject instanceof Fadable) {
 				Color3f c = BethRenderSettings.isOutlineConts() || outlineSetOn ? outlineColor : null;
-				((Fadable) j3dNiAVObject).setOutline(c);
+				((Fadable)j3dNiAVObject).setOutline(c);
 			}
 		}
+	}
+
+	 
+
+	// just goes through animations one after the other, for something to do for the user
+	public void fireNextAnimation() {
+		J3dNiControllerManager ncm = j3dNiAVObject.getJ3dNiControllerManager();
+		if (ncm != null) {
+			String[] allSeq = ncm.getAllSequences();
+			if (allSeq != null && allSeq.length > 0) {
+				if (ncm.nextAnimIdx >= allSeq.length)
+					ncm.nextAnimIdx = 0;
+
+				String nextAnim = allSeq[ncm.nextAnimIdx];
+				//System.out.println("J3dRECOTypeActionable " + this + " fireNextAnimation " + nextAnim);
+				J3dNiControllerSequence s = ncm.getSequence(nextAnim);
+				if (s != null) {
+					s.fireSequenceOnce();
+				}
+			}
+			ncm.nextAnimIdx++;
+		}
+
 	}
 
 }

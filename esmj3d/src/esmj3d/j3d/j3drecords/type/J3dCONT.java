@@ -89,22 +89,35 @@ public class J3dCONT extends J3dRECOType
 		}
 	}
 
-	public void setOpen(boolean isOpen)
-	{
+	public void setOpen(boolean isOpen) {
 		this.isOpen = isOpen;
 
 		//Oblivion chest don't open!	
 		J3dNiControllerManager ncm = j3dNiAVObject.getJ3dNiControllerManager();
-		if (ncm != null)
-		{
+		if (ncm != null) {
 			J3dNiControllerSequence s = ncm.getSequence(isOpen ? "Open" : "Close");
-			if (s != null)
-			{
+			if (s != null) {
 				s.fireSequenceOnce();
+			} else {
+				System.out.println("Container open ahs no animation");
+				System.out.println("looked for " + (isOpen ? "Open" : "Close"));
+				String[] allSeq = ncm.getAllSequences();
+				if (allSeq != null && allSeq.length > 0) {
+					for (int i = 0; i < allSeq.length; i++) {
+						System.out.println("Seq: " + allSeq[i]);
+					}
+				}
 			}
 		}
 	}
-
+	
+ 
+	public void toggleOpen()
+	{
+		isOpen = !isOpen;
+		setOpen(isOpen);
+	}
+	
 	public boolean isOpen()
 	{
 		return isOpen;
