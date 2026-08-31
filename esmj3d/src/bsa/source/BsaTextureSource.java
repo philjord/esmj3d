@@ -11,14 +11,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import org.jogamp.java3d.CompressedImageComponent2D;
 import org.jogamp.java3d.ImageComponent;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.Texture2D;
 import org.jogamp.java3d.TextureUnitState;
-
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -32,9 +30,6 @@ import compressedtexture.DDSImage;
 import compressedtexture.KTXImage;
 import compressedtexture.dktxtools.ktx.KTXFormatException;
 import javaawt.image.BufferedImage;
-import nif.NifFile;
-import nif.j3d.J3dNiAVObject;
-import old.utils.SoftValueHashMap;
 import texture.CompressedTextureLoaderExt;
 import texture.DDSToKTXConverter;
 import tools.WeakValueHashMap;
@@ -133,6 +128,9 @@ public class BsaTextureSource implements TextureSource {
 
 	// we can't request the same file at the same time, this tell threads to wait for each other
 	private static Set<String> loadingTexture = Collections.synchronizedSet(new HashSet<String>());
+	
+	
+	
 		
 	@Override
 	public Texture getTexture(String texName) {
@@ -285,13 +283,22 @@ public class BsaTextureSource implements TextureSource {
 		return getTextureUnitState(texName, false);
 	}
 	
-	
+
+	/**
+	 * Clear both loadedTexture and loadedTextureUnitState, for debug usage
+	 */
+	public static void clearCache() {
+		loadedTexture.clear();
+		loadedTextureUnitState.clear();
+	}
 	
 	// we must implement our own caching and cut out the CompressedTextureLoader
 	private static Map<String, TextureUnitState> loadedTextureUnitState = Collections.synchronizedMap(new WeakValueHashMap<String, TextureUnitState>());
 
 	// we can't request the same file at the same time, this tell threads to wait for each other
 	private static Set<String> loadingTextureUnitState = Collections.synchronizedSet(new HashSet<String>());
+	
+	
 	
 	@Override
 	public TextureUnitState getTextureUnitState(String texName, boolean dropMip0) {		
