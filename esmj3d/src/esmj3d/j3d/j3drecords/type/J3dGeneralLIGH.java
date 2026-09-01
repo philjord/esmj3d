@@ -33,45 +33,40 @@ import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromNif;
 import utils.source.MediaSources;
 
-public class J3dGeneralLIGH extends J3dRECOType
-{
-	public static boolean showDebug = true;
+public class J3dGeneralLIGH extends J3dRECOType {
+	public static boolean			showDebug		= true;
 
-	private Light light = null;
+	public static boolean			lightsFlicker	= true;
 
-	private BoundingLeaf bl = new BoundingLeaf();
+	private Light					light			= null;
 
-	private LightFlickerBehavior lightFlickerBehavior;
+	private BoundingLeaf			bl				= new BoundingLeaf();
 
-	private Color3f color;
+	private LightFlickerBehavior	lightFlickerBehavior;
 
-	private float radius;
+	private Color3f					color;
 
-	private BranchGroup obg;
+	private float					radius;
 
-	public J3dGeneralLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources)
-	{
+	private BranchGroup				obg;
+
+	public J3dGeneralLIGH(CommonLIGH ligh, boolean makePhys, MediaSources mediaSources) {
 		super(ligh, ligh.MODL == null ? "" : ligh.MODL.model);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
 
 		Point3f lightPosition = new Point3f(0, 0, 0);
-		if (ligh.MODL != null)
-		{
+		if (ligh.MODL != null) {
 			String nifFileName = ligh.MODL.model;
-			if (makePhys)
-			{
+			if (makePhys) {
 				NifJ3dHavokRoot hr = NifToJ3d.loadHavok(nifFileName, mediaSources.getMeshSource());
-				if (hr != null)
-				{
+				if (hr != null) {
 					j3dNiAVObject = hr.getHavokRoot();
 				}
-			}
-			else
-			{
-				if (nifFileName.length() > 0)
-				{
-					NifJ3dVisRoot vr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(), mediaSources.getTextureSource());
+			} else {
+				if (nifFileName.length() > 0) {
+					NifJ3dVisRoot vr = NifToJ3d.loadShapes(nifFileName, mediaSources.getMeshSource(),
+							mediaSources.getTextureSource());
 					// not found messages will have already been published
 					if (vr != null) {
 						j3dNiAVObject = vr.getVisualRoot();
@@ -85,29 +80,24 @@ public class J3dGeneralLIGH extends J3dRECOType
 				}
 			}
 
-			if (j3dNiAVObject != null)
-			{
+			if (j3dNiAVObject != null) {
 				addChild(j3dNiAVObject);
 				fireIdle();
 			}
 
 		}
 
-		if (!makePhys)
-		{
+		if (!makePhys) {
 			color = new Color3f(ligh.color.x / 255f, ligh.color.y / 255f, ligh.color.z / 255f);
 			radius = ConvertFromNif.toJ3d(ligh.radius);
 			//System.out.println("new light " + color);
 			//System.out.println("falls fade " + ligh.fade + " falloffExponent " + ligh.falloffExponent + " fieldOfView " + ligh.fieldOfView);
 			//System.out.println("ligh.radius " + ligh.radius + " " + (ligh.radius * ESConfig.ES_TO_METERS_SCALE));
-			if (ligh.fieldOfView == -1 || ligh.fieldOfView >= 90f)
-			{
+			if (ligh.fieldOfView == -1 || ligh.fieldOfView >= 90f) {
 				light = new PointLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent));
-			}
-			else
-			{
-				light = new SpotLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent), new Vector3f(0, 0, -1),
-						ligh.fieldOfView, 0);
+			} else {
+				light = new SpotLight(true, color, lightPosition, new Point3f(1, ligh.fade, ligh.falloffExponent),
+						new Vector3f(0, 0, -1), ligh.fieldOfView, 0);
 			}
 			light.setCapability(Light.ALLOW_STATE_WRITE);
 			light.setCapability(Light.ALLOW_COLOR_WRITE);
@@ -116,41 +106,38 @@ public class J3dGeneralLIGH extends J3dRECOType
 			addChild(bl);
 			addChild(light);
 
-			// add the flickering effect in with a behaviour (just up and down intensity of each color randomly a bit)
-			lightFlickerBehavior = new LightFlickerBehavior(light);
-			lightFlickerBehavior.setSchedulingBounds(Utils3D.defaultBounds);
-			addChild(lightFlickerBehavior);
+			if (lightsFlicker) {
+				// add the flickering effect in with a behaviour (just up and down intensity of each color randomly a bit)
+				lightFlickerBehavior = new LightFlickerBehavior(light);
+				lightFlickerBehavior.setSchedulingBounds(Utils3D.defaultBounds);
+				addChild(lightFlickerBehavior);
+				lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
+			}
 
 			light.setEnable(BethRenderSettings.isEnablePlacedLights());
-			lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
+
 			setOutlineLights(BethRenderSettings.isOutlineLights());
 		}
 
 	}
 
 	@Override
-	public void setOutlined(boolean b)
-	{
+	public void setOutlined(boolean b) {
 		//Ignored for now
 	}
 
-	public Vector3f findAttachLight(NiAVObject niAVObject, NiToJ3dData niToJ3dData)
-	{
+	public Vector3f findAttachLight(NiAVObject niAVObject, NiToJ3dData niToJ3dData) {
 		//TODO: this should be the classic multiply up the chain gear
-		if (niAVObject.name.equals("AttachLight"))
-		{
-			return ConvertFromNif.toJ3d(niAVObject.translation);					
+		if (niAVObject.name.equals("AttachLight")) {
+			return ConvertFromNif.toJ3d(niAVObject.translation);
 		}
 
-		if (niAVObject instanceof NiNode)
-		{
-			NiNode niNode = (NiNode) niAVObject;
-			for (int i = 0; i < niNode.numChildren; i++)
-			{
+		if (niAVObject instanceof NiNode) {
+			NiNode niNode = (NiNode)niAVObject;
+			for (int i = 0; i < niNode.numChildren; i++) {
 				NiObject o = niToJ3dData.get(niNode.children[i]);
-				if (o != null && o instanceof NiNode)
-				{
-					NiNode childNode = (NiNode) o;
+				if (o != null && o instanceof NiNode) {
+					NiNode childNode = (NiNode)o;
 					Vector3f v = findAttachLight(childNode, niToJ3dData);
 					if (v != null)
 						return v;
@@ -163,30 +150,24 @@ public class J3dGeneralLIGH extends J3dRECOType
 	}
 
 	@Override
-	public void renderSettingsUpdated()
-	{
+	public void renderSettingsUpdated() {
 		super.renderSettingsUpdated();
-		if (light != null)
-		{
+		if (light != null) {
 			light.setEnable(BethRenderSettings.isEnablePlacedLights());
-			lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
+			if (lightFlickerBehavior != null) {
+				lightFlickerBehavior.setEnable(BethRenderSettings.isEnablePlacedLights());
+			}
 			setOutlineLights(BethRenderSettings.isOutlineLights());
 		}
 	}
 
-	private void setOutlineLights(boolean outline)
-	{
-		if (!outline)
-		{
-			if (obg != null)
-			{
+	private void setOutlineLights(boolean outline) {
+		if (!outline) {
+			if (obg != null) {
 				obg.detach();
 			}
-		}
-		else
-		{
-			if (obg == null)
-			{
+		} else {
+			if (obg == null) {
 				obg = new BranchGroup();
 				obg.setCapability(BranchGroup.ALLOW_DETACH);
 				obg.setCapability(Group.ALLOW_PARENT_READ);
@@ -208,41 +189,36 @@ public class J3dGeneralLIGH extends J3dRECOType
 				c2.setAppearance(new SimpleShaderAppearance(color));
 				obg.addChild(c2);
 			}
-			
-			
-			if(obg.getParent() == null)
+
+			if (obg.getParent() == null)
 				addChild(obg);
 		}
 
 	}
 
-	private class LightFlickerBehavior extends Behavior
-	{
-		private Light lightToFlicker;
-		private Color3f originalColor = new Color3f();
-		private Color3f updateColor = new Color3f();
+	private class LightFlickerBehavior extends Behavior {
+		private Light				lightToFlicker;
+		private Color3f				originalColor	= new Color3f();
+		private Color3f				updateColor		= new Color3f();
 
-		private WakeupOnElapsedTime wakeUp;
+		private WakeupOnElapsedTime	wakeUp;
 
-		public LightFlickerBehavior(Light lightToFlicker)
-		{
+		public LightFlickerBehavior(Light lightToFlicker) {
 			this.lightToFlicker = lightToFlicker;
 			lightToFlicker.getColor(originalColor);
 			wakeUp = new WakeupOnElapsedTime(50);
 		}
 
 		@Override
-		public void initialize()
-		{
+		public void initialize() {
 			wakeupOn(wakeUp);
 		}
 
 		@Override
-		public void processStimulus(Iterator<WakeupCriterion> critiria)
-		{
-			float dr = (float) ((Math.random() * 0.2) - 0.1);
-			float dg = (float) ((Math.random() * 0.2) - 0.1);
-			float db = (float) ((Math.random() * 0.2) - 0.1);
+		public void processStimulus(Iterator<WakeupCriterion> critiria) {
+			float dr = (float)((Math.random() * 0.2) - 0.1);
+			float dg = (float)((Math.random() * 0.2) - 0.1);
+			float db = (float)((Math.random() * 0.2) - 0.1);
 			updateColor.x = originalColor.x * (1f + dr);
 			updateColor.y = originalColor.y * (1f + dg);
 			updateColor.z = originalColor.z * (1f + db);
