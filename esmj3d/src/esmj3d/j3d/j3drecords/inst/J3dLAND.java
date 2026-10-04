@@ -51,28 +51,28 @@ import utils.source.MaterialsSource;
 import utils.source.TextureSource;
 
 public class J3dLAND extends J3dRECOStatInst {
-	public static int				GRID_COUNT			= 32;
+	protected static int			GRID_COUNT			= 32;
 
-	public static final float		TERRIAN_SQUARE_SIZE	= ConvertFromNif.toJ3d(128);// = 1.6256m
+	private static final float		TERRIAN_SQUARE_SIZE	= ConvertFromNif.toJ3d(128);		// = 1.6256m
 
 	protected static final boolean	OUTPUT_BINDINGS		= false;
 
-	public static float				TEX_REPEAT			= 0.5f;								// suggests how many times to repeat the texture over a grid square
+	protected static float			TEX_REPEAT			= 0.5f;								// suggests how many times to repeat the texture over a grid square
 
 	//	NOTE nif x,y,z to j3d x,z,-y
-	public static float				HEIGHT_TO_J3D_SCALE	= ConvertFromNif.toJ3d(2);		//this is one inch! 0.0254m
+	protected static float			HEIGHT_TO_J3D_SCALE	= ConvertFromNif.toJ3d(2);			//this is one inch! 0.0254m
 
 	public static float				LAND_SIZE			= GRID_COUNT * TERRIAN_SQUARE_SIZE;	//= (32*1.6256) = 52.0192 (or 104.0384 tes3)
 
-	public static boolean			BY_REF				= true;
+	protected static boolean		BY_REF				= true;
 
-	public static boolean			BUFFERS				= true;
+	protected static boolean		BUFFERS				= true;
 
-	public static boolean			INTERLEAVE			= false;							// DO NOT TURN ON until pipeline supports it
+	protected static boolean		INTERLEAVE			= false;							// DO NOT TURN ON until pipeline supports it
 
 	//FIXME: can't turn on because vertex attributes need to be stripified at the same time
 	// tristrips are stitched now, but the landgen thing makes a mess of getting tristrips
-	public static boolean			STRIPIFY			= false;							// DO NOT TURN ON massive increase in draw calls 
+	protected static boolean		STRIPIFY			= false;							// DO NOT TURN ON massive increase in draw calls 
 
 	//LOD tristrip in 5.12 increments (2.56?)
 	//public static float HEIGHT_TO_J3D_SCALE = 0.057f;
@@ -145,7 +145,7 @@ public class J3dLAND extends J3dRECOStatInst {
 	public J3dLAND(LAND land, boolean enableSimpleFade, boolean makePhys) {
 		super(land, enableSimpleFade, makePhys);
 	}
-
+		 
 	/**
 	 * Makes the physics version of land
 	 */
@@ -309,13 +309,13 @@ public class J3dLAND extends J3dRECOStatInst {
 
 				ByteBuffer bb = ByteBuffer.allocateDirect((quadrantSquareCount * quadrantSquareCount) * 4 * 4);
 				bb.order(ByteOrder.nativeOrder());
-				FloatBuffer alphas04 = bb.asFloatBuffer();
+				FloatBuffer alphas03 = bb.asFloatBuffer();
 				bb = ByteBuffer.allocateDirect((quadrantSquareCount * quadrantSquareCount) * 4 * 4);
 				bb.order(ByteOrder.nativeOrder());
-				FloatBuffer alphas58 = bb.asFloatBuffer();
+				FloatBuffer alphas47 = bb.asFloatBuffer();
 				bb = ByteBuffer.allocateDirect((quadrantSquareCount * quadrantSquareCount) * 4 * 4);
 				bb.order(ByteOrder.nativeOrder());
-				FloatBuffer alphas912 = bb.asFloatBuffer();
+				FloatBuffer alphas811 = bb.asFloatBuffer();
 
 				//These are per sorted by layer in LAND RECO
 				for (int a = 0; a < atxts.length; a++) {
@@ -346,11 +346,11 @@ public class J3dLAND extends J3dRECOStatInst {
 
 								int idx = ((rowno * quadrantSquareCount + colno) * 4) + (atxt.layer % 4);
 								if (atxt.layer < 4)
-									alphas04.put(idx, vtxt.opacity[v]);
+									alphas03.put(idx, vtxt.opacity[v]);
 								else if (atxt.layer < 8)
-									alphas58.put(idx, vtxt.opacity[v]);
+									alphas47.put(idx, vtxt.opacity[v]);
 								else if (atxt.layer < 12)
-									alphas912.put(idx, vtxt.opacity[v]);
+									alphas811.put(idx, vtxt.opacity[v]);
 								else
 									System.out.println("atxt.layer== " + atxt.layer);
 							}
@@ -358,9 +358,9 @@ public class J3dLAND extends J3dRECOStatInst {
 					}
 				}
 
-				ga.setVertexAttrRefBuffer(0, new J3DBuffer(alphas04));
-				ga.setVertexAttrRefBuffer(1, new J3DBuffer(alphas58));
-				ga.setVertexAttrRefBuffer(2, new J3DBuffer(alphas912));
+				ga.setVertexAttrRefBuffer(0, new J3DBuffer(alphas03));
+				ga.setVertexAttrRefBuffer(1, new J3DBuffer(alphas47));
+				ga.setVertexAttrRefBuffer(2, new J3DBuffer(alphas811));
 
 				TextureUnitState[] tusa = new TextureUnitState[allTextureUnitStates.size()];
 				for (int i = 0; i < allTextureUnitStates.size(); i++) {
@@ -569,6 +569,7 @@ public class J3dLAND extends J3dRECOStatInst {
 		//Skyrim //textures\\landscape\\dirt01.dds
 		//FO3 //textures\\landscape\\dirt01.dds
 		//Obliv //textures\\landscape\\default.dds
+		//FO76 \\landscape\\ground\\defaultgroundcolor_lgrad.dds
 		if (defaultTex == null) {
 			if (textureSource.textureFileExists("Landscape\\dirt01.dds")) {
 				defaultTex = textureSource.getTextureUnitState("Landscape\\dirt01.dds");
@@ -578,6 +579,8 @@ public class J3dLAND extends J3dRECOStatInst {
 				defaultTex = textureSource.getTextureUnitState("_land_default.dds");
 			} else if (textureSource.textureFileExists("Landscape\\Ground\\BlastedForestDirt01_d.DDS")) {
 				defaultTex = textureSource.getTextureUnitState("Landscape\\Ground\\BlastedForestDirt01_d.DDS");
+			} else if (textureSource.textureFileExists("\\landscape\\ground\\toxicdirt01_d.dds")) {
+				defaultTex = textureSource.getTextureUnitState("\\landscape\\ground\\toxicdirt01_d.dds");
 			} else {
 				System.out.println("BUM, no default LAND texture found somehow?");
 			}
@@ -814,7 +817,7 @@ public class J3dLAND extends J3dRECOStatInst {
 
 				shaderProgram.setShaderAttrNames(shaderAttrNames);
 
-				String[] vertexAttrNames = new String[] {"alphas04", "alphas58", "alphas912"};
+				String[] vertexAttrNames = new String[] {"alphas03", "alphas47", "alphas811"};
 				shaderProgram.setVertexAttrNames(vertexAttrNames);
 
 			}
@@ -1010,6 +1013,11 @@ public class J3dLAND extends J3dRECOStatInst {
 
 			}
 		}
+	}
+
+	// So the btdb sub class can override
+	public float getTERRIAN_SQUARE_SIZE() {
+		return TERRIAN_SQUARE_SIZE;
 	}
 
 }
