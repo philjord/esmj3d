@@ -565,7 +565,7 @@ public class J3dLAND extends J3dRECOStatInst {
 
 	private static TextureUnitState defaultTex = null;
 
-	protected static TextureUnitState getDefaultTexture(TextureSource textureSource) {
+	public static TextureUnitState getDefaultTexture(TextureSource textureSource) {
 		//Skyrim //textures\\landscape\\dirt01.dds
 		//FO3 //textures\\landscape\\dirt01.dds
 		//Obliv //textures\\landscape\\default.dds
